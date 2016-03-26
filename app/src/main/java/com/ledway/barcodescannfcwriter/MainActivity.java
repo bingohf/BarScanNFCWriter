@@ -59,9 +59,13 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btn_write_nfc).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(intents == null){
+                    Toast.makeText(MainActivity.this, R.string.no_card_found,Toast.LENGTH_LONG).show();
+                    return;
+                }
                 Tag tagFromIntent = intents
                         .getParcelableExtra(NfcAdapter.EXTRA_TAG);
-                if(tagFromIntent == null){
+                if(intents == null){
                     Toast.makeText(MainActivity.this, R.string.no_card_found,Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -88,8 +92,9 @@ public class MainActivity extends AppCompatActivity {
                                 f[k + j2] = (byte) 0x00;
                             }
                         }
-                        mfc.writeBlock(0, f);
-                        byte[] bytes = mfc.readBlock(0);
+                        mfc.writeBlock(4, f);
+                        mfc.sectorToBlock(4);
+                        byte[] bytes = mfc.readBlock(4);
                         Toast.makeText(getApplicationContext(),"write success:" +  new String(bytes),Toast.LENGTH_LONG).show();
                     }
                 } catch (IOException e) {
