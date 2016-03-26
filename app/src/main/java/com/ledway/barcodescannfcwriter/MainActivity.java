@@ -14,6 +14,8 @@ import android.nfc.tech.NfcA;
 import android.os.Bundle;
 import android.serialport.api.SerialPort;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
@@ -45,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
             mEdtBarCode.setText(text);
         }
     };
+    private View mBtnClear;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,6 +136,32 @@ public class MainActivity extends AppCompatActivity {
                 CaptureService.scanGpio.openScan();
             }
         });
+        mBtnClear = findViewById(R.id.btn_clear);
+        mBtnClear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEdtBarCode.setText("");
+            }
+        });
+        mEdtBarCode.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mBtnClear.setVisibility(s.length() > 0? View.VISIBLE:View.GONE);
+            }
+        });
+        Intent newIntent = new Intent(MainActivity.this, CaptureService.class);
+        newIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startService(newIntent);
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("com.zkc.scancode");

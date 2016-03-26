@@ -34,12 +34,13 @@
                 android:maxLength="16" />
 
             <ImageButton
-                android:id="@+id/calc_clear_txt_Prise"
+                android:id="@+id/btn_clear"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="10dp"
                 android:layout_gravity="right|center_vertical"
-                android:background="@drawable/ic_close_circle_grey600_18dp" />
+                android:background="@drawable/ic_close_circle_grey600_18dp"
+                android:visibility="gone"/>
 
         </FrameLayout>
         <ImageButton
