@@ -15,6 +15,10 @@ public class Record extends Model{
     @Column(name = "barcode", index = true, unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)
     public String barcode;
 
-    @Column(name = "barcode", index = true)
+    @Column(name = "datetime", index = true)
     public Date datetime;
+
+    public Record() {
+        super();
+    }
 }

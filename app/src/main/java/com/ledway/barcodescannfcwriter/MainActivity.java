@@ -21,12 +21,22 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Toast;
 
+import com.activeandroid.Model;
+import com.activeandroid.query.Select;
+import com.ledway.barcodescannfcwriter.models.Record;
 import com.zkc.Service.CaptureService;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.logging.SimpleFormatter;
 import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
@@ -50,12 +60,19 @@ public class MainActivity extends AppCompatActivity {
         }
     };
     private View mBtnClear;
+    private ListView mListRecord;
+    private ArrayList<String> mArrayRecord;
+    private ArrayAdapter<String> mListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mEdtBarCode = (EditText) findViewById(R.id.txt_barcode);
+        mListRecord = (ListView) findViewById(R.id.list_record);
+        mArrayRecord = getRecordHistory();
+        mListAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,mArrayRecord);
+        mListRecord.setAdapter(mListAdapter);
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
         if (nfcAdapter == null) {
@@ -75,14 +92,7 @@ public class MainActivity extends AppCompatActivity {
                 new String[] { MifareClassic.class.getName() },
                 new String[] { NfcA.class.getName() } };// 允许扫描的标签类型
 
-        findViewById(R.id.btn_write_nfc).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-
-
-            }
-        });
 
         findViewById(R.id.btn_scan).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -241,7 +251,16 @@ public class MainActivity extends AppCompatActivity {
                 mfc.writeBlock(4, f);
                 mfc.sectorToBlock(4);
                 byte[] bytes = mfc.readBlock(4);
-                Toast.makeText(getApplicationContext(),"write success:" +  new String(bytes),Toast.LENGTH_LONG).show();
+                if (barcode.equals(new String(bytes).trim())){
+                    Record r = new Record();
+                    r.barcode = barcode;
+                    r.datetime = new Date();
+                    r.save();
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                    mListAdapter.insert(simpleDateFormat.format(r.datetime) + ":\t" + barcode, 0);
+
+                }
+
             }
         } catch (IOException e) {
             Toast.makeText(MainActivity.this, R.string.check_nfc_card,Toast.LENGTH_LONG).show();
@@ -256,4 +275,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public ArrayList<String> getRecordHistory() {
+        List<Record> records = new Select().from(Record.class).orderBy("datetime desc").execute();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        ArrayList<String> list = new ArrayList<>();
+        for(Record r : records){
+            list.add(simpleDateFormat.format(r.datetime) + ":\t" + r.barcode);
+        }
+        return  list;
+    }
 }

@@ -45,25 +45,19 @@
         </FrameLayout>
     </LinearLayout>
 
+
+
+   <ListView
+       android:id="@+id/list_record"
+       android:layout_width="match_parent"
+       android:layout_height="0dp"
+       android:layout_weight="1"/>
+
     <Button
         android:text="@string/scan.btn"
         android:id="@+id/btn_scan"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:drawableStart="@drawable/ic_barcode_scan_black_36dp"/>
-
-    <RelativeLayout
-        android:layout_height="0dp"
-        android:layout_width="match_parent"
-        android:layout_weight="1">
-
-        <Button
-            android:id="@+id/btn_write_nfc"
-            android:text="@string/write_to_mifare"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"/>
-
-    </RelativeLayout>
+        android:drawableLeft="@drawable/ic_barcode_scan_black_36dp"/>
 </LinearLayout>

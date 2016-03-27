@@ -177,7 +177,7 @@ public class SerialPort {
 		}
 		System.arraycopy(buffer, 0, barCodeHex, barCodeLen, size);
 
-		Log.i(TAG, "BarCode1:" + bytesToString(buffer, size));
+		Log.i("ttt_serialPort", "BarCode1:" + bytesToString(buffer, size));
 		barCodeLen += size;
 		/*try {
 			barCodeStr += new String(buffer, 0, size, "UTF-8");
