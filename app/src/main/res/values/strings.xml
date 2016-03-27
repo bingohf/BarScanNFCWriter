@@ -9,8 +9,10 @@
     <string name="no_card_found">请将IC卡放到感应区</string>
     <string name="check_nfc_card">请检查NFC功能是否正常，并将IC卡贴到感应区</string>
     <string name="auth_fail_card">无法识别该卡</string>
-    <string name="exit">Exit</string>
+    <string name="exit">退出</string>
     <string name="exit_confirm">确定退出？</string>
     <string name="yes">是</string>
     <string name="no">否</string>
+    <string name="barcode_invalid">条码不正确，请重新扫码</string>
+    <string name="scan.btn">扫描</string>
 </resources>

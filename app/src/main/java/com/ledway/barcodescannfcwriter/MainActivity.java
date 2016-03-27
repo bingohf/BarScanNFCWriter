@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.serialport.api.SerialPort;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
@@ -26,6 +27,7 @@ import android.widget.Toast;
 import com.zkc.Service.CaptureService;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -76,55 +78,8 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btn_write_nfc).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(intents == null){
-                    Toast.makeText(MainActivity.this, R.string.no_card_found,Toast.LENGTH_LONG).show();
-                    return;
-                }
-                Tag tagFromIntent = intents
-                        .getParcelableExtra(NfcAdapter.EXTRA_TAG);
-                if(intents == null){
-                    Toast.makeText(MainActivity.this, R.string.no_card_found,Toast.LENGTH_LONG).show();
-                    return;
-                }
-                MifareClassic mfc = MifareClassic
-                        .get(tagFromIntent);
-                boolean auth = false;
-                try {
-                    mfc.connect();
-                    auth = mfc.authenticateSectorWithKeyA(
-                            1,
-                            keyA);
-                    if(!auth){
-                        Toast.makeText(MainActivity.this, R.string.auth_fail_card,Toast.LENGTH_LONG).show();
-                    }else{
-                        byte[] d = mEdtBarCode.getText().toString().trim().getBytes();
-                        byte[] f = new byte[16];
-                        for (int j = 0; j < d.length; j++) {
-                            f[j] = d[j];
-                        }
-                        if (d.length < 16) {
-                            int j = 16 - d.length;
-                            int k = d.length;
-                            for (int j2 = 0; j2 < j; j2++) {
-                                f[k + j2] = (byte) 0x00;
-                            }
-                        }
-                        mfc.writeBlock(4, f);
-                        mfc.sectorToBlock(4);
-                        byte[] bytes = mfc.readBlock(4);
-                        Toast.makeText(getApplicationContext(),"write success:" +  new String(bytes),Toast.LENGTH_LONG).show();
-                    }
-                } catch (IOException e) {
-                    Toast.makeText(MainActivity.this, R.string.check_nfc_card,Toast.LENGTH_LONG).show();
-                    e.printStackTrace();
-                }
-                finally {
-                    try {
-                        mfc.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
+
+
 
             }
         });
@@ -222,6 +177,7 @@ public class MainActivity extends AppCompatActivity {
         if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction())) {
             // 处理该intent
             intents = intent;
+            writeToIC();
         }
     }
 
@@ -239,4 +195,65 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
+    private void writeToIC(){
+        String barcode = mEdtBarCode.getText().toString().trim();
+        Pattern pattern = Pattern.compile("[^0-9a-zA-Z_ ]");
+        if (TextUtils.isEmpty(barcode) || pattern.matcher(barcode).matches()){
+            Toast.makeText(this, R.string.barcode_invalid, Toast.LENGTH_LONG).show();
+            return;
+        }
+        if(intents == null){
+            Toast.makeText(MainActivity.this, R.string.no_card_found,Toast.LENGTH_LONG).show();
+            return;
+        }
+        Tag tagFromIntent = intents
+                .getParcelableExtra(NfcAdapter.EXTRA_TAG);
+        if(intents == null){
+            Toast.makeText(MainActivity.this, R.string.no_card_found,Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        MifareClassic mfc = MifareClassic
+                .get(tagFromIntent);
+        boolean auth = false;
+        try {
+            mfc.connect();
+            auth = mfc.authenticateSectorWithKeyA(
+                    1,
+                    keyA);
+            if(!auth){
+                Toast.makeText(MainActivity.this, R.string.auth_fail_card,Toast.LENGTH_LONG).show();
+            }else{
+                byte[] d = mEdtBarCode.getText().toString().trim().getBytes();
+                byte[] f = new byte[16];
+                for (int j = 0; j < d.length; j++) {
+                    f[j] = d[j];
+                }
+                if (d.length < 16) {
+                    int j = 16 - d.length;
+                    int k = d.length;
+                    for (int j2 = 0; j2 < j; j2++) {
+                        f[k + j2] = (byte) 0x00;
+                    }
+                }
+                mfc.writeBlock(4, f);
+                mfc.sectorToBlock(4);
+                byte[] bytes = mfc.readBlock(4);
+                Toast.makeText(getApplicationContext(),"write success:" +  new String(bytes),Toast.LENGTH_LONG).show();
+            }
+        } catch (IOException e) {
+            Toast.makeText(MainActivity.this, R.string.check_nfc_card,Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                mfc.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }
