@@ -2,6 +2,7 @@ package com.ledway.barcodescannfcwriter;
 
 import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -12,6 +13,7 @@ import android.nfc.Tag;
 import android.nfc.tech.MifareClassic;
 import android.nfc.tech.NfcA;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.serialport.api.SerialPort;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -36,8 +38,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.SimpleFormatter;
 import java.util.regex.Pattern;
+
+import rx.Observable;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.functions.Action1;
+import rx.subscriptions.CompositeSubscription;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -63,17 +70,22 @@ public class MainActivity extends AppCompatActivity {
     private ListView mListRecord;
     private ArrayList<String> mArrayRecord;
     private ArrayAdapter<String> mListAdapter;
+    private CompositeSubscription subscriptions = new CompositeSubscription();
+    private Vibrator vibrator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        findViewById(R.id.my_layout).requestFocus();
         mEdtBarCode = (EditText) findViewById(R.id.txt_barcode);
         mListRecord = (ListView) findViewById(R.id.list_record);
         mArrayRecord = getRecordHistory();
         mListAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,mArrayRecord);
         mListRecord.setAdapter(mListAdapter);
+        //mListRecord.scrollTo(0,100000);
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        vibrator=(Vibrator)getSystemService(Service.VIBRATOR_SERVICE);
 
         if (nfcAdapter == null) {
             Toast.makeText(this, R.string.device_no_nfc,Toast.LENGTH_LONG).show();
@@ -160,6 +172,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         this.unregisterReceiver(scanBroadcastReceiver);
         super.onDestroy();
+        subscriptions.clear();
     }
 
     @Override
@@ -208,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void writeToIC(){
-        String barcode = mEdtBarCode.getText().toString().trim();
+        final String barcode = mEdtBarCode.getText().toString().trim();
         Pattern pattern = Pattern.compile("[^0-9a-zA-Z_ ]");
         if (TextUtils.isEmpty(barcode) || pattern.matcher(barcode).matches()){
             Toast.makeText(this, R.string.barcode_invalid, Toast.LENGTH_LONG).show();
@@ -218,64 +231,72 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this, R.string.no_card_found,Toast.LENGTH_LONG).show();
             return;
         }
-        Tag tagFromIntent = intents
+        final Tag tagFromIntent = intents
                 .getParcelableExtra(NfcAdapter.EXTRA_TAG);
         if(intents == null){
             Toast.makeText(MainActivity.this, R.string.no_card_found,Toast.LENGTH_LONG).show();
             return;
         }
 
-        MifareClassic mfc = MifareClassic
-                .get(tagFromIntent);
-        boolean auth = false;
-        try {
-            mfc.connect();
-            auth = mfc.authenticateSectorWithKeyA(
-                    1,
-                    keyA);
-            if(!auth){
-                Toast.makeText(MainActivity.this, R.string.auth_fail_card,Toast.LENGTH_LONG).show();
-            }else{
-                byte[] d = mEdtBarCode.getText().toString().trim().getBytes();
-                byte[] f = new byte[16];
-                for (int j = 0; j < d.length; j++) {
-                    f[j] = d[j];
-                }
-                if (d.length < 16) {
-                    int j = 16 - d.length;
-                    int k = d.length;
-                    for (int j2 = 0; j2 < j; j2++) {
-                        f[k + j2] = (byte) 0x00;
+        subscriptions.add(validateBarcode(barcode).subscribe(new Action1() {
+            @Override
+            public void call(Object o) {
+                MifareClassic mfc = MifareClassic
+                        .get(tagFromIntent);
+                boolean auth = false;
+                try {
+                    mfc.connect();
+                    auth = mfc.authenticateSectorWithKeyA(
+                            1,
+                            keyA);
+                    if (!auth) {
+                        Toast.makeText(MainActivity.this, R.string.auth_fail_card, Toast.LENGTH_LONG).show();
+                    } else {
+                        byte[] d = mEdtBarCode.getText().toString().trim().getBytes();
+                        byte[] f = new byte[16];
+                        for (int j = 0; j < d.length; j++) {
+                            f[j] = d[j];
+                        }
+                        if (d.length < 16) {
+                            int j = 16 - d.length;
+                            int k = d.length;
+                            for (int j2 = 0; j2 < j; j2++) {
+                                f[k + j2] = (byte) 0x00;
+                            }
+                        }
+                        mfc.writeBlock(4, f);
+                        mfc.sectorToBlock(4);
+                        byte[] bytes = mfc.readBlock(4);
+                        if (barcode.equals(new String(bytes).trim())) {
+                            Record r = new Record();
+                            r.barcode = barcode;
+                            r.datetime = new Date();
+                            r.save();
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                            mListAdapter.add(simpleDateFormat.format(r.datetime) + ":\t" + barcode);
+                            mListRecord.smoothScrollByOffset(100000);
+
+                        }
+
+                    }
+                } catch (IOException e) {
+                    vibrator.vibrate(1000);
+                    Toast.makeText(MainActivity.this, R.string.check_nfc_card, Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        mfc.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
-                mfc.writeBlock(4, f);
-                mfc.sectorToBlock(4);
-                byte[] bytes = mfc.readBlock(4);
-                if (barcode.equals(new String(bytes).trim())){
-                    Record r = new Record();
-                    r.barcode = barcode;
-                    r.datetime = new Date();
-                    r.save();
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                    mListAdapter.insert(simpleDateFormat.format(r.datetime) + ":\t" + barcode, 0);
-
-                }
-
             }
-        } catch (IOException e) {
-            Toast.makeText(MainActivity.this, R.string.check_nfc_card,Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-        }
-        finally {
-            try {
-                mfc.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        }));
+
+
     }
 
-    public ArrayList<String> getRecordHistory() {
+    private ArrayList<String> getRecordHistory() {
         List<Record> records = new Select().from(Record.class).orderBy("datetime desc").execute();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         ArrayList<String> list = new ArrayList<>();
@@ -284,4 +305,55 @@ public class MainActivity extends AppCompatActivity {
         }
         return  list;
     }
+    private Record findRecord(String barcode){
+        List<Record> records = new Select().from(Record.class).where("barcode =?", barcode).orderBy("datetime desc").limit(1).execute();
+        if (records.size() > 0 ){
+            return records.get(0);
+        }
+        return null;
+    }
+    private boolean inWrite = false;
+    private Observable validateBarcode(final String barcode){
+        return Observable.create(new Observable.OnSubscribe<Object>() {
+            @Override
+            public void call(final Subscriber<? super Object> subscriber) {
+                Record record = findRecord(barcode);
+                if (record == null){
+                    subscriber.onNext(null);
+                }else{
+                    if (inWrite){
+                        subscriber.onCompleted();
+                    }else {
+                        inWrite = true;
+                        vibrator.vibrate(1000);
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                        new AlertDialog.Builder(MainActivity.this)
+                                .setTitle(R.string.had_to_mifare)
+                                .setMessage(simpleDateFormat.format(record.datetime) + ":\t" + record.barcode + "\r\n" + "确认再写一次？")
+                                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        subscriber.onNext(null);
+                                    }
+                                })
+                                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        subscriber.onCompleted();
+                                        inWrite = false;
+                                    }
+                                })
+                                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                                    @Override
+                                    public void onCancel(DialogInterface dialog) {
+                                        subscriber.onCompleted();
+                                        inWrite = false;
+                                    }
+                                }).create().show();
+                    }
+                }
+            }
+        });
+    }
+
 }

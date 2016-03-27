@@ -12,7 +12,7 @@ import java.util.Date;
 
 @Table(name = "record")
 public class Record extends Model{
-    @Column(name = "barcode", index = true, unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)
+    @Column(name = "barcode", index = true)
     public String barcode;
 
     @Column(name = "datetime", index = true)
