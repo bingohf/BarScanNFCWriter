@@ -8,12 +8,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.MifareClassic;
 import android.nfc.tech.NfcA;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.serialport.api.SerialPort;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -43,8 +45,10 @@ import java.util.regex.Pattern;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
+import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
+import rx.subscriptions.Subscriptions;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -78,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         findViewById(R.id.my_layout).requestFocus();
+        preCheck();
         mEdtBarCode = (EditText) findViewById(R.id.txt_barcode);
         mListRecord = (ListView) findViewById(R.id.list_record);
         mArrayRecord = getRecordHistory();
@@ -140,9 +145,22 @@ public class MainActivity extends AppCompatActivity {
         newIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startService(newIntent);
 
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("com.zkc.scancode");
-        this.registerReceiver(scanBroadcastReceiver, intentFilter);
+
+
+        subscriptions.add(Observable.create(new Observable.OnSubscribe<Object>() {
+            @Override
+            public void call(Subscriber<? super Object> subscriber) {
+                IntentFilter intentFilter = new IntentFilter();
+                intentFilter.addAction("com.zkc.scancode");
+                MainActivity.this.registerReceiver(scanBroadcastReceiver, intentFilter);
+                subscriber.add(Subscriptions.create(new Action0() {
+                    @Override
+                    public void call() {
+                        MainActivity.this.unregisterReceiver(scanBroadcastReceiver);
+                    }
+                }));
+            }
+        }).subscribe());
     }
     private void exitActivity() {
         new AlertDialog.Builder(this)
@@ -170,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
     }
     @Override
     protected void onDestroy() {
-        this.unregisterReceiver(scanBroadcastReceiver);
+
         super.onDestroy();
         subscriptions.clear();
     }
@@ -183,14 +201,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-        nfcAdapter.enableForegroundDispatch(this, pendingIntent, mFilters,
-                mTechLists);
+        if (nfcAdapter.isEnabled()) {
+            nfcAdapter.enableForegroundDispatch(this, pendingIntent, mFilters,
+                    mTechLists);
             if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(getIntent()
                     .getAction())) {
                 // 处理该intent
                 intents = getIntent();
             }
+        }
 
     }
 
@@ -355,5 +374,25 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void preCheck(){
+        ConnectivityManager manager = (ConnectivityManager)
+                getSystemService(MainActivity.CONNECTIVITY_SERVICE);
+/*
+ * 3G confirm
+ */
+        Boolean is3g = manager.getNetworkInfo(
+                ConnectivityManager.TYPE_MOBILE).isConnectedOrConnecting();
+/*
+ * wifi confirm
+ */
+        Boolean isWifi = manager.getNetworkInfo(
+                ConnectivityManager.TYPE_WIFI).isConnectedOrConnecting();
+        if (!is3g && !isWifi) {
+            // Activity transfer to wifi settings
+            startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+        }
+    }
+
 
 }
