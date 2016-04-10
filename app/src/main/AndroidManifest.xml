@@ -40,6 +40,10 @@
                 android:resource="@xml/nfc_tech_filter" />
         </activity>
 
+        <activity android:name=".AppPreferences"
+            android:label="Setting">
+
+        </activity>
 
 
         <!-- 按键广播 -->
@@ -66,6 +70,8 @@
                 <action android:name="com.zkc.Service.CaptureService" />
             </intent-filter>
         </service>
+
+
 
 
         <meta-data android:name="AA_DB_NAME" android:value="BarCode.db" />

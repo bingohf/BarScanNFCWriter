@@ -92,13 +92,6 @@ public class MainActivity extends AppCompatActivity {
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         vibrator=(Vibrator)getSystemService(Service.VIBRATOR_SERVICE);
 
-        if (nfcAdapter == null) {
-            Toast.makeText(this, R.string.device_no_nfc,Toast.LENGTH_LONG).show();
-        }
-        if (!nfcAdapter.isEnabled()) {
-            Toast.makeText(this, R.string.device_nfc_disabled,Toast.LENGTH_LONG).show();
-            return;
-        }
 
         pendingIntent = PendingIntent.getActivity(this, 0, new Intent(this,
                 getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
@@ -108,8 +101,6 @@ public class MainActivity extends AppCompatActivity {
         mTechLists = new String[][] {
                 new String[] { MifareClassic.class.getName() },
                 new String[] { NfcA.class.getName() } };// 允许扫描的标签类型
-
-
 
         findViewById(R.id.btn_scan).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -161,6 +152,15 @@ public class MainActivity extends AppCompatActivity {
                 }));
             }
         }).subscribe());
+
+        if (nfcAdapter == null) {
+            Toast.makeText(this, R.string.device_no_nfc,Toast.LENGTH_LONG).show();
+        }
+        if (!nfcAdapter.isEnabled()) {
+            Toast.makeText(this, R.string.device_nfc_disabled,Toast.LENGTH_LONG).show();
+            return;
+        }
+
     }
     private void exitActivity() {
         new AlertDialog.Builder(this)
@@ -183,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-       // getMenuInflater().inflate(R.menu.menu_main, menu);
+       getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
     @Override
@@ -232,6 +232,8 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, AppPreferences.class);
+            startActivity(intent);
             return true;
         }
 
