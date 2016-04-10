@@ -59,6 +59,13 @@ public class AppPreferences extends PreferenceActivity  implements SharedPrefere
             } else {
                 p.setSummary(editTextPref.getText());
             }
+            editTextPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener(){
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    return newValue.toString().length() > 0;
+                }
+            });
+
         }
         if (p instanceof MultiSelectListPreference) {
             EditTextPreference editTextPref = (EditTextPreference) p;
