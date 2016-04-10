@@ -3,4 +3,11 @@
     <EditTextPreference android:title="Line"
         android:key="Line"
         android:summary="Please provide your line"></EditTextPreference>
+    <EditTextPreference android:title="Reader"
+        android:key="Reader"
+        android:summary="Please provide your Reader"></EditTextPreference>
+    <com.ledway.barcodescannfcwriter.UploadPreference
+        android:key="pref_max_volume"
+        android:title="test"
+        android:summary="Please provide your line"/>
 </PreferenceScreen>
