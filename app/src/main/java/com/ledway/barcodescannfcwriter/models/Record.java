@@ -12,11 +12,26 @@ import java.util.Date;
 
 @Table(name = "record")
 public class Record extends Model{
-    @Column(name = "barcode", index = true)
-    public String barcode;
+    @Column(name = "readings", index = true)
+    public String readings;
 
-    @Column(name = "datetime", index = true)
-    public Date datetime;
+    @Column(name = "wk_date", index = true)
+    public Date wk_date;
+
+    @Column(name = "line")
+    public String line;
+
+    @Column(name = "reader")
+    public String reader;
+
+    @Column(name = "lwGuid")
+    public String lwGuid;
+
+    @Column(name = "uploaded_datetime")
+    public Date uploaded_datetime;
+
+    @Column(name = "logMessage")
+    public String logMessage;
 
     public Record() {
         super();

@@ -8,6 +8,6 @@
         android:summary="Please provide your Reader"></EditTextPreference>
     <com.ledway.barcodescannfcwriter.UploadPreference
         android:key="pref_max_volume"
-        android:title="test"
-        android:summary="Please provide your line"/>
-</PreferenceScreen>
+        android:title="@string/upload"
+        android:summary="Loading..."/>
+    </PreferenceScreen>

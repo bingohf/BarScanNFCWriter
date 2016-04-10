@@ -7,6 +7,8 @@
     android:paddingRight="?android:attr/scrollbarSize"
     android:background="?android:attr/selectableItemBackground" >
 
+
+
     <ImageView
         android:id="@+android:id/icon"
         android:layout_width="wrap_content"
@@ -29,7 +31,8 @@
             android:singleLine="true"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:ellipsize="marquee"
-            android:fadingEdge="horizontal" />
+            android:fadingEdge="horizontal"
+            android:text="title"/>
 
         <TextView android:id="@android:id/summary"
             android:layout_width="wrap_content"
@@ -38,7 +41,17 @@
             android:layout_alignLeft="@android:id/title"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:attr/textColorSecondary"
-            android:maxLines="4" />
+            android:maxLines="4"
+            android:text="summary"/>
+
+        <ProgressBar
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/progressBar"
+            android:layout_toRightOf="@android:id/summary"
+            android:layout_alignTop="@android:id/summary" />
+
 
     </RelativeLayout>
 

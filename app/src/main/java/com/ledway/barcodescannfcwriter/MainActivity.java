@@ -42,6 +42,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import rx.Observable;
@@ -230,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     })
                     .setCancelable(false);
-            builder.show();
+            builder.create().show();
         }else {
             getSupportActionBar().setTitle(mLine + " - " + mReader);
         }
@@ -315,11 +316,14 @@ public class MainActivity extends AppCompatActivity {
                         byte[] bytes = mfc.readBlock(4);
                         if (barcode.equals(new String(bytes).trim())) {
                             Record r = new Record();
-                            r.barcode = barcode;
-                            r.datetime = new Date();
+                            r.readings = barcode;
+                            r.wk_date = new Date();
+                            r.reader = mReader;
+                            r.line = mLine;
+                            r.lwGuid =  UUID.randomUUID().toString();
                             r.save();
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                            mListAdapter.add(simpleDateFormat.format(r.datetime) + ":\t" + barcode);
+                            mListAdapter.add(simpleDateFormat.format(r.wk_date) + ":\t" + barcode);
                             mListRecord.smoothScrollByOffset(100000);
 
                         }
@@ -343,16 +347,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private ArrayList<String> getRecordHistory() {
-        List<Record> records = new Select().from(Record.class).orderBy("datetime desc").execute();
+        List<Record> records = new Select().from(Record.class).orderBy("uploaded_datetime desc").execute();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         ArrayList<String> list = new ArrayList<>();
         for(Record r : records){
-            list.add(simpleDateFormat.format(r.datetime) + ":\t" + r.barcode);
+            list.add(simpleDateFormat.format(r.wk_date) + ":\t" + r.readings);
         }
         return  list;
     }
     private Record findRecord(String barcode){
-        List<Record> records = new Select().from(Record.class).where("barcode =?", barcode).orderBy("datetime desc").limit(1).execute();
+        List<Record> records = new Select().from(Record.class).where("readings =?", barcode).orderBy("wk_date desc").limit(1).execute();
         if (records.size() > 0 ){
             return records.get(0);
         }
@@ -375,7 +379,7 @@ public class MainActivity extends AppCompatActivity {
                         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                         new AlertDialog.Builder(MainActivity.this)
                                 .setTitle(R.string.had_to_mifare)
-                                .setMessage(simpleDateFormat.format(record.datetime) + ":\t" + record.barcode + "\r\n" + "确认再写一次？")
+                                .setMessage(simpleDateFormat.format(record.wk_date) + ":\t" + record.readings + "\r\n" + "确认再写一次？")
                                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
