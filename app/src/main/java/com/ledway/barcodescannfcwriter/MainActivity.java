@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
@@ -15,6 +16,7 @@ import android.nfc.tech.MifareClassic;
 import android.nfc.tech.NfcA;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.serialport.api.SerialPort;
 import android.support.v7.app.AppCompatActivity;
@@ -76,6 +78,8 @@ public class MainActivity extends AppCompatActivity {
     private ArrayAdapter<String> mListAdapter;
     private CompositeSubscription subscriptions = new CompositeSubscription();
     private Vibrator vibrator;
+    private String mLine;
+    private String mReader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -210,6 +214,27 @@ public class MainActivity extends AppCompatActivity {
                 intents = getIntent();
             }
         }
+
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        mLine = sp.getString("Line","");
+        mReader = sp.getString("Reader", "");
+        if(TextUtils.isEmpty(mLine) || TextUtils.isEmpty(mReader)){
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.invalid_setting)
+                    .setMessage(R.string.goto_setting)
+                    .setPositiveButton(R.string.setting, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent intent = new Intent(MainActivity.this, AppPreferences.class);
+                            startActivity(intent);
+                        }
+                    })
+                    .setCancelable(false);
+            builder.show();
+        }else {
+            getSupportActionBar().setTitle(mLine + " - " + mReader);
+        }
+
 
     }
 
