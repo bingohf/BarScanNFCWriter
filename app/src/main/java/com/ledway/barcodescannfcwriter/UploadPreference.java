@@ -119,33 +119,27 @@ public class UploadPreference extends Preference {
                 progressDialog.setCancelable(false);
                 progressDialog.show();
 
-
-                Observable.create(new Observable.OnSubscribe<Statement>() {
+                Observable.create(new Observable.OnSubscribe<Pair<Statement,Record>>() {
                     @Override
-                    public void call(Subscriber<? super Statement> subscriber) {
+                    public void call(Subscriber<? super Pair<Statement,Record>> subscriber) {
                         try {
-                            Class.forName("net.sourceforge.jtds.jdbc.Driver").newInstance();
-                            String ConnectionString = "jdbc:jtds:sqlserver://www.ledway.com.tw:1433;DatabaseName=WINUPRFID";
-                            Connection conn = DriverManager.getConnection(ConnectionString,
-                                    "sa", "ledway");
-                            Statement statement = conn.createStatement();
-                            subscriber.onNext(statement);
+
+                            List<Record> records = new Select().from(Record.class).where("uploaded_datetime is null").orderBy("wk_date").execute();
+                            if(records.size() > 0) {
+                                Class.forName("net.sourceforge.jtds.jdbc.Driver").newInstance();
+                                String ConnectionString = "jdbc:jtds:sqlserver://www.ledway.com.tw:1433;DatabaseName=WINUPRFID";
+                                Connection conn = DriverManager.getConnection(ConnectionString,
+                                        "sa", "ledway");
+                                Statement statement = conn.createStatement();
+                                for (Record r : records) {
+                                    subscriber.onNext(new Pair<Statement, Record>(statement, r));
+                                }
+                            }
                             subscriber.onCompleted();
                         } catch (InstantiationException |IllegalAccessException|ClassNotFoundException|SQLException e) {
                             e.printStackTrace();
                             subscriber.onError(e);
                         }
-                    }
-                }).flatMap(new Func1<Statement, Observable<Pair<Statement,Record>>>() {
-                    @Override
-                    public Observable<Pair<Statement,Record>> call(Statement statement) {
-                        List<Record> records = new Select().from(Record.class).where("uploaded_datetime is null").orderBy("wk_date").execute();
-                        ArrayList<Pair<Statement, Record>> pairs = new ArrayList<Pair<Statement, Record>>();
-                        for(Record r : records){
-                            Pair<Statement, Record> pair = new Pair<Statement, Record>(statement, r);
-                            pairs.add(pair);
-                        }
-                        return Observable.from(pairs);
                     }
                 }).map(new Func1<Pair<Statement,Record>, Record>() {
                     @Override
@@ -178,6 +172,7 @@ public class UploadPreference extends Preference {
                     @Override
                     public void onError(Throwable e) {
                         Toast.makeText(getContext(),e.getMessage(),Toast.LENGTH_LONG).show();
+                        progressDialog.dismiss();
                     }
 
                     @Override

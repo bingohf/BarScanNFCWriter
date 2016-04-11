@@ -216,25 +216,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        mLine = sp.getString("Line","");
-        mReader = sp.getString("Reader", "");
-        if(TextUtils.isEmpty(mLine) || TextUtils.isEmpty(mReader)){
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(R.string.invalid_setting)
-                    .setMessage(R.string.goto_setting)
-                    .setPositiveButton(R.string.setting, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Intent intent = new Intent(MainActivity.this, AppPreferences.class);
-                            startActivity(intent);
-                        }
-                    })
-                    .setCancelable(false);
-            builder.create().show();
-        }else {
-            getSupportActionBar().setTitle(mLine + " - " + mReader);
-        }
+
 
 
     }
@@ -407,23 +389,50 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void preCheck(){
-        ConnectivityManager manager = (ConnectivityManager)
+/*        ConnectivityManager manager = (ConnectivityManager)
                 getSystemService(MainActivity.CONNECTIVITY_SERVICE);
-/*
+*//*
  * 3G confirm
- */
+ *//*
         Boolean is3g = manager.getNetworkInfo(
                 ConnectivityManager.TYPE_MOBILE).isConnectedOrConnecting();
-/*
+*//*
  * wifi confirm
- */
+ *//*
         Boolean isWifi = manager.getNetworkInfo(
                 ConnectivityManager.TYPE_WIFI).isConnectedOrConnecting();
         if (!is3g && !isWifi) {
             // Activity transfer to wifi settings
             startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
         }
+        */
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        mLine = sp.getString("Line","");
+        mReader = sp.getString("Reader", "");
+        if(TextUtils.isEmpty(mLine) || TextUtils.isEmpty(mReader)){
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.invalid_setting)
+                    .setMessage(R.string.goto_setting)
+                    .setPositiveButton(R.string.setting, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent intent = new Intent(MainActivity.this, AppPreferences.class);
+                            startActivityForResult(intent,1);
+                        }
+                    })
+                    .setCancelable(false);
+            builder.create().show();
+        }else {
+            getSupportActionBar().setTitle(mLine + " - " + mReader);
+        }
+
     }
 
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == 1){
+            preCheck();
+        }
+    }
 }
