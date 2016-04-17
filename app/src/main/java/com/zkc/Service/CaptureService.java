@@ -2,6 +2,7 @@ package com.zkc.Service;
 
 import java.io.DataOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.regex.Pattern;
 
 import com.zkc.Receiver.RemoteControlReceiver;
 import com.zkc.beep.ServiceBeepManager;
@@ -74,7 +75,9 @@ public class CaptureService extends Service {
 			// TODO Auto-generated method stub
 			String barCodeStr = msg.obj.toString();
 			////barCodeStr=barCodeStr.trim();
-			if (beepManager != null) {
+
+			Pattern pattern = Pattern.compile("[^0-9a-zA-Z_ ]");
+			if (beepManager != null && !pattern.matcher(barCodeStr).matches()) {
 				beepManager.playBeepSoundAndVibrate();
 			}
 			Intent intentBroadcast = new Intent();

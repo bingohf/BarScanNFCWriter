@@ -69,8 +69,14 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String text = intent.getExtras().getString("code");
+            text = "#";
             Log.i(TAG, "MyBroadcastReceiver code:" + text);
-            mEdtBarCode.setText(text);
+            Pattern pattern = Pattern.compile("[^0-9a-zA-Z_ ]");
+            if(!pattern.matcher(text).matches()) {
+                mEdtBarCode.setText(text);
+            }else{
+                vibrator.vibrate(1000);
+            }
         }
     };
     private View mBtnClear;

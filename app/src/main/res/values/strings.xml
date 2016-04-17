@@ -26,4 +26,6 @@
     <string name="company">威虹資訊股份有限公司版權所有</string>
     <string name="company.tel">服務電話: +886222799889</string>
     <string name="company_short">威虹資訊</string>
+    <string name="setting.reader.title">Reader(##) (96發料, 97車縫, 98整燙, 99繳庫)</string>
+    <string name="setting.line.title">Line(####)</string>
 </resources>
