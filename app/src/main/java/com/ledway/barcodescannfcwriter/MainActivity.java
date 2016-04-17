@@ -69,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String text = intent.getExtras().getString("code");
-            text = "#";
             Log.i(TAG, "MyBroadcastReceiver code:" + text);
             Pattern pattern = Pattern.compile("[^0-9a-zA-Z_ ]");
             if(!pattern.matcher(text).matches()) {
@@ -259,6 +258,7 @@ public class MainActivity extends AppCompatActivity {
         final String barcode = mEdtBarCode.getText().toString().trim();
         Pattern pattern = Pattern.compile("[^0-9a-zA-Z_ ]");
         if (TextUtils.isEmpty(barcode) || pattern.matcher(barcode).matches()){
+            vibrator.vibrate(1000);
             Toast.makeText(this, R.string.barcode_invalid, Toast.LENGTH_LONG).show();
             return;
         }
