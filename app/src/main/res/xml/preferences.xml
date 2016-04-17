@@ -10,4 +10,10 @@
         android:key="pref_max_volume"
         android:title="@string/upload"
         android:summary="Loading..."/>
+
+    <Preference
+        android:key="pref_static_field_key"
+        android:selectable="false"
+        android:title="@string/company"
+        android:summary="@string/company.tel"/>
     </PreferenceScreen>

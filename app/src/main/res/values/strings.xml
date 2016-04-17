@@ -14,7 +14,7 @@
     <string name="yes">是</string>
     <string name="no">否</string>
     <string name="barcode_invalid">条码不正确，请重新扫码</string>
-    <string name="scan.btn">扫描</string>
+    <string name="scan.btn">扫描 (Scan)</string>
     <string name="had_to_mifare">此条码已经录入</string>
     <string name="ok">确认</string>
     <string name="cancel">取消</string>
@@ -23,4 +23,7 @@
     <string name="goto_setting">进入设置</string>
     <string name="setting">设置</string>
     <string name="uploading">正在上传</string>
+    <string name="company">威虹資訊股份有限公司版權所有</string>
+    <string name="company.tel">服務電話: +886222799889</string>
+    <string name="company_short">威虹資訊</string>
 </resources>

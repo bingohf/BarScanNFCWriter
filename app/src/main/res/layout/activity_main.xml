@@ -31,7 +31,8 @@
                 android:textStyle="bold"
                 android:hint="@string/barcode.hint"
                 android:singleLine="true"
-                android:maxLength="16" />
+                android:textSize="30sp"
+                android:maxLength="20" />
 
             <ImageButton
                 android:id="@+id/btn_clear"

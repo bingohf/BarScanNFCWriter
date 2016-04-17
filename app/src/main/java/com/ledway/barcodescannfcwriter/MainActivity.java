@@ -423,7 +423,7 @@ public class MainActivity extends AppCompatActivity {
                     .setCancelable(false);
             builder.create().show();
         }else {
-            getSupportActionBar().setTitle(mLine + " - " + mReader);
+            getSupportActionBar().setTitle(mLine + " - " + mReader + "  " + getString(R.string.company_short));
         }
 
     }
