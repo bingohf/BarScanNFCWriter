@@ -40,6 +40,8 @@ import com.zkc.Service.CaptureService;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -246,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             Intent intent = new Intent(this, AppPreferences.class);
-            startActivity(intent);
+            startActivityForResult(intent,1);
             return true;
         }
 
@@ -276,6 +278,7 @@ public class MainActivity extends AppCompatActivity {
         subscriptions.add(validateBarcode(barcode).subscribe(new Action1() {
             @Override
             public void call(Object o) {
+                inWrite = false;
                 MifareClassic mfc = MifareClassic
                         .get(tagFromIntent);
                 boolean auth = false;
@@ -311,8 +314,9 @@ public class MainActivity extends AppCompatActivity {
                             r.lwGuid =  UUID.randomUUID().toString();
                             r.save();
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                            mListAdapter.add(simpleDateFormat.format(r.wk_date) + ":\t" + barcode);
-                            mListRecord.smoothScrollByOffset(100000);
+                            mListAdapter.insert(simpleDateFormat.format(r.wk_date) + ":\t" + barcode, 0 );
+                          //  mListAdapter.add(simpleDateFormat.format(r.wk_date) + ":\t" + barcode);
+                            mListRecord.smoothScrollByOffset(0);
 
                         }
 
@@ -339,7 +343,11 @@ public class MainActivity extends AppCompatActivity {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         ArrayList<String> list = new ArrayList<>();
         for(Record r : records){
-            list.add(simpleDateFormat.format(r.wk_date) + ":\t" + r.readings);
+            String text = simpleDateFormat.format(r.wk_date) + ":\t" + r.readings;
+            if (r.uploaded_datetime != null){
+                text = "* " + text;
+            }
+            list.add(text);
         }
         return  list;
     }
@@ -439,6 +447,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == 1){
             preCheck();
+            mArrayRecord.clear();
+            ArrayList<String> records = getRecordHistory();
+            for(String s : records){
+                mArrayRecord.add(s);
+            }
+            mListAdapter.notifyDataSetChanged();
+            mListRecord.smoothScrollByOffset(0);
         }
     }
 }
