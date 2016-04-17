@@ -1,6 +1,8 @@
 package com.ledway.barcodescannfcwriter;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
@@ -21,6 +23,17 @@ public class AppPreferences extends PreferenceActivity  implements SharedPrefere
         PreferenceManager.setDefaultValues(AppPreferences.this, R.xml.preferences,
                 false);
         initSummary(getPreferenceScreen());
+
+
+        findPreference("about").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + "+886222799889"));
+
+                AppPreferences.this.startActivity(intent);
+                return true;
+            }
+        });
     }
 
     @Override

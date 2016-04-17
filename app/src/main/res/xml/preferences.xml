@@ -12,8 +12,7 @@
         android:summary="Loading..."/>
 
     <Preference
-        android:key="pref_static_field_key"
-        android:selectable="false"
+        android:key="about"
         android:title="@string/company"
         android:summary="@string/company.tel"/>
     </PreferenceScreen>
