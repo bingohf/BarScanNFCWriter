@@ -127,7 +127,7 @@ public class UploadPreference extends Preference {
                             List<Record> records = new Select().from(Record.class).where("uploaded_datetime is null").orderBy("wk_date").execute();
                             if(records.size() > 0) {
                                 Class.forName("net.sourceforge.jtds.jdbc.Driver").newInstance();
-                                String ConnectionString = "jdbc:jtds:sqlserver://www.ledway.com.tw:1433;DatabaseName=WINUPRFID";
+                                String ConnectionString = "jdbc:jtds:sqlserver://www.ledway.com.tw:1433;DatabaseName=WINUPRFID;charset=UTF8";
                                 Connection conn = DriverManager.getConnection(ConnectionString,
                                         "sa", "ledway");
                                 Statement statement = conn.createStatement();
@@ -172,6 +172,7 @@ public class UploadPreference extends Preference {
                     @Override
                     public void onError(Throwable e) {
                         Toast.makeText(getContext(),e.getMessage(),Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
                         progressDialog.dismiss();
                     }
 
