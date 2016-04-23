@@ -3,6 +3,7 @@ package com.ledway.barcodescannfcwriter;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
 
 import com.ledway.barcodescannfcwriter.models.Record;
 
@@ -57,6 +58,7 @@ public class UploadService {
                         record.uploaded_datetime = new Date();
                         record.save();
                         subscriber.onNext("ok");
+                        subscriber.onCompleted();
                     } catch (Exception e) {
                         e.printStackTrace();
                         subscriber.onError(e);
@@ -69,7 +71,9 @@ public class UploadService {
     private synchronized void prepareStatement() throws Exception {
         boolean isClosed = true;
         try {
-            isClosed = statement.isClosed();
+            if(statement != null) {
+                isClosed = statement.isClosed();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

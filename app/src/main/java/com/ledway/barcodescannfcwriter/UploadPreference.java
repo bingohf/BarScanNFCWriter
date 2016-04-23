@@ -119,50 +119,24 @@ public class UploadPreference extends Preference {
                 progressDialog.setCancelable(false);
                 progressDialog.show();
 
-                Observable.create(new Observable.OnSubscribe<Pair<Statement,Record>>() {
+                MApp.getInstance().getSettings().reload();
+                Observable.create(new Observable.OnSubscribe<Record>() {
                     @Override
-                    public void call(Subscriber<? super Pair<Statement,Record>> subscriber) {
-                        try {
-
-                            List<Record> records = new Select().from(Record.class).where("uploaded_datetime is null").orderBy("wk_date").execute();
-                            if(records.size() > 0) {
-                                Class.forName("net.sourceforge.jtds.jdbc.Driver").newInstance();
-                                String ConnectionString = "jdbc:jtds:sqlserver://www.ledway.com.tw:1433;DatabaseName=WINUPRFID;charset=UTF8";
-                                Connection conn = DriverManager.getConnection(ConnectionString,
-                                        "sa", "ledway");
-                                Statement statement = conn.createStatement();
-                                for (Record r : records) {
-                                    subscriber.onNext(new Pair<Statement, Record>(statement, r));
-                                }
-                            }
-                            subscriber.onCompleted();
-                        } catch (InstantiationException |IllegalAccessException|ClassNotFoundException|SQLException e) {
-                            e.printStackTrace();
-                            subscriber.onError(e);
+                    public void call(Subscriber<? super Record> subscriber) {
+                        List<Record> records = new Select().from(Record.class).where("uploaded_datetime is null").orderBy("wk_date").execute();
+                        for(Record record: records){
+                            subscriber.onNext(record);
                         }
+                        subscriber.onCompleted();
                     }
-                }).map(new Func1<Pair<Statement,Record>, Record>() {
+                }).flatMap(new Func1<Record, Observable<String>>() {
                     @Override
-                    public Record call(Pair<Statement, Record> statementRecordPair) {
-                        String sql = "insert into dbo.RFID1(line,reader,readings,wK_date) values('" + statementRecordPair.second.line
-                                +"','" + statementRecordPair.second.reader
-                                + "','" + statementRecordPair.second.readings
-                                +"','" + dateFormat.format(statementRecordPair.second.wk_date) +"')"
-                                ;
-                        try {
-                            statementRecordPair.first.execute(sql);
-                            statementRecordPair.second.uploaded_datetime = new Date();
-                            statementRecordPair.second.save();
-                        } catch (SQLException e) {
-                            statementRecordPair.second.logMessage = e.getMessage();
-                            statementRecordPair.second.save();
-                            e.printStackTrace();
-                        }
-                        return  statementRecordPair.second;
+                    public Observable<String> call(Record record) {
+                        return MApp.getInstance().getUploadService().uploadRecord(record);
                     }
                 }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Record>() {
+                .subscribe(new Subscriber<String>() {
                     @Override
                     public void onCompleted() {
                         progressDialog.dismiss();
@@ -177,7 +151,7 @@ public class UploadPreference extends Preference {
                     }
 
                     @Override
-                    public void onNext(Record record) {
+                    public void onNext(String msg) {
                         progressDialog.setProgress(progressDialog.getProgress() + 1);
                     }
                 });
