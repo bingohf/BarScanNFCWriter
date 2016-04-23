@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="array_device_type_label">
+        <item>NFC Write &amp; Read</item>
+        <item>Read NFC or Barcode</item>
+    </string-array>
+    <string-array name="array_device_type_value">
+        <item>NFCWriter</item>
+        <item>ReadNFC</item>
+    </string-array>
+</resources>
