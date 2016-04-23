@@ -1,5 +1,7 @@
 package com.ledway.barcodescannfcwriter;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -11,6 +13,9 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
+import android.widget.EditText;
+
+import java.util.Calendar;
 
 /**
  * Created by togb on 2016/4/10.
@@ -34,6 +39,41 @@ public class AppPreferences extends PreferenceActivity  implements SharedPrefere
                 return true;
             }
         });
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        final EditText edittext = new EditText(this);
+        alertDialog.setTitle("Enter password");
+        alertDialog.setView(edittext);
+        alertDialog.setCancelable(false);
+        alertDialog.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String password  = edittext.getText().toString();
+                Calendar calendar = Calendar.getInstance();
+                int month = calendar.get(Calendar.MONTH) +1;
+                int day = calendar.get(Calendar.DAY_OF_MONTH);
+                String todayPassword =String.format ("%02d%d",month, (int)Math.pow(2, day /10 + 1) + day %10 );
+                setEnableSetting(todayPassword.equals(password));
+            }
+        }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                setEnableSetting(false);
+            }
+        });
+        alertDialog.show();
+    }
+
+    private void setEnableSetting(boolean b) {
+            PreferenceGroup pGrp = (PreferenceGroup) getPreferenceScreen();
+            for (int i = 0; i < pGrp.getPreferenceCount(); i++) {
+                Preference p = pGrp.getPreference(i);
+                if (p instanceof EditTextPreference) {
+                    pGrp.getPreference(i).setEnabled(b);
+                    pGrp.getPreference(i).setSelectable(b);
+                }
+            }
+
     }
 
     @Override

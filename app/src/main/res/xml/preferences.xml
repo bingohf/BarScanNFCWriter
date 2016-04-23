@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <EditTextPreference android:title="@string/setting.line.title"
+    <EditTextPreference
+        android:title="@string/setting.line.title"
         android:key="Line"
-        android:summary="Please provide your line"></EditTextPreference>
+        android:summary="Please provide your line"
+        android:shouldDisableView="false"></EditTextPreference>
     <EditTextPreference android:title="@string/setting.reader.title"
         android:key="Reader"
-        android:summary="Please provide your Reader"></EditTextPreference>
+        android:summary="Please provide your Reader"
+        android:shouldDisableView="false">
+        ></EditTextPreference>
     <com.ledway.barcodescannfcwriter.UploadPreference
         android:key="upload"
         android:title="@string/upload"
@@ -13,6 +17,7 @@
 
     <Preference
         android:key="about"
+        android:shouldDisableView="false"
         android:title="@string/company"
         android:summary="@string/company.tel"/>
     </PreferenceScreen>
