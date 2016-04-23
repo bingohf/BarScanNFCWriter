@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.DialogPreference;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
@@ -13,6 +14,7 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
+import android.preference.TwoStatePreference;
 import android.widget.EditText;
 
 import java.util.Calendar;
@@ -68,7 +70,7 @@ public class AppPreferences extends PreferenceActivity  implements SharedPrefere
             PreferenceGroup pGrp = (PreferenceGroup) getPreferenceScreen();
             for (int i = 0; i < pGrp.getPreferenceCount(); i++) {
                 Preference p = pGrp.getPreference(i);
-                if (p instanceof EditTextPreference) {
+                if (p instanceof DialogPreference || p instanceof TwoStatePreference) {
                     pGrp.getPreference(i).setEnabled(b);
                     pGrp.getPreference(i).setSelectable(b);
                 }
