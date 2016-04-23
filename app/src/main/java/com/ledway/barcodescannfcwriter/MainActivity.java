@@ -78,7 +78,9 @@ public class MainActivity extends AppCompatActivity {
             if(!pattern.matcher(text).matches()) {
                 mEdtBarCode.setText(text);
                 if (settings.getDeviceType().equals("ReadNFC")){
-                    saveRecordLog(text);
+                    Record record = new Record();
+                    record.readings = text;
+                    insertRecordLog(record);
                 }
             }else{
                 vibrator.vibrate(1000);
@@ -87,33 +89,32 @@ public class MainActivity extends AppCompatActivity {
     };
 
 
-    private void saveRecordLog(String barcode) {
-        Record r = new Record();
-        r.readings = barcode;
-        r.wk_date = new Date();
-        r.reader = settings.getReader();
-        r.line = settings.getLine();
-        r.lwGuid =  UUID.randomUUID().toString();
-        r.save();
-        MApp.getInstance().getUploadService().uploadRecord(r)
+    private void insertRecordLog(Record record) {
+        record.wk_date = new Date();
+        record.reader = settings.getReader();
+        record.line = settings.getLine();
+        record.lwGuid =  UUID.randomUUID().toString();
+        record.save();
+        mListAdapter.insert(record, 0);
+       //mListAdapter.notifyDataSetChanged();
+        if (settings.isAutoUpload()) {
+            MApp.getInstance().getUploadService().uploadRecord(record)
                 .subscribeOn(Schedulers.io())
-                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Record>() {
-                    @Override
-                    public void onCompleted() {
+                    @Override public void onCompleted() {
+                        mListAdapter.notifyDataSetChanged();
+                    }
+
+                    @Override public void onError(Throwable e) {
 
                     }
 
-                    @Override
-                    public void onError(Throwable e) {
-
-                    }
-
-                    @Override
-                    public void onNext(Record record) {
-
+                    @Override public void onNext(Record record) {
+                        Log.v("record", record.wk_date.toLocaleString());
                     }
                 });
+        }
     }
 
     private View mBtnClear;
@@ -133,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
         mEdtBarCode = (EditText) findViewById(R.id.txt_barcode);
         mListRecord = (ListView) findViewById(R.id.list_record);
         mListAdapter = new RecordListAdapter(this, 0);
+        getRecordHistory();
         mListRecord.setAdapter(mListAdapter);
         //mListRecord.scrollTo(0,100000);
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
@@ -282,7 +284,10 @@ public class MainActivity extends AppCompatActivity {
                     if (auth) {
                         byte[] bytes = mfc.readBlock(4);
                         String barcode = new String(bytes);
-                        saveRecordLog(barcode);
+                        mEdtBarCode.setText(barcode);
+                        Record record = new Record();
+                        record.readings = barcode;
+                        insertRecordLog(record);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -361,13 +366,7 @@ public class MainActivity extends AppCompatActivity {
                         if (barcode.equals(new String(bytes).trim())) {
                             Record r = new Record();
                             r.readings = barcode;
-                            r.wk_date = new Date();
-                            r.reader = settings.getReader();
-                            r.line = settings.getLine();
-                            r.lwGuid =  UUID.randomUUID().toString();
-                            r.save();
-                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                            mListAdapter.insert(r,0);
+                            insertRecordLog(r);
                             mListRecord.smoothScrollByOffset(0);
                         }
 

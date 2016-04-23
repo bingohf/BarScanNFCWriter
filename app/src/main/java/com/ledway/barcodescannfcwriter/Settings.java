@@ -15,6 +15,13 @@ public class Settings {
     private boolean isAutoUpload;
     private String deviceType;
 
+    public boolean isAutoUpload() {
+        return isAutoUpload;
+    }
+
+
+
+
     public String getDeviceType() {
         return deviceType;
     }

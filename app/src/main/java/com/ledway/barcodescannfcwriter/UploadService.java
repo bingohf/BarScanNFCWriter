@@ -57,6 +57,7 @@ public class UploadService {
                                 +"','" + dateFormat.format(record.wk_date) +"')";
                         statement.execute(sql);
                         record.uploaded_datetime = new Date();
+                       // Thread.sleep(3000);
                         record.save();
                         subscriber.onNext(record);
                         subscriber.onCompleted();
