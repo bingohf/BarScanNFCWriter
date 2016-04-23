@@ -15,8 +15,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import rx.Notification;
 import rx.Observable;
 import rx.Subscriber;
+import rx.functions.Action1;
 
 /**
  * Created by togb on 2016/4/23.
@@ -65,7 +67,12 @@ public class UploadService {
                     }
                 }
             }
-        });
+        }).doOnError(new Action1<Throwable>() {
+            @Override
+            public void call(Throwable throwable) {
+                statement = null;
+            }
+        }).retry(2);
     }
 
     private synchronized void prepareStatement() throws Exception {
