@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        settings = new Settings(this);
+        settings = MApp.getInstance().getSettings();
         setContentView(R.layout.activity_main);
         findViewById(R.id.my_layout).requestFocus();
         preCheck();
