@@ -17,7 +17,6 @@ import android.nfc.tech.NfcA;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
 import android.serialport.api.SerialPort;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -66,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
     private String[][] mTechLists;
     private Intent intents;
     private EditText mEdtBarCode;
+    private Settings settings;
     private BroadcastReceiver scanBroadcastReceiver = new BroadcastReceiver(){
 
         @Override
@@ -86,12 +86,12 @@ public class MainActivity extends AppCompatActivity {
     private ArrayAdapter<String> mListAdapter;
     private CompositeSubscription subscriptions = new CompositeSubscription();
     private Vibrator vibrator;
-    private String mLine;
-    private String mReader;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        settings = new Settings(this);
         setContentView(R.layout.activity_main);
         findViewById(R.id.my_layout).requestFocus();
         preCheck();
@@ -244,14 +244,12 @@ public class MainActivity extends AppCompatActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             Intent intent = new Intent(this, AppPreferences.class);
             startActivityForResult(intent,1);
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -309,15 +307,13 @@ public class MainActivity extends AppCompatActivity {
                             Record r = new Record();
                             r.readings = barcode;
                             r.wk_date = new Date();
-                            r.reader = mReader;
-                            r.line = mLine;
+                            r.reader = settings.getReader();
+                            r.line = settings.getLine();
                             r.lwGuid =  UUID.randomUUID().toString();
                             r.save();
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                             mListAdapter.insert(simpleDateFormat.format(r.wk_date) + ":\t" + barcode, 0 );
-                          //  mListAdapter.add(simpleDateFormat.format(r.wk_date) + ":\t" + barcode);
                             mListRecord.smoothScrollByOffset(0);
-
                         }
 
                     }
@@ -334,8 +330,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }));
-
-
     }
 
     private ArrayList<String> getRecordHistory() {
@@ -420,10 +414,8 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
         }
         */
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        mLine = sp.getString("Line","");
-        mReader = sp.getString("Reader", "");
-        if(TextUtils.isEmpty(mLine) || TextUtils.isEmpty(mReader)){
+        settings.reload();
+        if(TextUtils.isEmpty(settings.getLine()) || TextUtils.isEmpty(settings.getReader())){
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.invalid_setting)
                     .setMessage(R.string.goto_setting)
@@ -437,7 +429,7 @@ public class MainActivity extends AppCompatActivity {
                     .setCancelable(false);
             builder.create().show();
         }else {
-            getSupportActionBar().setTitle(mLine + " - " + mReader + "  " + getString(R.string.company_short));
+            getSupportActionBar().setTitle(settings.getLine() + " - " + settings.getReader() + "  " + getString(R.string.company_short));
         }
 
     }

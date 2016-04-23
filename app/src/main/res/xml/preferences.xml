@@ -16,10 +16,13 @@
         android:shouldDisableView="false">
         ></EditTextPreference>
     <SwitchPreference
+        android:shouldDisableView="false"
         android:key="auto_upload_switch"
         android:title="@string/setting.autoupload.title"
         android:defaultValue="true" />
-    <ListPreference     android:title="@string/setting.type.title"
+    <ListPreference
+        android:shouldDisableView="false"
+        android:title="@string/setting.type.title"
         android:summary="Select the type that you would like to use this device"
         android:key="deviceType"
         android:defaultValue="ReadNFC"
