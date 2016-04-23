@@ -281,12 +281,14 @@ public class MainActivity extends AppCompatActivity {
                     boolean auth = mfc.authenticateSectorWithKeyA(
                             1,
                             keyA);
+                    String mifareID = readMifareId(intent);
                     if (auth) {
                         byte[] bytes = mfc.readBlock(4);
                         String barcode = new String(bytes);
                         mEdtBarCode.setText(barcode);
                         Record record = new Record();
                         record.readings = barcode;
+                        record.rfidSeries = mifareID ;
                         insertRecordLog(record);
                     }
                 } catch (IOException e) {
@@ -296,6 +298,33 @@ public class MainActivity extends AppCompatActivity {
                 writeToIC();
             }
         }
+    }
+    private String bytesToHexString(byte[] src) {
+        StringBuilder stringBuilder = new StringBuilder("");
+        if (src == null || src.length <= 0) {
+            return null;
+        }
+        char[] buffer = new char[2];
+        for (int i = 0; i < src.length; i++) {
+            buffer[0] = Character.forDigit((src[i] >>> 4) & 0x0F, 16);
+            buffer[1] = Character.forDigit(src[i] & 0x0F, 16);
+
+            stringBuilder.append(buffer);
+
+        }
+        return stringBuilder.toString();
+    }
+
+    private String readMifareId(Intent intent){
+        byte[] myNFCID = intent.getByteArrayExtra(NfcAdapter.EXTRA_ID);
+        int before = (int) Long.parseLong(bytesToHexString(myNFCID), 16);
+        int r24 = before >> 24 & 0x000000FF;
+        int r8 = before >> 8 & 0x0000FF00;
+        int l8 = before << 8 & 0x00FF0000;
+        int l24 = before << 24 & 0xFF000000;
+
+        long mifareId = Long.parseLong(Integer.toHexString((r24 | r8 | l8 | l24)), 16);
+        return mifareId +"";
     }
 
     @Override
@@ -366,6 +395,7 @@ public class MainActivity extends AppCompatActivity {
                         if (barcode.equals(new String(bytes).trim())) {
                             Record r = new Record();
                             r.readings = barcode;
+                            r.rfidSeries = readMifareId(intents);
                             insertRecordLog(r);
                             mListRecord.smoothScrollByOffset(0);
                         }

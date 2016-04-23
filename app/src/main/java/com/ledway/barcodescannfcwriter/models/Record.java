@@ -33,6 +33,8 @@ public class Record extends Model{
     @Column(name = "logMessage")
     public String logMessage;
 
+    @Column(name ="RFID_Series")
+    public String rfidSeries;
     public Record() {
         super();
     }

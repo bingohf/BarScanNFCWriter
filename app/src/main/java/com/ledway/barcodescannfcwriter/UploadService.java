@@ -51,10 +51,12 @@ public class UploadService {
                 }else {
                     try {
                         prepareStatement();
-                        String sql = "insert into dbo.RFID1(line,reader,readings,wK_date) values('" + record.line
+                        String sql = "insert into dbo.RFID1(line,reader,readings,wK_date,rfid_series) values('" + record.line
                                 +"','" + record.reader
                                 + "','" + record.readings
-                                +"','" + dateFormat.format(record.wk_date) +"')";
+                                +"','" + dateFormat.format(record.wk_date)
+                                 +"','" + record.rfidSeries
+                            +"')";
                         statement.execute(sql);
                         record.uploaded_datetime = new Date();
                        // Thread.sleep(3000);
