@@ -34,11 +34,10 @@ public class UploadService {
         settings = MApp.getInstance().getSettings();
     }
 
-
-    public Observable<String> uploadRecord(final Record record){
-        return Observable.create(new Observable.OnSubscribe<String>() {
+    public Observable<Record> uploadRecord(final Record record){
+        return Observable.create(new Observable.OnSubscribe<Record>() {
             @Override
-            public void call(Subscriber<? super String> subscriber) {
+            public void call(Subscriber<? super Record> subscriber) {
                 if (!isOnline()){
                     subscriber.onError(new Exception("Network is not available"));
                     if(statement != null) {
@@ -59,7 +58,7 @@ public class UploadService {
                         statement.execute(sql);
                         record.uploaded_datetime = new Date();
                         record.save();
-                        subscriber.onNext("ok");
+                        subscriber.onNext(record);
                         subscriber.onCompleted();
                     } catch (Exception e) {
                         e.printStackTrace();

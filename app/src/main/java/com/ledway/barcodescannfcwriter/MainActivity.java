@@ -8,8 +8,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.MifareClassic;
@@ -35,6 +33,7 @@ import com.activeandroid.Model;
 import com.activeandroid.query.Select;
 import com.ledway.barcodescannfcwriter.models.Record;
 import com.zkc.Service.CaptureService;
+import com.zkc.beep.ServiceBeepManager;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -49,8 +48,10 @@ import java.util.regex.Pattern;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import rx.subscriptions.Subscriptions;
 
@@ -66,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
     private Intent intents;
     private EditText mEdtBarCode;
     private Settings settings;
+    private ServiceBeepManager beepManager;
     private BroadcastReceiver scanBroadcastReceiver = new BroadcastReceiver(){
 
         @Override
@@ -75,15 +77,48 @@ public class MainActivity extends AppCompatActivity {
             Pattern pattern = Pattern.compile("[^0-9a-zA-Z_ ]");
             if(!pattern.matcher(text).matches()) {
                 mEdtBarCode.setText(text);
+                if (settings.getDeviceType().equals("ReadNFC")){
+                    saveRecordLog(text);
+                }
             }else{
                 vibrator.vibrate(1000);
             }
         }
     };
+
+
+    private void saveRecordLog(String barcode) {
+        Record r = new Record();
+        r.readings = barcode;
+        r.wk_date = new Date();
+        r.reader = settings.getReader();
+        r.line = settings.getLine();
+        r.lwGuid =  UUID.randomUUID().toString();
+        r.save();
+        MApp.getInstance().getUploadService().uploadRecord(r)
+                .subscribeOn(Schedulers.io())
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Record>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onNext(Record record) {
+
+                    }
+                });
+    }
+
     private View mBtnClear;
     private ListView mListRecord;
-    private ArrayList<String> mArrayRecord;
-    private ArrayAdapter<String> mListAdapter;
+    private RecordListAdapter mListAdapter;
     private CompositeSubscription subscriptions = new CompositeSubscription();
     private Vibrator vibrator;
 
@@ -97,8 +132,7 @@ public class MainActivity extends AppCompatActivity {
         preCheck();
         mEdtBarCode = (EditText) findViewById(R.id.txt_barcode);
         mListRecord = (ListView) findViewById(R.id.list_record);
-        mArrayRecord = getRecordHistory();
-        mListAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,mArrayRecord);
+        mListAdapter = new RecordListAdapter(this, 0);
         mListRecord.setAdapter(mListAdapter);
         //mListRecord.scrollTo(0,100000);
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
@@ -234,7 +268,28 @@ public class MainActivity extends AppCompatActivity {
         if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction())) {
             // 处理该intent
             intents = intent;
-            writeToIC();
+            if (settings.getDeviceType().equals("ReadNFC")){
+                Tag tagFromIntent = intents
+                        .getParcelableExtra(NfcAdapter.EXTRA_TAG);
+                MifareClassic mfc = MifareClassic
+                        .get(tagFromIntent);
+
+                try {
+                    mfc.connect();
+                    boolean auth = mfc.authenticateSectorWithKeyA(
+                            1,
+                            keyA);
+                    if (auth) {
+                        byte[] bytes = mfc.readBlock(4);
+                        String barcode = new String(bytes);
+                        saveRecordLog(barcode);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }else {
+                writeToIC();
+            }
         }
     }
 
@@ -312,7 +367,7 @@ public class MainActivity extends AppCompatActivity {
                             r.lwGuid =  UUID.randomUUID().toString();
                             r.save();
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                            mListAdapter.insert(simpleDateFormat.format(r.wk_date) + ":\t" + barcode, 0 );
+                            mListAdapter.insert(r,0);
                             mListRecord.smoothScrollByOffset(0);
                         }
 
@@ -332,18 +387,11 @@ public class MainActivity extends AppCompatActivity {
         }));
     }
 
-    private ArrayList<String> getRecordHistory() {
+    private void getRecordHistory() {
         List<Record> records = new Select().from(Record.class).orderBy("uploaded_datetime desc").execute();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        ArrayList<String> list = new ArrayList<>();
         for(Record r : records){
-            String text = simpleDateFormat.format(r.wk_date) + ":\t" + r.readings;
-            if (r.uploaded_datetime != null){
-                text = "* " + text;
-            }
-            list.add(text);
+            mListAdapter.add(r);
         }
-        return  list;
     }
     private Record findRecord(String barcode){
         List<Record> records = new Select().from(Record.class).where("readings =?", barcode).orderBy("wk_date desc").limit(1).execute();
@@ -439,11 +487,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == 1){
             preCheck();
-            mArrayRecord.clear();
-            ArrayList<String> records = getRecordHistory();
-            for(String s : records){
-                mArrayRecord.add(s);
-            }
+            mListAdapter.clear();
+            getRecordHistory();
             mListAdapter.notifyDataSetChanged();
             mListRecord.smoothScrollByOffset(0);
         }

@@ -129,14 +129,14 @@ public class UploadPreference extends Preference {
                         }
                         subscriber.onCompleted();
                     }
-                }).flatMap(new Func1<Record, Observable<String>>() {
+                }).flatMap(new Func1<Record, Observable<Record>>() {
                     @Override
-                    public Observable<String> call(Record record) {
+                    public Observable<Record> call(Record record) {
                         return MApp.getInstance().getUploadService().uploadRecord(record);
                     }
                 }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<String>() {
+                .subscribe(new Subscriber<Record>() {
                     @Override
                     public void onCompleted() {
                         progressDialog.dismiss();
@@ -151,7 +151,7 @@ public class UploadPreference extends Preference {
                     }
 
                     @Override
-                    public void onNext(String msg) {
+                    public void onNext(Record record) {
                         progressDialog.setProgress(progressDialog.getProgress() + 1);
                     }
                 });

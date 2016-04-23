@@ -15,6 +15,12 @@ public class Settings {
     private boolean isAutoUpload;
     private String deviceType;
 
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+
+
     public Settings(Context context){
         this.context = context;
         reload();
