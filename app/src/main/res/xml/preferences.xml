@@ -10,6 +10,15 @@
         android:summary="Please provide your Reader"
         android:shouldDisableView="false">
         ></EditTextPreference>
+    <EditTextPreference android:title="@string/setting.server.title"
+        android:key="Server"
+        android:summary="Please provide cloud server"
+        android:shouldDisableView="false">
+        ></EditTextPreference>
+    <SwitchPreference
+        android:key="auto_upload_switch"
+        android:title="@string/setting.autoupload.title"
+        android:defaultValue="true" />
     <com.ledway.barcodescannfcwriter.UploadPreference
         android:key="upload"
         android:title="@string/upload"
