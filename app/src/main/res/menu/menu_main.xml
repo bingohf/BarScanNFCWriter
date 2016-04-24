@@ -3,6 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.ledway.barcodescannfcwriter.MainActivity">
     <item
+        android:id="@+id/action_count"
+        android:orderInCategory="100"
+        android:title="@string/empty"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="@string/action_settings"

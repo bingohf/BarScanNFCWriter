@@ -98,6 +98,8 @@ public class MainActivity extends AppCompatActivity {
         record.lwGuid =  UUID.randomUUID().toString();
         record.save();
         mListAdapter.insert(record, 0);
+        ++todayActionCount;
+        invalidateOptionsMenu();
        //mListAdapter.notifyDataSetChanged();
         if (settings.isAutoUpload()) {
             MApp.getInstance().getUploadService().uploadRecord(record)
@@ -213,6 +215,13 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
+    @Override public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item = menu.findItem(R.id.action_count);
+        item.setTitle(todayActionCount +"");
+        return  true;
+    }
+
     private void exitActivity() {
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
@@ -447,9 +456,12 @@ public class MainActivity extends AppCompatActivity {
             }
             ++todayActionCount;
         }
+        invalidateOptionsMenu();
     }
 
+   private void showTotalActionCount(){
 
+   }
     private Record findRecord(String barcode){
         List<Record> records = new Select().from(Record.class).where("readings =?", barcode).orderBy("wk_date desc").limit(1).execute();
         if (records.size() > 0 ){
