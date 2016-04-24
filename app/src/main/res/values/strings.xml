@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">NFC Writer</string>
+    <string name="app_name">Bundle Tracking</string>
     <string name="action_settings">Settings</string>
     <string name="barcode.hint">Scan bar code</string>
     <string name="nfc.hint">请将IC放到感应区</string>
@@ -16,19 +16,19 @@
     <string name="barcode_invalid">条码不正确，请重新扫码</string>
     <string name="scan.btn">扫描 (Scan)</string>
     <string name="had_to_mifare">此条码已经录入</string>
-    <string name="ok">确认</string>
-    <string name="cancel">取消</string>
-    <string name="upload">上传</string>
+    <string name="ok">确认(OK)</string>
+    <string name="cancel">取消(Cancel)</string>
+    <string name="upload">上传(Upload)</string>
     <string name="invalid_setting">本机设置信息不完整</string>
     <string name="goto_setting">进入设置</string>
     <string name="setting">设置</string>
-    <string name="uploading">正在上传</string>
+    <string name="uploading">正在上传(uploading)</string>
     <string name="company">威虹資訊股份有限公司版權所有</string>
     <string name="company.tel">服務電話: +886222799889</string>
     <string name="company_short">威虹資訊</string>
     <string name="setting.reader.title">Reader(##) (96發料, 97車縫, 98整燙, 99繳庫)</string>
     <string name="setting.line.title">Line(####)</string>
     <string name="setting.server.title">Server</string>
-    <string name="setting.autoupload.title">Auto Upload</string>
+    <string name="setting.autoupload.title">自动上传(Auto Upload)</string>
     <string name="setting.type.title">Type</string>
 </resources>

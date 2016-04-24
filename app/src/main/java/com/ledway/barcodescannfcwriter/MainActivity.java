@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -68,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText mEdtBarCode;
     private Settings settings;
     private ServiceBeepManager beepManager;
+    private int todayActionCount = 0;
     private BroadcastReceiver scanBroadcastReceiver = new BroadcastReceiver(){
 
         @Override
@@ -209,6 +211,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+
     }
     private void exitActivity() {
         new AlertDialog.Builder(this)
@@ -251,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         if (nfcAdapter.isEnabled()) {
             nfcAdapter.enableForegroundDispatch(this, pendingIntent, mFilters,
-                    mTechLists);
+                mTechLists);
             if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(getIntent()
                     .getAction())) {
                 // 处理该intent
@@ -284,12 +287,14 @@ public class MainActivity extends AppCompatActivity {
                     String mifareID = readMifareId(intent);
                     if (auth) {
                         byte[] bytes = mfc.readBlock(4);
-                        String barcode = new String(bytes);
-                        mEdtBarCode.setText(barcode);
-                        Record record = new Record();
-                        record.readings = barcode;
-                        record.rfidSeries = mifareID ;
-                        insertRecordLog(record);
+                        String barcode = new String(bytes).trim();
+                        if(!TextUtils.isEmpty(barcode)) {
+                            mEdtBarCode.setText(barcode);
+                            Record record = new Record();
+                            record.readings = barcode;
+                            record.rfidSeries = mifareID;
+                            insertRecordLog(record);
+                        }
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -416,12 +421,35 @@ public class MainActivity extends AppCompatActivity {
         }));
     }
 
+    private long clearTime(Date date){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTimeInMillis();
+    }
+
+
     private void getRecordHistory() {
+        todayActionCount = 0;
         List<Record> records = new Select().from(Record.class).orderBy("uploaded_datetime desc").execute();
+
         for(Record r : records){
             mListAdapter.add(r);
         }
+        long today = clearTime(new Date());
+        for(Record r : records){
+            long day = clearTime(r.wk_date);
+            if (day != today ){
+                break;
+            }
+            ++todayActionCount;
+        }
     }
+
+
     private Record findRecord(String barcode){
         List<Record> records = new Select().from(Record.class).where("readings =?", barcode).orderBy("wk_date desc").limit(1).execute();
         if (records.size() > 0 ){
@@ -474,23 +502,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void preCheck(){
-/*        ConnectivityManager manager = (ConnectivityManager)
-                getSystemService(MainActivity.CONNECTIVITY_SERVICE);
-*//*
- * 3G confirm
- *//*
-        Boolean is3g = manager.getNetworkInfo(
-                ConnectivityManager.TYPE_MOBILE).isConnectedOrConnecting();
-*//*
- * wifi confirm
- *//*
-        Boolean isWifi = manager.getNetworkInfo(
-                ConnectivityManager.TYPE_WIFI).isConnectedOrConnecting();
-        if (!is3g && !isWifi) {
-            // Activity transfer to wifi settings
-            startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
-        }
-        */
         settings.reload();
         if(TextUtils.isEmpty(settings.getLine()) || TextUtils.isEmpty(settings.getReader())){
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -506,7 +517,8 @@ public class MainActivity extends AppCompatActivity {
                     .setCancelable(false);
             builder.create().show();
         }else {
-            getSupportActionBar().setTitle(settings.getLine() + " - " + settings.getReader() + "  " + getString(R.string.company_short));
+            String type = settings.getDeviceType().equals("ReadNFC") ?" ": " W ";
+            getSupportActionBar().setTitle(settings.getLine() + " - " + settings.getReader() + type + getString(R.string.company_short));
         }
 
     }
