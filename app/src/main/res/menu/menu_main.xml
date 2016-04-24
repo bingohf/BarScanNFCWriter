@@ -6,7 +6,8 @@
         android:id="@+id/action_count"
         android:orderInCategory="100"
         android:title="@string/empty"
-        app:showAsAction="always" />
+        app:showAsAction="always"
+        android:theme= "@style/AppTheme.MenuItem"/>
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"

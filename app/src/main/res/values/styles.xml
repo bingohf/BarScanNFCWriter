@@ -6,6 +6,8 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:actionMenuTextAppearance">@style/actionMenuTextAppearance</item>
+        <item name="actionMenuTextAppearance">@style/actionMenuTextAppearance</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -16,5 +18,11 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
+    <style name="AppTheme.MenuItem" >
+        <item name="android:actionMenuTextAppearance">@style/actionMenuTextAppearance</item>
+        <item name="actionMenuTextAppearance">@style/actionMenuTextAppearance</item>
+    </style>
+    <style name="actionMenuTextAppearance" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Menu">
+        <item name="android:textSize">18sp</item>
+    </style>
 </resources>
