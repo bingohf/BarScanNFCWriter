@@ -446,12 +446,22 @@ public class MainActivity extends AppCompatActivity {
 
     private void getRecordHistory() {
         todayActionCount = 0;
-        List<Record> records = new Select().from(Record.class).orderBy("uploaded_datetime desc").execute();
-
+        List<Record> records = new Select().from(Record.class).where("uploaded_datetime is null").orderBy("uploaded_datetime desc").execute();
+        List<Record> uploadedRecords = new Select().from(Record.class).where("uploaded_datetime is not null").orderBy("uploaded_datetime desc").execute();
         for(Record r : records){
             mListAdapter.add(r);
         }
+        for(Record r : uploadedRecords){
+            mListAdapter.add(r);
+        }
         long today = clearTime(new Date());
+        for(Record r : uploadedRecords){
+            long day = clearTime(r.wk_date);
+            if (day != today ){
+                break;
+            }
+            ++todayActionCount;
+        }
         for(Record r : records){
             long day = clearTime(r.wk_date);
             if (day != today ){

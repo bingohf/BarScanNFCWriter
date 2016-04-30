@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Bundle Tracking</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">Set</string>
     <string name="barcode.hint">Scan bar code</string>
     <string name="nfc.hint">請將IC放到感應區</string>
     <string name="write_to_mifare">寫入IC卡</string>
