@@ -3,6 +3,7 @@ package com.ledway.barcodescannfcwriter;
 import android.app.Application;
 
 import com.activeandroid.ActiveAndroid;
+import com.facebook.stetho.Stetho;
 
 /**
  * Created by togb on 2016/3/27.
@@ -19,6 +20,7 @@ public class MApp extends Application {
        instance = this;
         settings = new Settings(this);
        uploadService = new UploadService(this);
+     Stetho.initializeWithDefaults(this);
     }
     public Settings getSettings() {
         return settings;

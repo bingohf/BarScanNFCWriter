@@ -273,6 +273,21 @@ public class MainActivity extends AppCompatActivity {
                 intents = getIntent();
             }
         }
+        CleanService.getInstance().checkAndStart().subscribeOn(Schedulers.newThread())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Subscriber<String>() {
+                @Override public void onCompleted() {
+
+                }
+
+                @Override public void onError(Throwable e) {
+                    Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+
+                @Override public void onNext(String s) {
+
+                }
+            });
 
 
 
