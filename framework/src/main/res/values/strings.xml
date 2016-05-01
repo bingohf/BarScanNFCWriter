@@ -1,0 +1,36 @@
+<resources>
+  <string name="app_name">framework</string>
+  <string name="action_settings">Set</string>
+  <string name="barcode.hint">Scan bar code</string>
+  <string name="nfc.hint">請將IC放到感應區</string>
+  <string name="write_to_mifare">寫入IC卡</string>
+  <string name="device_no_nfc">妳的設備不支持NFC</string>
+  <string name="device_nfc_disabled">請到系統設置裏開啟NFC</string>
+  <string name="no_card_found">請將IC卡放到感應區</string>
+  <string name="check_nfc_card">請檢查NFC功能是否正常，並將IC卡貼到感應區</string>
+  <string name="auth_fail_card">無法識別該卡</string>
+  <string name="exit">退出(Exit)</string>
+  <string name="exit_confirm">確定退出(Exit)？</string>
+  <string name="yes">是(Yes)</string>
+  <string name="no">否(No)</string>
+  <string name="barcode_invalid">條碼不正確，請重新掃碼</string>
+  <string name="scan.btn">掃描 (Scan)</string>
+  <string name="had_to_mifare">此條碼已經錄入</string>
+  <string name="ok">確認(OK)</string>
+  <string name="cancel">取消(Cancel)</string>
+  <string name="upload">上傳(Upload)</string>
+  <string name="invalid_setting">本機設置信息不完整</string>
+  <string name="goto_setting">進入設置</string>
+  <string name="setting">設置</string>
+  <string name="uploading">正在上傳(uploading)</string>
+  <string name="company">威虹資訊股份有限公司版權所有</string>
+  <string name="company.tel">服務電話: +886222799889</string>
+  <string name="company_short">威虹資訊</string>
+  <string name="setting.reader.title">Reader(##) (96發料, 97車縫, 98整燙, 99繳庫)</string>
+  <string name="setting.line.title">Line(####)</string>
+  <string name="setting.server.title">Server</string>
+  <string name="setting.autoupload.title">自動上傳(Auto Upload)</string>
+  <string name="setting.type.title">Type</string>
+  <string name="empty"/>
+  <string name="invalid_barcode">條碼不全(Invalid Code)</string>
+</resources>
