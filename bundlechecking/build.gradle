@@ -19,6 +19,11 @@ android {
       storeFile file("../ledway.keystore.jks")
     }
   }
+  android {
+    lintOptions {
+      abortOnError false
+    }
+  }
   buildTypes {
     debug{
       versionNameSuffix ".dev"
