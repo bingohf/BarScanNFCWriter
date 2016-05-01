@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -13,44 +12,73 @@
     >
 
   <LinearLayout
-      android:orientation="horizontal"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content">
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      >
     <FrameLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:padding="5dp">
+        android:padding="5dp"
+        >
 
       <EditText
           android:id="@+id/txt_barcode"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:textStyle="bold"
           android:hint="@string/barcode.hint"
+          android:imeOptions="actionSearch"
+          android:maxLength="20"
           android:singleLine="true"
           android:textSize="30sp"
-          android:imeOptions="actionSearch"
-          android:maxLength="20" />
+          android:textStyle="bold"
+          />
 
     </FrameLayout>
   </LinearLayout>
+  <FrameLayout
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="1"
+      android:gravity="center_vertical|center_horizontal"
+      >
 
+    <TextView
+        android:id="@+id/txt_response"
+        android:text="test"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textSize="20sp"
+        />
 
+    <ProgressBar
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/prg_loading"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        />
+
+  </FrameLayout>
 
 
   <Button
-      android:text="@string/scan.btn"
       android:id="@+id/btn_scan"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_gravity="center_vertical"
-      android:drawableLeft="@drawable/ic_barcode_scan_black_36dp"/>
+      android:drawableLeft="@drawable/ic_barcode_scan_black_36dp"
+      android:text="@string/scan.btn"
+      />
   <LinearLayout
+      android:id="@+id/my_layout"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:id="@+id/my_layout"
       android:focusable="true"
       android:focusableInTouchMode="true"
-      android:orientation="horizontal" />
+      android:orientation="horizontal"
+      />
 </LinearLayout>

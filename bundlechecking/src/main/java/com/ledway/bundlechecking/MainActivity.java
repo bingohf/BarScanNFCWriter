@@ -26,6 +26,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -44,7 +45,9 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import rx.Observable;
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
+import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import rx.subscriptions.Subscriptions;
 
@@ -62,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
   private String[][] mTechLists;
   private Intent intents;
   EditText mEdtBarCode;
+  View mPrgLoading;
+  TextView mTxtResponse;
   private ServiceBeepManager beepManager;
   private CompositeSubscription subscriptions = new CompositeSubscription();
   private BroadcastReceiver scanBroadcastReceiver = new BroadcastReceiver(){
@@ -94,6 +99,8 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     mEdtBarCode = (EditText) findViewById(R.id.txt_barcode);
+    mPrgLoading = findViewById(R.id.prg_loading);
+    mTxtResponse = (TextView) findViewById(R.id.txt_response);
     findViewById(R.id.my_layout).requestFocus();
 
     //mListRecord.scrollTo(0,100000);
@@ -136,14 +143,42 @@ public class MainActivity extends AppCompatActivity {
 
     mEdtBarCode.setOnEditorActionListener(new TextView.OnEditorActionListener() {
       @Override public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-        if (actionId == EditorInfo.IME_ACTION_SEARCH){
-          return  true;
-        }
+        doQuery(v.getText().toString());
         return  false;
       }
     });
   }
 
+  @Override public void onBackPressed() {
+    exitActivity();
+  }
+
+  private void doQuery(String barcode) {
+
+    View view = this.getCurrentFocus();
+    if (view != null) {
+      InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+      imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+    mPrgLoading.setVisibility(View.VISIBLE);
+    MyProjectApi.getInstance().getBarCodeDesc(barcode)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Subscriber<String>() {
+          @Override public void onCompleted() {
+            mPrgLoading.setVisibility(View.GONE);
+          }
+
+          @Override public void onError(Throwable e) {
+            mTxtResponse.setText(e.getMessage());
+            e.printStackTrace();
+          }
+
+          @Override public void onNext(String s) {
+            mTxtResponse.setText(s);
+          }
+        });
+  }
 
   private void exitActivity() {
     new AlertDialog.Builder(this)
