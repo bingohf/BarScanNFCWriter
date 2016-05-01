@@ -216,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
 
   @Override protected void onResume() {
     super.onResume();
-    if (nfcAdapter.isEnabled()) {
+    if (nfcAdapter != null && nfcAdapter.isEnabled()) {
       nfcAdapter.enableForegroundDispatch(this, pendingIntent, mFilters,
           mTechLists);
       if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(getIntent()

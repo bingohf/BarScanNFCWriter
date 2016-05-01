@@ -1,4 +1,4 @@
 <resources>
-  <string name="app_name">Bundle Checking</string>
+  <string name="app_name">Bundle Viewer</string>
   <string name="main_activity_name">威虹資訊RFID工票查詢</string>
 </resources>
