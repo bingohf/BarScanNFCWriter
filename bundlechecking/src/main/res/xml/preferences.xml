@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <EditTextPreference android:title="@string/setting.server.title"
+        android:key="Server"
+        android:summary="Please provide cloud server"
+        android:shouldDisableView="false">
+        ></EditTextPreference>
+    <Preference
+        android:key="about"
+        android:shouldDisableView="false"
+        android:title="@string/company"
+        android:summary="@string/company.tel"/>
+    </PreferenceScreen>

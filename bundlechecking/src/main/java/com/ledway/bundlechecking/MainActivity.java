@@ -81,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
       Pattern pattern = Pattern.compile("[^0-9a-zA-Z_ ]");
       if(!pattern.matcher(text).matches()) {
         mEdtBarCode.setText(text);
+        doQuery(text);
       }else{
         vibrator.vibrate(1000);
       }
@@ -154,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void doQuery(String barcode) {
-
+    mTxtResponse.setText("");
     View view = this.getCurrentFocus();
     if (view != null) {
       InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -171,6 +172,7 @@ public class MainActivity extends AppCompatActivity {
 
           @Override public void onError(Throwable e) {
             mTxtResponse.setText(e.getMessage());
+            mPrgLoading.setVisibility(View.GONE);
             e.printStackTrace();
           }
 
@@ -198,8 +200,57 @@ public class MainActivity extends AppCompatActivity {
             }).setNegativeButton(R.string.no, null).show();
   }
 
+  @Override public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.menu_main,menu);
+    return true;
+  }
 
+  @Override public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()){
+      case R.id.action_settings:
+        startActivity(new Intent(this,AppPreferences.class));
+        break;
+    }
+    return true;
+  }
 
+  @Override protected void onResume() {
+    super.onResume();
+    if (nfcAdapter.isEnabled()) {
+      nfcAdapter.enableForegroundDispatch(this, pendingIntent, mFilters,
+          mTechLists);
+      if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(getIntent()
+          .getAction())) {
+        // 处理该intent
+        intents = getIntent();
+      }
+    }
 
+  }
+
+  @Override protected void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+    if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction())) {
+      // 处理该intent
+      intents = intent;
+      Tag tagFromIntent = intents.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+      MifareClassic mfc = MifareClassic.get(tagFromIntent);
+
+      try {
+        mfc.connect();
+        boolean auth = mfc.authenticateSectorWithKeyA(1, keyA);
+        if (auth) {
+          byte[] bytes = mfc.readBlock(4);
+          String barcode = new String(bytes).trim();
+          if (!TextUtils.isEmpty(barcode)) {
+            mEdtBarCode.setText(barcode);
+            doQuery(barcode);
+          }
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+  }
 
 }
