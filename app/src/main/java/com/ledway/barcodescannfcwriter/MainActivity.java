@@ -188,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         Intent newIntent = new Intent(MainActivity.this, CaptureService.class);
-        newIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        newIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP );
         startService(newIntent);
 
 

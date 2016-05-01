@@ -26,8 +26,7 @@ import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.ledway.barcodescannfcwriter.R;
-
+import com.ledway.framework.R;
 import java.io.Closeable;
 import java.io.IOException;
 
