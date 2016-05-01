@@ -30,27 +30,14 @@
           android:hint="@string/barcode.hint"
           android:singleLine="true"
           android:textSize="30sp"
+          android:imeOptions="actionSearch"
           android:maxLength="20" />
-
-      <ImageButton
-          android:id="@+id/btn_clear"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_marginRight="10dp"
-          android:layout_gravity="right|center_vertical"
-          android:background="@drawable/ic_close_circle_grey600_18dp"
-          android:visibility="gone"/>
 
     </FrameLayout>
   </LinearLayout>
 
 
 
-  <ListView
-      android:id="@+id/list_record"
-      android:layout_width="match_parent"
-      android:layout_height="0dp"
-      android:layout_weight="1"/>
 
   <Button
       android:text="@string/scan.btn"
@@ -58,7 +45,6 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_gravity="center_vertical"
-      android:focusable="true"
       android:drawableLeft="@drawable/ic_barcode_scan_black_36dp"/>
   <LinearLayout
       android:layout_width="wrap_content"
