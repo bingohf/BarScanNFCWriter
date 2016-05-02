@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
 
     findViewById(R.id.btn_camera_scan).setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
-
+        startActivityForResult(new Intent(MainActivity.this, FullScannerActivity.class),1);
       }
     });
   }
@@ -259,4 +259,11 @@ public class MainActivity extends AppCompatActivity {
     }
   }
 
+  @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    if (requestCode ==1 && resultCode == 1) {
+      mEdtBarCode.setText(data.getStringExtra("barcode"));
+      doQuery(mEdtBarCode.getText().toString());
+    }
+  }
 }

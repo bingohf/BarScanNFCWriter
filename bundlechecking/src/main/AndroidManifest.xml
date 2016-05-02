@@ -36,6 +36,9 @@
           android:resource="@xml/nfc_tech_filter" />
     </activity>
     <activity android:name=".AppPreferences"/>
+    <activity
+        android:theme="@style/AppOverlayTheme"
+        android:name=".FullScannerActivity"/>
     <!-- 按键广播 -->
     <receiver
         android:name="com.zkc.Receiver.RemoteControlReceiver"
