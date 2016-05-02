@@ -148,6 +148,12 @@ public class MainActivity extends AppCompatActivity {
         return  false;
       }
     });
+
+    findViewById(R.id.btn_camera_scan).setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View v) {
+
+      }
+    });
   }
 
   @Override public void onBackPressed() {

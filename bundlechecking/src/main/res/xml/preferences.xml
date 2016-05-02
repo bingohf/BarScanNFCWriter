@@ -5,6 +5,12 @@
         android:summary="Please provide cloud server"
         android:shouldDisableView="false">
         ></EditTextPreference>
+
+    <Preference
+        android:key="helpinfo"
+        android:shouldDisableView="false"
+        android:title="@string/barcode"
+        android:summary="@string/barcode.help"/>
     <Preference
         android:key="about"
         android:shouldDisableView="false"

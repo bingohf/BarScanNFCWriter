@@ -40,29 +40,7 @@ public class AppPreferences extends PreferenceActivity  implements SharedPrefere
                 return true;
             }
         });
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-        final EditText edittext = new EditText(this);
-        alertDialog.setTitle("Enter password");
-        alertDialog.setView(edittext);
-        alertDialog.setCancelable(false);
-        alertDialog.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String password  = edittext.getText().toString();
-                Calendar calendar = Calendar.getInstance();
-                int month = calendar.get(Calendar.MONTH) +1;
-                int day = calendar.get(Calendar.DAY_OF_MONTH);
-                String todayPassword =String.format ("%02d%d",month, (int)Math.pow(2, day /10 + 1) + day %10 );
-                setEnableSetting(todayPassword.equals(password));
-            }
-        }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                setEnableSetting(false);
-            }
-        });
-        alertDialog.show();
+
     }
 
     private void setEnableSetting(boolean b) {

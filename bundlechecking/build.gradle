@@ -57,6 +57,7 @@ dependencies {
   testCompile 'junit:junit:4.12'
   compile 'com.android.support:appcompat-v7:23.3.0'
   compile 'com.android.support:design:23.3.0'
+  compile 'me.dm7.barcodescanner:zxing:1.8.4'
   compile 'com.jakewharton:butterknife:8.0.1'
   compile 'io.reactivex:rxjava:1.0.14'
   compile 'io.reactivex:rxandroid:1.0.1'
