@@ -102,4 +102,8 @@ public class UploadService {
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
+
+    public void reset() {
+        statement = null;
+    }
 }

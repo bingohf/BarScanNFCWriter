@@ -214,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()){
       case R.id.action_settings:
-        startActivity(new Intent(this,AppPreferences.class));
+        startActivityForResult(new Intent(this,AppPreferences.class),2);
         break;
     }
     return true;
@@ -264,6 +264,8 @@ public class MainActivity extends AppCompatActivity {
     if (requestCode ==1 && resultCode == 1) {
       mEdtBarCode.setText(data.getStringExtra("barcode"));
       doQuery(mEdtBarCode.getText().toString());
+    }else{
+      MApp.getInstance().getSettings().reload();
     }
   }
 }

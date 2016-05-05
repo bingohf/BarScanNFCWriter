@@ -568,6 +568,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == 1){
             preCheck();
+            MApp.getInstance().getUploadService().reset();
             mListAdapter.clear();
             getRecordHistory();
             mListAdapter.notifyDataSetChanged();

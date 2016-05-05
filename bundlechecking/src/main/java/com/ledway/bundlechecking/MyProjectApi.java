@@ -91,6 +91,9 @@ public class MyProjectApi {
 
     }
   }
+  public void reset(){
+    cstmt = null;
+  }
   public boolean isOnline() {
     ConnectivityManager cm =
         (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
