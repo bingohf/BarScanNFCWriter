@@ -34,7 +34,7 @@ public class CleanService {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
         int month = calendar.get(Calendar.MONTH);
-        calendar.set(Calendar.MONTH, month-3);
+        calendar.set(Calendar.MONTH, month-1);
         try {
           List<Record> records = new Select().from(Record.class)
               .where("uploaded_datetime is not null and wk_date < ?", calendar.getTime().getTime())

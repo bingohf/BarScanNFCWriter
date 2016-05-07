@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.serialport.api.SerialPort;
+import android.serialport.api.SerialPortHelper;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -32,6 +33,7 @@ import android.widget.Toast;
 import com.activeandroid.Model;
 import com.activeandroid.query.Select;
 import com.ledway.barcodescannfcwriter.models.Record;
+import com.zkc.Receiver.StartReceiver;
 import com.zkc.Service.CaptureService;
 import com.zkc.beep.ServiceBeepManager;
 
@@ -44,6 +46,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import rx.Observable;
@@ -52,7 +55,9 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
+import rx.subjects.PublishSubject;
 import rx.subscriptions.CompositeSubscription;
 import rx.subscriptions.Subscriptions;
 
@@ -70,12 +75,18 @@ public class MainActivity extends AppCompatActivity {
     private Settings settings;
     private ServiceBeepManager beepManager;
     private int todayActionCount = 0;
+    private PublishSubject<String> mScanTimer = PublishSubject.create();
+    private CompositeSubscription mSubscriptions = new CompositeSubscription();
+    private long autoScanTimeStamp = System.currentTimeMillis();
+
+
     private BroadcastReceiver scanBroadcastReceiver = new BroadcastReceiver(){
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            autoScanTimeStamp = System.currentTimeMillis();
             String text = intent.getExtras().getString("code");
-            if (text.length()<10){
+            if (text.length() < 10){
                 Toast.makeText(MainActivity.this, R.string.invalid_barcode, Toast.LENGTH_LONG).show();
             }
             Log.i(TAG, "MyBroadcastReceiver code:" + text);
@@ -89,6 +100,37 @@ public class MainActivity extends AppCompatActivity {
                 }
             }else{
                 vibrator.vibrate(1000);
+            }
+            mScanTimer.onNext("Receiver");
+            Observable.just(true).delay(1,TimeUnit.SECONDS).subscribe(new Action1<Boolean>() {
+                @Override public void call(Boolean aBoolean) {
+                    SerialPort.CleanBuffer();
+                    CaptureService.scanGpio.openScan();
+                    mScanTimer.onNext("Receiver-delay");
+                }
+            });
+
+        }
+
+    };
+
+    @Override protected void onPause() {
+        super.onPause();
+        autoScanTimeStamp = 0;
+    }
+
+    private BroadcastReceiver systemBroadcastReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            Log.v("action_test",action);
+            if (action.equals("com.zkc.keycode")) {
+                mScanTimer.onNext("scan_key");
+                autoScanTimeStamp = System.currentTimeMillis();
+            } else if (action.equals("android.intent.action.SCREEN_ON")) {
+            } else if (action.equals("android.intent.action.SCREEN_OFF")) {
+                autoScanTimeStamp = 0;
+            } else if (action.equals("android.intent.action.ACTION_SHUTDOWN")) {
+                autoScanTimeStamp = 0;
             }
         }
     };
@@ -162,6 +204,9 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 SerialPort.CleanBuffer();
                 CaptureService.scanGpio.openScan();
+                mScanTimer.onNext("Click");
+                autoScanTimeStamp = System.currentTimeMillis();
+
             }
         });
         mBtnClear = findViewById(R.id.btn_clear);
@@ -216,7 +261,25 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        mScanTimer.debounce(3, TimeUnit.SECONDS)
+            .subscribe(new Action1<String>() {
+                @Override public void call(String s) {
+                    Log.v("timer",s);
+                    long timeDelta = System.currentTimeMillis() - autoScanTimeStamp;
+                    if (timeDelta < 20000) {
+                        SerialPort.CleanBuffer();
+                        CaptureService.scanGpio.openScan();
+                        mScanTimer.onNext("Auto");
+                    }
+                }
+            });
 
+        IntentFilter screenStatusIF = new IntentFilter();
+        screenStatusIF.addAction(Intent.ACTION_SCREEN_ON);
+        screenStatusIF.addAction(Intent.ACTION_SCREEN_OFF);
+        screenStatusIF.addAction(Intent.ACTION_SHUTDOWN);
+        screenStatusIF.addAction("com.zkc.keycode");
+        registerReceiver(systemBroadcastReceiver,screenStatusIF);
     }
 
     @Override public boolean onPrepareOptionsMenu(Menu menu) {
@@ -254,6 +317,7 @@ public class MainActivity extends AppCompatActivity {
 
         super.onDestroy();
         subscriptions.clear();
+        unregisterReceiver(systemBroadcastReceiver);
     }
 
     @Override

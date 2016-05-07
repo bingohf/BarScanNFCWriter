@@ -18,6 +18,8 @@ import android.util.Log;
  */
 public class RemoteControlReceiver extends BroadcastReceiver {
 
+
+
 	private static final String TAG = "RemoteControlReceiver";
 
 	@Override
