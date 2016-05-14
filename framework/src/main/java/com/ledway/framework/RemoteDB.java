@@ -2,11 +2,13 @@ package com.ledway.framework;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
+import java.sql.Types;
+import java.util.Date;
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Action1;
@@ -24,25 +26,27 @@ public class RemoteDB {
   public Observable<Boolean> execute(final String sql, final Object... args){
     return Observable.create(new Observable.OnSubscribe<Boolean>() {
       @Override public void call(Subscriber<? super Boolean> subscriber) {
-        initStatement();
+
         try {
-          CallableStatement callableStatement = connection.prepareCall(sql);
+          initStatement();
+          PreparedStatement preparedStatement = connection.prepareStatement(sql);
           for(int i =0;i < args.length ;++i){
             if (args[i] instanceof String){
-              callableStatement.setString(i + 1, (String)args[i]);
+              preparedStatement.setString(i + 1, (String)args[i]);
             } else if (args[i] instanceof Integer){
-              callableStatement.setInt(i + 1, (Integer) args[i]);
+              preparedStatement.setInt(i + 1, (Integer) args[i]);
             } else if (args[i] instanceof Float){
-              callableStatement.setFloat(i + 1, (Float) args[i]);
+              preparedStatement.setFloat(i + 1, (Float) args[i]);
             } else if (args[i] instanceof Date){
-              callableStatement.setDate(i + 1, (Date) args[i]);
-            } else if (args[i] instanceof Time){
-              callableStatement.setTime(i + 1, (Time) args[i]);
-            }else{
+              Date date = (Date) args[i];
+              preparedStatement.setTimestamp(i +1, new java.sql.Timestamp(date.getTime()));
+            }else if (args[i] == null){
+              preparedStatement.setNull(i +1, Types.VARCHAR);
+            }else {
               throw new Exception("invalid sql & parameters");
             }
           }
-          if (!callableStatement.execute()){
+          if (preparedStatement.executeUpdate() == 0){
             throw new Exception("execute fail " + sql);
           }
           subscriber.onNext(true);
@@ -82,7 +86,8 @@ public class RemoteDB {
             } else if (args[i] instanceof Float){
               callableStatement.setFloat(i + 1, (Float) args[i]);
             } else if (args[i] instanceof Date){
-              callableStatement.setDate(i + 1, (Date) args[i]);
+              Date date = (Date) args[i];
+              callableStatement.setDate(i + 1,new java.sql.Date(date.getTime()) );
             } else if (args[i] instanceof Time){
               callableStatement.setTime(i + 1, (Time) args[i]);
             }else{
@@ -99,15 +104,7 @@ public class RemoteDB {
       }
     }).doOnError(new Action1<Throwable>() {
       @Override public void call(Throwable throwable) {
-        if (connection != null){
-          try {
-            connection.close();
-            connection = null;
-          } catch (SQLException e) {
-            e.printStackTrace();
-          }
-
-        }
+        reset();
       }
     }).retry(2);
   }
@@ -137,6 +134,17 @@ public class RemoteDB {
       } catch (SQLException e) {
         e.printStackTrace();
       }
+    }
+  }
+  public synchronized void reset(){
+    if (connection != null){
+      try {
+        connection.close();
+        connection = null;
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+
     }
   }
 
