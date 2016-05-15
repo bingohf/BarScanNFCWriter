@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Bundle Tracking</string>
+    <string name="ledway_license">Please contact Ledway.com</string>
+    <string name="wait_a_moment">Wait a moment</string>
+    <string name="license">License</string>
+    <string name="authorization">授權中</string>
 
 </resources>

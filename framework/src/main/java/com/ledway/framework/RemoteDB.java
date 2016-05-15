@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Date;
 import rx.Observable;
 import rx.Subscriber;
@@ -71,14 +72,14 @@ public class RemoteDB {
     }).retry(2);
   }
 
-
-  public Observable<ResultSet> executeQuery(final String sql, final Object... args){
-    return Observable.create(new Observable.OnSubscribe<ResultSet>() {
-      @Override public void call(Subscriber<? super ResultSet> subscriber) {
-        initStatement();
+  public Observable<ArrayList<Object>> executeProcedure(final String sql, final int[] outPutSchema, final Object... args){
+    return Observable.create(new Observable.OnSubscribe<ArrayList<Object>>() {
+      @Override public void call(Subscriber<? super ArrayList<Object>> subscriber) {
         try {
+          initStatement();
           CallableStatement callableStatement = connection.prepareCall(sql);
-          for(int i =0;i < args.length ;++i){
+          int i =0;
+          for(;i < args.length ;++i){
             if (args[i] instanceof String){
               callableStatement.setString(i + 1, (String)args[i]);
             } else if (args[i] instanceof Integer){
@@ -87,14 +88,60 @@ public class RemoteDB {
               callableStatement.setFloat(i + 1, (Float) args[i]);
             } else if (args[i] instanceof Date){
               Date date = (Date) args[i];
-              callableStatement.setDate(i + 1,new java.sql.Date(date.getTime()) );
-            } else if (args[i] instanceof Time){
-              callableStatement.setTime(i + 1, (Time) args[i]);
-            }else{
+              callableStatement.setTimestamp(i +1, new java.sql.Timestamp(date.getTime()));
+            }else if (args[i] == null){
+              callableStatement.setNull(i +1, Types.VARCHAR);
+            }else {
               throw new Exception("invalid sql & parameters");
             }
           }
-          ResultSet resultSet = callableStatement.executeQuery();
+          int j = i;
+          for(Integer type: outPutSchema){
+            callableStatement.registerOutParameter(j +1,type);
+            ++j;
+          }
+          j = i;
+          callableStatement.execute();
+          ArrayList<Object> result = new ArrayList<Object>();
+          for(Integer type: outPutSchema){
+            result.add(callableStatement.getObject(j +1));
+            ++j;
+          }
+          subscriber.onNext(result);
+          subscriber.onCompleted();
+
+        } catch (Exception e) {
+          e.printStackTrace();
+          subscriber.onError(e);
+        }
+      }
+    });
+  }
+
+  public Observable<ResultSet> executeQuery(final String sql, final Object... args){
+    return Observable.create(new Observable.OnSubscribe<ResultSet>() {
+      @Override public void call(Subscriber<? super ResultSet> subscriber) {
+
+        try {
+          initStatement();
+          PreparedStatement preparedStatement = connection.prepareStatement(sql);
+          for(int i =0;i < args.length ;++i){
+            if (args[i] instanceof String){
+              preparedStatement.setString(i + 1, (String)args[i]);
+            } else if (args[i] instanceof Integer){
+              preparedStatement.setInt(i + 1, (Integer) args[i]);
+            } else if (args[i] instanceof Float){
+              preparedStatement.setFloat(i + 1, (Float) args[i]);
+            } else if (args[i] instanceof Date){
+              Date date = (Date) args[i];
+              preparedStatement.setTimestamp(i +1, new java.sql.Timestamp(date.getTime()));
+            }else if (args[i] == null){
+              preparedStatement.setNull(i +1, Types.VARCHAR);
+            }else {
+              throw new Exception("invalid sql & parameters");
+            }
+          }
+          ResultSet resultSet = preparedStatement.executeQuery();
           subscriber.onNext(resultSet);
           subscriber.onCompleted();
         } catch (Exception e) {
