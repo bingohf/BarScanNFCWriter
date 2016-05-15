@@ -30,7 +30,7 @@ public class AppPreferences extends PreferenceActivity  implements SharedPrefere
         PreferenceManager.setDefaultValues(AppPreferences.this, R.xml.preferences,
                 false);
         initSummary(getPreferenceScreen());
-
+        findPreference("app_version").setSummary(getString(R.string.app_name) + " " + BuildConfig.VERSION_NAME);
 
         findPreference("about").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
