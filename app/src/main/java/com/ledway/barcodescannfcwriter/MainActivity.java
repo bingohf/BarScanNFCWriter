@@ -120,12 +120,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private BroadcastReceiver systemBroadcastReceiver = new BroadcastReceiver() {
+        private int times = 0;
         @Override public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             Log.v("action_test",action);
             if (action.equals("com.zkc.keycode")) {
-                mScanTimer.onNext("scan_key");
-                autoScanTimeStamp = System.currentTimeMillis();
+                if (StartReceiver.times++ > 0) {
+                    times = 0;
+                    int keyValue = intent.getIntExtra("keyvalue", 0);
+                    if (keyValue == 136 || keyValue == 135 || keyValue == 131) {
+                        mScanTimer.onNext("scan_key");
+                        autoScanTimeStamp = System.currentTimeMillis();
+                    }
+                }
+
+
             } else if (action.equals("android.intent.action.SCREEN_ON")) {
             } else if (action.equals("android.intent.action.SCREEN_OFF")) {
                 autoScanTimeStamp = 0;
