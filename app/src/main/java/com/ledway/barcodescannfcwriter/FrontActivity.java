@@ -9,6 +9,8 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.text.method.LinkMovementMethod;
+import android.widget.TextView;
 import android.widget.Toast;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -27,6 +29,8 @@ public class FrontActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_front);
     getSupportActionBar().setTitle(R.string.license);
+    TextView tv = (TextView) findViewById(R.id.txt_license);
+    tv.setMovementMethod(LinkMovementMethod.getInstance());
     mSp = getSharedPreferences("license", Context.MODE_PRIVATE);
     if (mSp.getBoolean("authority", false) == true && mSp.getLong("ExpiredDate",0L) > new Date().getTime()){
       finish();
