@@ -23,7 +23,8 @@
       android:label="@string/app_name"
       android:supportsRtl="true"
       android:theme="@style/AppTheme">
-    <activity android:name=".MainActivity">
+    <activity android:name=".MainActivity"
+        android:theme="@style/AppTheme.NoActionBar">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
 
@@ -65,7 +66,7 @@
         android:value="1"/>
     <meta-data
         android:name="AA_MODELS"
-        android:value="com.ledway.btprinter.models.CustRecord,com.ledway.btprinter.models.Prod"/>
+        android:value="com.ledway.btprinter.models.SampleMaster,com.ledway.btprinter.models.Prod"/>
 
   </application>c
 

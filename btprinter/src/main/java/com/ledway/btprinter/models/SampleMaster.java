@@ -13,12 +13,18 @@ import java.util.List;
  */
 
 @Table(name = "cust_record")
-public class CustRecord  extends Model implements Serializable {
+public class SampleMaster extends Model implements Serializable {
   public List<Prod> prods;
 
 
   @Column(name = "guid", unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)
   public String guid;
+
+  @Column(name = "line")
+  public String line;
+
+  @Column(name = "reader")
+  public String reader;
 
   @Column(name = "desc")
   public String desc;
@@ -32,7 +38,7 @@ public class CustRecord  extends Model implements Serializable {
     return getMany(Prod.class, "cust_record");
   }
 
-  public CustRecord(){
+  public SampleMaster(){
     super();
     if (getId() != null){
       prods = items();

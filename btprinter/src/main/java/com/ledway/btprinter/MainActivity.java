@@ -5,17 +5,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.support.v4.text.TextUtilsCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
-import com.ledway.btprinter.models.CustRecord;
+import android.view.View;
+import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.framework.RemoteDB;
 import com.zkc.Service.CaptureService;
 import java.util.UUID;
-import rx.Observable;
 import rx.functions.Action1;
 import rx.subjects.PublishSubject;
 
@@ -25,6 +25,9 @@ public class MainActivity extends AppCompatActivity {
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
+    Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+    setSupportActionBar(toolbar);
+
     Intent newIntent = new Intent(MainActivity.this, CaptureService.class);
     newIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP );
     startService(newIntent);
@@ -49,10 +52,19 @@ public class MainActivity extends AppCompatActivity {
       }
     });
     checkSetting();
+
+
+
+    findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View v) {
+        SampleMaster sampleMaster = new SampleMaster();
+        startActivity(new Intent(MainActivity.this, ItemDetailActivity.class).putExtra("cust_record",
+            sampleMaster));
+      }
+    });
   }
 
   private void reset() {
-
   }
 
   private void checkSetting(){
@@ -79,12 +91,6 @@ public class MainActivity extends AppCompatActivity {
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()){
-      case R.id.action_add:{
-        CustRecord custRecord = new CustRecord();
-        custRecord.guid = UUID.randomUUID().toString();
-        startActivity(new Intent(this, ItemDetailActivity.class).putExtra("cust_record",custRecord));
-        break;
-      }
     }
     return true;
   }

@@ -4,9 +4,11 @@
   <string name="scan_barcode">扫条码</string>
   <string name="cust_contact">客户名片</string>
   <string name="read_qr_code">读取二维码</string>
-  <string name="take_photo">拍名片</string>
+  <string name="take_photo_1">拍名片 正面</string>
+  <string name="take_photo_2">拍名片 反面</string>
   <string name="action_save">保存</string>
   <string name="action_print">打印</string>
   <string name="action_add">新增</string>
   <string name="action_preview">打印预览</string>
+  <string name="action_upload">上传</string>
 </resources>

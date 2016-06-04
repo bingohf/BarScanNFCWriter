@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto">
   <item
-android:id="@+id/action_print"
-android:orderInCategory="100"
-android:title="@string/action_preview"
-app:showAsAction="ifRoom" />
-    </menu>
+    android:id="@+id/action_print"
+    android:orderInCategory="100"
+    android:title="@string/action_preview"
+    app:showAsAction="ifRoom"/>
+  <item
+      android:id="@+id/action_upload"
+      android:orderInCategory="100"
+      android:title="@string/action_upload"
+      app:showAsAction="ifRoom"/>
+</menu>
