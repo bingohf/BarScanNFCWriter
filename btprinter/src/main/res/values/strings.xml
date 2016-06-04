@@ -8,4 +8,5 @@
   <string name="action_save">保存</string>
   <string name="action_print">打印</string>
   <string name="action_add">新增</string>
+  <string name="action_preview">打印预览</string>
 </resources>

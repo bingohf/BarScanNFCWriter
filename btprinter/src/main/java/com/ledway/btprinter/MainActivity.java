@@ -11,7 +11,10 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import com.ledway.btprinter.models.CustRecord;
 import com.ledway.framework.RemoteDB;
+import com.zkc.Service.CaptureService;
+import java.util.UUID;
 import rx.Observable;
 import rx.functions.Action1;
 import rx.subjects.PublishSubject;
@@ -22,7 +25,9 @@ public class MainActivity extends AppCompatActivity {
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-
+    Intent newIntent = new Intent(MainActivity.this, CaptureService.class);
+    newIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP );
+    startService(newIntent);
     mSettingSubject.subscribe(new Action1<Boolean>() {
       @Override public void call(Boolean aBoolean) {
         if (aBoolean){
@@ -75,7 +80,9 @@ public class MainActivity extends AppCompatActivity {
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()){
       case R.id.action_add:{
-        startActivity(new Intent(this, ItemDetailActivity.class));
+        CustRecord custRecord = new CustRecord();
+        custRecord.guid = UUID.randomUUID().toString();
+        startActivity(new Intent(this, ItemDetailActivity.class).putExtra("cust_record",custRecord));
         break;
       }
     }
