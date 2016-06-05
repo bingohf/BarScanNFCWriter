@@ -11,4 +11,5 @@
   <string name="action_add">新增</string>
   <string name="action_preview">打印预览</string>
   <string name="action_upload">上传</string>
+  <string name="action_bind_bt_printer">绑定打印机</string>
 </resources>

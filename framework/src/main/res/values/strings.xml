@@ -34,4 +34,14 @@
   <string name="empty"/>
   <string name="invalid_barcode">條碼不全(Invalid Code)</string>
   <string name="app_version">App Version</string>
+
+
+  <string name="toggle_flash">Flash</string>
+  <string name="flash_on">Flash [ON]</string>
+  <string name="flash_off">Flash [OFF]</string>
+  <string name="auto_focus_on">Auto Focus [ON]</string>
+  <string name="auto_focus_off">Auto Focus [OFF]</string>
+  <string name="formats">Formats</string>
+  <string name="choose_formats">Choose Formats</string>
+  <string name="select_camera">Select a Camera</string>
 </resources>

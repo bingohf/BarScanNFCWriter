@@ -1,18 +1,21 @@
 package com.ledway.btprinter.models;
 
 import android.os.Parcelable;
+import android.text.TextUtils;
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
+import com.ledway.btprinter.MApp;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import org.w3c.dom.Text;
 
 /**
  * Created by togb on 2016/5/29.
  */
 
-@Table(name = "cust_record")
+@Table(name = "sample_master")
 public class SampleMaster extends Model implements Serializable {
   public List<Prod> prods;
 
@@ -30,10 +33,10 @@ public class SampleMaster extends Model implements Serializable {
   public String desc;
 
   @Column(name = "image1")
-  public String image1;
+  public byte[] image1;
 
   @Column(name = "image2")
-  public String image2;
+  public byte[] image2;
   public List<Prod> items() {
     return getMany(Prod.class, "cust_record");
   }
@@ -45,7 +48,12 @@ public class SampleMaster extends Model implements Serializable {
     }else {
       prods = new ArrayList<>();
     }
+  }
 
+  public void insertOrUpdate() {
+    if (TextUtils.isEmpty(guid)){
+      guid  = MApp.getApplication().getSystemInfo().getMacAddress() + "_" + System.currentTimeMillis();
+    }
   }
 
 }

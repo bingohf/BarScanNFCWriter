@@ -8,4 +8,10 @@
       android:orderInCategory="100"
       android:title="@string/action_upload"
       app:showAsAction="ifRoom" />
+
+  <item
+      android:id="@+id/action_bind_bt_printer"
+      android:orderInCategory="100"
+      android:title="@string/action_bind_bt_printer"
+      app:showAsAction="ifRoom" />
 </menu>
