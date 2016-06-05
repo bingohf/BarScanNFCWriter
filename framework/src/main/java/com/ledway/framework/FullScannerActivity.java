@@ -137,7 +137,7 @@ public class FullScannerActivity extends BaseScannerActivity implements  ZXingSc
             Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
             r.play();
         } catch (Exception e) {}
-        setResult(1, new Intent().putExtra("barcode",rawResult.getText()));
+        setResult(RESULT_OK, new Intent().putExtra("barcode",rawResult.getText()));
         finish();
         //showMessageDialog("Contents = " + rawResult.getText() + ", Format = " + rawResult.getBarcodeFormat().toString());
     }

@@ -8,6 +8,7 @@ import com.activeandroid.annotation.Table;
 import com.ledway.btprinter.MApp;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.w3c.dom.Text;
 
@@ -19,9 +20,14 @@ import org.w3c.dom.Text;
 public class SampleMaster extends Model implements Serializable {
   public List<Prod> prods;
 
-
   @Column(name = "guid", unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)
   public String guid;
+
+  @Column(name = "create_date")
+  public Date create_date;
+
+  @Column(name = "update_date")
+  public Date update_date;
 
   @Column(name = "line")
   public String line;
@@ -37,23 +43,36 @@ public class SampleMaster extends Model implements Serializable {
 
   @Column(name = "image2")
   public byte[] image2;
+
+
   public List<Prod> items() {
     return getMany(Prod.class, "cust_record");
   }
 
   public SampleMaster(){
     super();
+  }
+
+  public void allSave() {
+    if (TextUtils.isEmpty(guid)){
+      guid  = MApp.getApplication().getSystemInfo().getMacAddress() + "_" + System.currentTimeMillis();
+    }
+    if (create_date == null){
+      create_date = new Date();
+    }
+    update_date = new Date();
+    save();
+    for(Prod prod :prods){
+      prod.sampleMaster = this;
+      prod.save();
+    }
+  }
+
+  public void queryDetail() {
     if (getId() != null){
       prods = items();
     }else {
       prods = new ArrayList<>();
     }
   }
-
-  public void insertOrUpdate() {
-    if (TextUtils.isEmpty(guid)){
-      guid  = MApp.getApplication().getSystemInfo().getMacAddress() + "_" + System.currentTimeMillis();
-    }
-  }
-
 }

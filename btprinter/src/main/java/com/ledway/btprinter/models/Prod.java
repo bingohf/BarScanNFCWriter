@@ -12,9 +12,11 @@ import java.io.Serializable;
 public class Prod extends Model implements Serializable {
   @Column(name = "bar_code", unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)
   public String barcode;
-  @Column(name = "cust_record", onUpdate = Column.ForeignKeyAction.CASCADE, onDelete = Column.ForeignKeyAction.CASCADE)
+  @Column(name = "cust_record")
   public SampleMaster sampleMaster;
+  public Prod(){
 
+  }
 
   public Prod(String barcode){
     this.barcode = barcode;

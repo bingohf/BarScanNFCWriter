@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.serialport.api.SerialPort;
@@ -12,11 +13,10 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.Toast;
 import com.ledway.btprinter.adapters.DataAdapter;
 import com.ledway.btprinter.adapters.PhotoData;
@@ -27,7 +27,6 @@ import com.ledway.framework.FullScannerActivity;
 import com.zkc.Service.CaptureService;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -71,7 +70,8 @@ public class ItemDetailActivity extends AppCompatActivity {
 
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    mSampleMaster = (SampleMaster) getIntent().getSerializableExtra("cust_record");
+    mSampleMaster = (SampleMaster) MApp.getApplication().getSession().getValue("current_data");
+    mSampleMaster.queryDetail();
     setContentView(R.layout.activity_item_detail);
     mListViewProd = (RecyclerView)findViewById(R.id.list_data);
     IntentFilter intentFilter = new IntentFilter();
@@ -79,6 +79,33 @@ public class ItemDetailActivity extends AppCompatActivity {
     registerReceiver(scanBroadcastReceiver, intentFilter);
     setListView();
     setEvent();
+
+    setView();
+  }
+
+  private void setView() {
+    if (!TextUtils.isEmpty(mSampleMaster.desc)){
+      TextData textData = new TextData(DataAdapter.DATA_TYPE_MEMO);
+      textData.setText(mSampleMaster.desc);
+      mDataAdapter.addData(textData);
+    }
+    if (mSampleMaster.image1 != null){
+      Bitmap bitmap =  BitmapFactory.decodeByteArray(mSampleMaster.image1 , 0, mSampleMaster.image1 .length);
+      PhotoData photoData = new PhotoData(DataAdapter.DATA_TYPE_PHOTO_1);
+      mDataAdapter.addData(photoData);
+    }
+
+    if (mSampleMaster.image2 != null){
+      Bitmap bitmap =  BitmapFactory.decodeByteArray(mSampleMaster.image2 , 0, mSampleMaster.image2 .length);
+      PhotoData photoData = new PhotoData(DataAdapter.DATA_TYPE_PHOTO_2);
+      mDataAdapter.addData(photoData);
+    }
+
+    for (Prod prod: mSampleMaster.prods){
+      TextData textData = new TextData(DataAdapter.DATA_TYPE_BARCODE);
+      textData.setText(prod.barcode);
+      mDataAdapter.addData(textData);
+    }
 
   }
 
@@ -106,7 +133,7 @@ public class ItemDetailActivity extends AppCompatActivity {
 
   @Override protected void onDestroy() {
     super.onDestroy();
-    mSampleMaster.insertOrUpdate();
+    mSampleMaster.allSave();
     mSampleMaster.save();
     unregisterReceiver(scanBroadcastReceiver);
   }
@@ -140,34 +167,36 @@ public class ItemDetailActivity extends AppCompatActivity {
   }
 
   @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    switch (requestCode){
-      case RESULT_TAKE_PHOTO_1:
-      case RESULT_TAKE_PHOTO_2:{
-        if (resultCode == RESULT_OK){
-          Bitmap photo = (Bitmap) data.getExtras().get("data");
-          PhotoData photoData = new PhotoData(requestCode);
-          photoData.setBitmap(photo);
-          mDataAdapter.addData(photoData);
-          ByteArrayOutputStream stream = new ByteArrayOutputStream();
-          photo.compress(Bitmap.CompressFormat.PNG, 100, stream);
-          byte[] byteArray = stream.toByteArray();
-          if(RESULT_TAKE_PHOTO_1 == requestCode){
-            mSampleMaster.image1 = byteArray;
-          }else {
-            mSampleMaster.image2 = byteArray;
+    if (resultCode == RESULT_OK) {
+      switch (requestCode) {
+        case RESULT_TAKE_PHOTO_1:
+        case RESULT_TAKE_PHOTO_2: {
+          if (resultCode == RESULT_OK) {
+            Bitmap photo = (Bitmap) data.getExtras().get("data");
+            PhotoData photoData = new PhotoData(requestCode);
+            photoData.setBitmap(photo);
+            mDataAdapter.addData(photoData);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            photo.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            byte[] byteArray = stream.toByteArray();
+            if (RESULT_TAKE_PHOTO_1 == requestCode) {
+              mSampleMaster.image1 = byteArray;
+            } else {
+              mSampleMaster.image2 = byteArray;
+            }
           }
+          break;
         }
-        break;
-      }
-      case RESULT_CAMERA_QR_CODE:{
-        String qrcode = data.getStringExtra("barcode");
-        TextData textData = new TextData(DataAdapter.DATA_TYPE_MEMO);
-        textData.setText(qrcode);
-        mSampleMaster.desc  = qrcode;
-        mDataAdapter.addData(textData);
-        break;
-      }
+        case RESULT_CAMERA_QR_CODE: {
 
+          String qrcode = data.getStringExtra("barcode");
+          TextData textData = new TextData(DataAdapter.DATA_TYPE_MEMO);
+          textData.setText(qrcode);
+          mSampleMaster.desc = qrcode;
+          mDataAdapter.addData(textData);
+          break;
+        }
+      }
     }
   }
 }

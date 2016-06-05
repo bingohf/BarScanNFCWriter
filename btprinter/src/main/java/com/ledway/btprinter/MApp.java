@@ -11,17 +11,22 @@ import com.ledway.btprinter.models.SystemInfo;
 public class MApp extends Application {
   private static MApp instance;
   private SystemInfo systemInfo;
+  private Session session ;
   @Override public void onCreate() {
     super.onCreate();
     ActiveAndroid.initialize(this);
     Stetho.initializeWithDefaults(this);
     instance = this;
     systemInfo = new SystemInfo(this);
+    session = new Session();
   }
   public static MApp getApplication(){
     return instance;
   }
   public SystemInfo getSystemInfo(){
     return systemInfo;
+  }
+  public Session getSession(){
+    return session;
   }
 }

@@ -12,9 +12,18 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
+import com.activeandroid.Model;
+import com.activeandroid.query.Select;
+import com.ledway.btprinter.adapters.RecordAdapter;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.framework.RemoteDB;
 import com.zkc.Service.CaptureService;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 import rx.functions.Action1;
 import rx.subjects.PublishSubject;
@@ -22,6 +31,8 @@ import rx.subjects.PublishSubject;
 public class MainActivity extends AppCompatActivity {
   private RemoteDB remoteDB;
   private PublishSubject<Boolean> mSettingSubject = PublishSubject.create();
+  private RecordAdapter mRecordAdapter;
+
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
@@ -58,8 +69,25 @@ public class MainActivity extends AppCompatActivity {
     findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
         SampleMaster sampleMaster = new SampleMaster();
-        startActivity(new Intent(MainActivity.this, ItemDetailActivity.class).putExtra("cust_record",
-            sampleMaster));
+        MApp.getApplication().getSession().put("current_data",sampleMaster);
+        startActivity(new Intent(MainActivity.this, ItemDetailActivity.class));
+      }
+    });
+
+    setListView();
+  }
+
+  private void setListView() {
+    ListView listView = (ListView) findViewById(R.id.list_record);
+    mRecordAdapter = new RecordAdapter(this);
+    listView.setAdapter(mRecordAdapter);
+    getRecordData();
+    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+      @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        SampleMaster sampleMaster = mRecordAdapter.getItem(position);
+        MApp.getApplication().getSession().put("current_data",sampleMaster);
+        startActivity(new Intent(MainActivity.this, ItemDetailActivity.class));
       }
     });
   }
@@ -94,4 +122,12 @@ public class MainActivity extends AppCompatActivity {
     }
     return true;
   }
+
+  private void getRecordData(){
+    List<SampleMaster> dataList = new Select().from(SampleMaster.class).execute();
+    for(SampleMaster sampleMaster:dataList){
+      mRecordAdapter.addData(sampleMaster);
+    }
+  }
+
 }
