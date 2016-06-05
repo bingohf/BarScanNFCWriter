@@ -10,7 +10,7 @@ import java.io.Serializable;
  */
 @Table(name = "prod")
 public class Prod extends Model implements Serializable {
-  @Column(name = "bar_code", unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)
+  @Column(name = "bar_code")
   public String barcode;
   @Column(name = "cust_record")
   public SampleMaster sampleMaster;

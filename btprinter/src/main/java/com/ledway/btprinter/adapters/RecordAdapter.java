@@ -2,6 +2,7 @@ package com.ledway.btprinter.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,7 +49,7 @@ public class RecordAdapter extends BaseAdapter {
       holder = (ViewHolder)convertView.getTag();
     }
     SampleMaster sampleMaster = mDataList.get(position);
-    holder.textView.setText(sampleMaster.create_date.toLocaleString() +"\r\n" + sampleMaster.desc);
+    holder.textView.setText(sampleMaster.create_date.toLocaleString()+ (TextUtils.isEmpty(sampleMaster.desc)?"": "\r\n" +sampleMaster.desc));
     return convertView;
   }
 

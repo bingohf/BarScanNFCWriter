@@ -92,12 +92,14 @@ public class ItemDetailActivity extends AppCompatActivity {
     if (mSampleMaster.image1 != null){
       Bitmap bitmap =  BitmapFactory.decodeByteArray(mSampleMaster.image1 , 0, mSampleMaster.image1 .length);
       PhotoData photoData = new PhotoData(DataAdapter.DATA_TYPE_PHOTO_1);
+      photoData.setBitmap(bitmap);
       mDataAdapter.addData(photoData);
     }
 
     if (mSampleMaster.image2 != null){
       Bitmap bitmap =  BitmapFactory.decodeByteArray(mSampleMaster.image2 , 0, mSampleMaster.image2 .length);
       PhotoData photoData = new PhotoData(DataAdapter.DATA_TYPE_PHOTO_2);
+      photoData.setBitmap(bitmap);
       mDataAdapter.addData(photoData);
     }
 
@@ -134,7 +136,6 @@ public class ItemDetailActivity extends AppCompatActivity {
   @Override protected void onDestroy() {
     super.onDestroy();
     mSampleMaster.allSave();
-    mSampleMaster.save();
     unregisterReceiver(scanBroadcastReceiver);
   }
 
@@ -152,7 +153,12 @@ public class ItemDetailActivity extends AppCompatActivity {
         startActivityForResult(takePicture, RESULT_TAKE_PHOTO_1);//zero can be replaced with any action code
       }
     });
-
+    findViewById(R.id.btn_take_photo_2).setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View v) {
+        Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(takePicture, RESULT_TAKE_PHOTO_2);//zero can be replaced with any action code
+      }
+    });
     findViewById(R.id.btn_qr_code).setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
         startActivityForResult(new Intent(ItemDetailActivity.this, FullScannerActivity.class), RESULT_CAMERA_QR_CODE);
@@ -173,7 +179,7 @@ public class ItemDetailActivity extends AppCompatActivity {
         case RESULT_TAKE_PHOTO_2: {
           if (resultCode == RESULT_OK) {
             Bitmap photo = (Bitmap) data.getExtras().get("data");
-            PhotoData photoData = new PhotoData(requestCode);
+            PhotoData photoData = new PhotoData(RESULT_TAKE_PHOTO_2 == requestCode? DataAdapter.DATA_TYPE_PHOTO_2: DataAdapter.DATA_TYPE_PHOTO_1);
             photoData.setBitmap(photo);
             mDataAdapter.addData(photoData);
             ByteArrayOutputStream stream = new ByteArrayOutputStream();

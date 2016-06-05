@@ -3,7 +3,7 @@
   <string name="barcode">条码</string>
   <string name="scan_barcode">扫条码</string>
   <string name="cust_contact">客户名片</string>
-  <string name="read_qr_code">读取二维码</string>
+  <string name="read_qr_code">读取名片二维码</string>
   <string name="take_photo_1">拍名片 正面</string>
   <string name="take_photo_2">拍名片 反面</string>
   <string name="action_save">保存</string>
@@ -12,4 +12,6 @@
   <string name="action_preview">打印预览</string>
   <string name="action_upload">上传</string>
   <string name="action_bind_bt_printer">绑定打印机</string>
+  <string name="prod">布种:</string>
+  <string name="qr_card">名片信息:</string>
 </resources>
