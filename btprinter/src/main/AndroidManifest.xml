@@ -33,6 +33,7 @@
     </activity>
     <activity android:name=".AppPreferences"/>
     <activity android:name=".ItemDetailActivity"/>
+    <activity android:name=".PrintPreviewActivity"/>
     <activity
         android:theme="@style/AppOverlayTheme"
         android:name="com.ledway.framework.FullScannerActivity"/>

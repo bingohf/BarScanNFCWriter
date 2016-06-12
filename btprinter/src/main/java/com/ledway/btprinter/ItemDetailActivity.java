@@ -180,6 +180,10 @@ public class ItemDetailActivity extends AppCompatActivity {
         uploadRecord();
         break;
       }
+      case R.id.action_print:{
+        startActivity(new Intent(this, PrintPreviewActivity.class));
+        break;
+      }
     }
     return true;
   }
