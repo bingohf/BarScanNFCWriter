@@ -37,7 +37,7 @@ public class PrintPreviewActivity extends AppCompatActivity {
     mListView.setAdapter(mDataAdapter);
     QRCodeWriter writer = new QRCodeWriter();
     try {
-      BitMatrix bitMatrix = writer.encode("www.ledway.com.tw", BarcodeFormat.QR_CODE, 200, 200);
+      BitMatrix bitMatrix = writer.encode("http://www.ledway.com.tw", BarcodeFormat.QR_CODE, 200, 200);
       int width = bitMatrix.getWidth();
       int height = bitMatrix.getHeight();
       Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
@@ -46,7 +46,7 @@ public class PrintPreviewActivity extends AppCompatActivity {
           bmp.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
         }
       }
-      PhotoData photoData = new PhotoData(DataAdapter.DATA_TYPE_PHOTO_1);
+      PhotoData photoData = new PhotoData(DataAdapter.DATA_TYPE_QR_CODE);
       photoData.setBitmap(bmp);
       mDataAdapter.addData(photoData);
     } catch (WriterException e) {
