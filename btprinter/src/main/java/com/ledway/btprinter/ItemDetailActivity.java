@@ -1,5 +1,6 @@
 package com.ledway.btprinter;
 
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -15,6 +16,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
@@ -24,12 +26,17 @@ import com.ledway.btprinter.adapters.TextData;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.models.Prod;
 import com.ledway.framework.FullScannerActivity;
+import com.ledway.framework.RemoteDB;
 import com.zkc.Service.CaptureService;
 import java.io.ByteArrayOutputStream;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by togb on 2016/5/29.
@@ -73,6 +80,7 @@ public class ItemDetailActivity extends AppCompatActivity {
     mSampleMaster = (SampleMaster) MApp.getApplication().getSession().getValue("current_data");
     mSampleMaster.queryDetail();
     setContentView(R.layout.activity_item_detail);
+    getSupportActionBar().setDisplayShowHomeEnabled(true);
     mListViewProd = (RecyclerView)findViewById(R.id.list_data);
     IntentFilter intentFilter = new IntentFilter();
     intentFilter.addAction("com.zkc.scancode");
@@ -166,6 +174,53 @@ public class ItemDetailActivity extends AppCompatActivity {
     });
   }
 
+  @Override public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()){
+      case R.id.action_upload:{
+        uploadRecord();
+        break;
+      }
+    }
+    return true;
+  }
+
+  private void uploadRecord(){
+    mSampleMaster.allSave();
+    final ProgressDialog progressDialog = ProgressDialog.show(this, getString(R.string.save_record), getString(R.string.wait_a_moment), false);
+    String connectionString =
+        "jdbc:jtds:sqlserver://www.ledway.com.tw:1433;DatabaseName=iSamplePub;charset=UTF8";
+/*        @Line int,
+        @Reader int,
+        @series nvarchar(50) ,--取樣單Series,GUID值,不可爲空
+        @empno nvarchar(20)  ,--員工代碼,輸入Mac No,不可爲空
+        @custMemo nvarchar(200),--客戶備註
+        @custCardPic image,--客戶名片圖片
+        @errCode int output,--有錯誤返回-1 成功返回1
+        @errData nvarchar(50) output--錯誤信息*/
+    RemoteDB remoteDB = new RemoteDB(connectionString);
+
+    remoteDB.executeProcedure("{call sp_UpSample(?,?,?,?,?,?,?,?)}", new int[]{ Types.INTEGER, Types.VARCHAR}
+        ,1,1, mSampleMaster.guid, mSampleMaster.mac_address,
+        mSampleMaster.desc,mSampleMaster.image1)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Subscriber<ArrayList<Object>>() {
+          @Override public void onCompleted() {
+            progressDialog.dismiss();
+          }
+
+          @Override public void onError(Throwable e) {
+            progressDialog.dismiss();
+            e.printStackTrace();
+          }
+
+          @Override public void onNext(ArrayList<Object> objects) {
+            int returnCode = (Integer) objects.get(0);
+            String returnMessage = (String) objects.get(1);
+            Toast.makeText(ItemDetailActivity.this, returnMessage, Toast.LENGTH_LONG).show();
+          }
+        });
+  }
   @Override public boolean onCreateOptionsMenu(Menu menu) {
     getMenuInflater().inflate(R.menu.item_detail_menu,menu);
     return true;

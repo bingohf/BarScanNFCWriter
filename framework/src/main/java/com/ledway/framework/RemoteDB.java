@@ -1,5 +1,6 @@
 package com.ledway.framework;
 
+import java.io.InputStream;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -91,6 +92,9 @@ public class RemoteDB {
               callableStatement.setTimestamp(i +1, new java.sql.Timestamp(date.getTime()));
             }else if (args[i] == null){
               callableStatement.setNull(i +1, Types.VARCHAR);
+            }
+            else if (args[i] instanceof byte[]){
+              callableStatement.setBytes(i + 1, (byte[])args[i]);
             }else {
               throw new Exception("invalid sql & parameters");
             }

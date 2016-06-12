@@ -29,6 +29,9 @@ import rx.functions.Action1;
 import rx.subjects.PublishSubject;
 
 public class MainActivity extends AppCompatActivity {
+  private final static int REQUEST_TYPE_SETTING = 1;
+  private final static int REQUEST_TYPE_ADD_RECORD = 2;
+  private final static int REQUEST_TYPE_MODIFY_RECORD = 3;
   private RemoteDB remoteDB;
   private PublishSubject<Boolean> mSettingSubject = PublishSubject.create();
   private RecordAdapter mRecordAdapter;
@@ -54,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                   Intent intent = new Intent(MainActivity.this, AppPreferences.class);
-                  startActivityForResult(intent,1);
+                  startActivityForResult(intent,REQUEST_TYPE_SETTING);
                 }
               })
               .setCancelable(false);
@@ -70,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
       @Override public void onClick(View v) {
         SampleMaster sampleMaster = new SampleMaster();
         MApp.getApplication().getSession().put("current_data",sampleMaster);
-        startActivity(new Intent(MainActivity.this, ItemDetailActivity.class));
+        startActivityForResult(new Intent(MainActivity.this, ItemDetailActivity.class),REQUEST_TYPE_ADD_RECORD);
       }
     });
 
@@ -87,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
       @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         SampleMaster sampleMaster = mRecordAdapter.getItem(position);
         MApp.getApplication().getSession().put("current_data",sampleMaster);
-        startActivity(new Intent(MainActivity.this, ItemDetailActivity.class));
+        startActivityForResult(new Intent(MainActivity.this, ItemDetailActivity.class), REQUEST_TYPE_MODIFY_RECORD);
       }
     });
   }
@@ -108,8 +111,22 @@ public class MainActivity extends AppCompatActivity {
   }
 
   @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    super.onActivityResult(requestCode, resultCode, data);
-    checkSetting();
+    SampleMaster currentData = (SampleMaster) MApp.getApplication().getSession().getValue("current_data");
+    switch (requestCode){
+      case REQUEST_TYPE_SETTING:{
+        checkSetting();
+        break;
+      }
+      case REQUEST_TYPE_ADD_RECORD:{
+        mRecordAdapter.addData(0,currentData);
+        break;
+      }
+      case REQUEST_TYPE_MODIFY_RECORD:{
+        mRecordAdapter.moveToTop(currentData);
+        break;
+      }
+    }
+
   }
 
   @Override public boolean onCreateOptionsMenu(Menu menu) {
@@ -124,10 +141,13 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void getRecordData(){
-    List<SampleMaster> dataList = new Select().from(SampleMaster.class).execute();
+    List<SampleMaster> dataList = new Select().from(SampleMaster.class).orderBy(" update_date desc ").execute();
+    mRecordAdapter.clear();
     for(SampleMaster sampleMaster:dataList){
       mRecordAdapter.addData(sampleMaster);
     }
   }
+
+
 
 }

@@ -57,8 +57,24 @@ public class RecordAdapter extends BaseAdapter {
     public TextView textView;
   }
 
+  public void clear(){
+    mDataList.clear();
+    notifyDataSetChanged();
+  }
+
+  public void addData(int index, SampleMaster sampleMaster){
+    mDataList.add(index, sampleMaster);
+    notifyDataSetChanged();
+  }
   public void addData(SampleMaster sampleMaster){
     mDataList.add(sampleMaster);
     notifyDataSetChanged();
   }
+  public void moveToTop(SampleMaster sampleMaster){
+    int index = mDataList.indexOf(sampleMaster);
+    mDataList.remove(index);
+    mDataList.add(0, sampleMaster);
+    notifyDataSetChanged();
+  }
+
 }

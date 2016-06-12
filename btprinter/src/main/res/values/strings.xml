@@ -14,4 +14,5 @@
   <string name="action_bind_bt_printer">绑定打印机</string>
   <string name="prod">布种:</string>
   <string name="qr_card">名片信息:</string>
+  <string name="save_record">保存记录</string>
 </resources>

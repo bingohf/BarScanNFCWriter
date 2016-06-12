@@ -29,6 +29,9 @@ public class SampleMaster extends Model implements Serializable {
   @Column(name = "update_date")
   public Date update_date;
 
+  @Column(name = "mac_address")
+  public String mac_address;
+
   @Column(name = "line")
   public String line;
 
@@ -60,6 +63,8 @@ public class SampleMaster extends Model implements Serializable {
     if (create_date == null){
       create_date = new Date();
     }
+
+    mac_address = MApp.getApplication().getSystemInfo().getDeviceId();
     update_date = new Date();
     save();
     for(Prod prod :prods){

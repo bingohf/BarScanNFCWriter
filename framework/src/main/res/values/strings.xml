@@ -44,4 +44,5 @@
   <string name="formats">Formats</string>
   <string name="choose_formats">Choose Formats</string>
   <string name="select_camera">Select a Camera</string>
+  <string name="wait_a_moment">wait a moment</string>
 </resources>
