@@ -14,6 +14,13 @@ public class Prod extends Model implements Serializable {
   public String barcode;
   @Column(name = "cust_record")
   public SampleMaster sampleMaster;
+
+  @Column(name = "ext")
+  public int ext;
+
+  @Column(name = "outProdNo")
+  public String outProdNo;
+
   public Prod(){
 
   }

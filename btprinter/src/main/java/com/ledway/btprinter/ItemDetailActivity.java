@@ -185,39 +185,22 @@ public class ItemDetailActivity extends AppCompatActivity {
   }
 
   private void uploadRecord(){
-    mSampleMaster.allSave();
-    final ProgressDialog progressDialog = ProgressDialog.show(this, getString(R.string.save_record), getString(R.string.wait_a_moment), false);
-    String connectionString =
-        "jdbc:jtds:sqlserver://www.ledway.com.tw:1433;DatabaseName=iSamplePub;charset=UTF8";
-/*        @Line int,
-        @Reader int,
-        @series nvarchar(50) ,--取樣單Series,GUID值,不可爲空
-        @empno nvarchar(20)  ,--員工代碼,輸入Mac No,不可爲空
-        @custMemo nvarchar(200),--客戶備註
-        @custCardPic image,--客戶名片圖片
-        @errCode int output,--有錯誤返回-1 成功返回1
-        @errData nvarchar(50) output--錯誤信息*/
-    RemoteDB remoteDB = new RemoteDB(connectionString);
-
-    remoteDB.executeProcedure("{call sp_UpSample(?,?,?,?,?,?,?,?)}", new int[]{ Types.INTEGER, Types.VARCHAR}
-        ,1,1, mSampleMaster.guid, mSampleMaster.mac_address,
-        mSampleMaster.desc,mSampleMaster.image1)
-        .subscribeOn(Schedulers.io())
+    final ProgressDialog progressDialog = ProgressDialog.show(this, getString(R.string.save_record), getString(R.string.wait_a_moment));
+    mSampleMaster.remoteSave().subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Subscriber<ArrayList<Object>>() {
+        .subscribe(new Subscriber<SampleMaster>() {
           @Override public void onCompleted() {
             progressDialog.dismiss();
           }
 
           @Override public void onError(Throwable e) {
             progressDialog.dismiss();
+            Toast.makeText(ItemDetailActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
             e.printStackTrace();
           }
 
-          @Override public void onNext(ArrayList<Object> objects) {
-            int returnCode = (Integer) objects.get(0);
-            String returnMessage = (String) objects.get(1);
-            Toast.makeText(ItemDetailActivity.this, returnMessage, Toast.LENGTH_LONG).show();
+          @Override public void onNext(SampleMaster sampleMaster) {
+
           }
         });
   }
