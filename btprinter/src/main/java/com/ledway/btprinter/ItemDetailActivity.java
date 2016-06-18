@@ -143,8 +143,12 @@ public class ItemDetailActivity extends AppCompatActivity {
 
   @Override protected void onDestroy() {
     super.onDestroy();
-    mSampleMaster.allSave();
     unregisterReceiver(scanBroadcastReceiver);
+  }
+
+  @Override public void onBackPressed() {
+    super.onBackPressed();
+    mSampleMaster.allSave();
   }
 
   private void setEvent() {
@@ -176,6 +180,10 @@ public class ItemDetailActivity extends AppCompatActivity {
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()){
+      case android.R.id.home:{
+        onBackPressed();
+        break;
+      }
       case R.id.action_upload:{
         uploadRecord();
         break;
