@@ -3,6 +3,7 @@
     package="com.ledway.btprinter">
 
 
+  <uses-permission android:name="android.permission.BLUETOOTH"/>
   <uses-permission android:name="android.permission.CALL_PHONE"/>
   <uses-permission android:name="android.permission.NFC"/>
   <uses-permission android:name="android.permission.INJECT_EVENT">
@@ -15,6 +16,9 @@
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
   <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
   <uses-permission android:name="android.permission.CAMERA" />
+
+
+  <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
 
   <application
       android:name=".MApp"

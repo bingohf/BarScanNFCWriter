@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.activeandroid.Model;
 import com.activeandroid.query.Select;
 import com.ledway.btprinter.adapters.RecordAdapter;
+import com.ledway.btprinter.fragments.BindBTPrintDialogFragment;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.framework.RemoteDB;
 import com.zkc.Service.CaptureService;
@@ -149,9 +150,18 @@ public class MainActivity extends AppCompatActivity {
         uploadAll();
         break;
       }
+      case  R.id.action_bind_bt_printer:{
+        showSetDialog();
+        break;
+      }
 
     }
     return true;
+  }
+
+  private void showSetDialog() {
+    BindBTPrintDialogFragment bindBTPrintDialogFragment = new BindBTPrintDialogFragment();
+    bindBTPrintDialogFragment.show(getSupportFragmentManager(), "dialog");
   }
 
   private void uploadAll() {
