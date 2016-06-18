@@ -18,6 +18,7 @@ import org.w3c.dom.Text;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
@@ -58,6 +59,9 @@ public class SampleMaster extends Model implements Serializable {
 
   @Column(name = "qrcode")
   public String qrcode;
+
+  @Column(name = "isDirty")
+  private boolean isDirty = true;
 
   public List<Prod> items() {
     return getMany(Prod.class, "cust_record");
@@ -140,6 +144,15 @@ public class SampleMaster extends Model implements Serializable {
                 });
           }
         });
-    return observableMaster.concatWith(observableDetail);
+    return observableMaster.concatWith(observableDetail).doOnCompleted(new Action0() {
+      @Override public void call() {
+        isDirty = false;
+        save();
+      }
+    });
+  }
+
+  public boolean isUploaded() {
+    return !isDirty;
   }
 }

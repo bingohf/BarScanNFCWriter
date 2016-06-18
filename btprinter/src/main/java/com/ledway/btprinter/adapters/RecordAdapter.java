@@ -12,11 +12,14 @@ import android.widget.TextView;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.models.SampleMaster;
 import java.util.ArrayList;
+import java.lang.Iterable;
+import java.util.Iterator;
+import org.w3c.dom.Text;
 
 /**
  * Created by togb on 2016/6/5.
  */
-public class RecordAdapter extends BaseAdapter {
+public class RecordAdapter extends BaseAdapter implements Iterable<SampleMaster>{
 
   private final LayoutInflater mInflater;
   private ArrayList<SampleMaster> mDataList = new ArrayList<>();
@@ -49,8 +52,16 @@ public class RecordAdapter extends BaseAdapter {
       holder = (ViewHolder)convertView.getTag();
     }
     SampleMaster sampleMaster = mDataList.get(position);
-    holder.textView.setText(sampleMaster.create_date.toLocaleString()+ (TextUtils.isEmpty(sampleMaster.desc)?"": "\r\n" +sampleMaster.desc));
+    String text = sampleMaster.create_date.toLocaleString()+ (TextUtils.isEmpty(sampleMaster.desc)?"": "\r\n" +sampleMaster.desc);
+    if (TextUtils.isEmpty(sampleMaster.qrcode) ){
+      text = " * " + text;
+    }
+    holder.textView.setText(text);
     return convertView;
+  }
+
+  @Override public Iterator<SampleMaster> iterator() {
+    return mDataList.iterator();
   }
 
   private static class ViewHolder{
@@ -76,5 +87,6 @@ public class RecordAdapter extends BaseAdapter {
     mDataList.add(0, sampleMaster);
     notifyDataSetChanged();
   }
+
 
 }

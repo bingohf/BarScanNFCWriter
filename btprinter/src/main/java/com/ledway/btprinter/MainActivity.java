@@ -1,6 +1,7 @@
 package com.ledway.btprinter;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,12 +10,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.Toast;
 import com.activeandroid.Model;
 import com.activeandroid.query.Select;
 import com.ledway.btprinter.adapters.RecordAdapter;
@@ -23,9 +26,15 @@ import com.ledway.framework.RemoteDB;
 import com.zkc.Service.CaptureService;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 
 public class MainActivity extends AppCompatActivity {
@@ -136,8 +145,45 @@ public class MainActivity extends AppCompatActivity {
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()){
+      case R.id.action_upload:{
+        uploadAll();
+        break;
+      }
+
     }
     return true;
+  }
+
+  private void uploadAll() {
+    final ProgressDialog progressDialog = ProgressDialog.show(this,getString(R.string.upload), getString(R.string.wait_a_moment), false);
+    Observable.from(mRecordAdapter).filter(new Func1<SampleMaster, Boolean>() {
+      @Override public Boolean call(SampleMaster sampleMaster) {
+        return ! sampleMaster.isUploaded();
+      }
+    }).flatMap(new Func1<SampleMaster, Observable<SampleMaster>>() {
+      @Override public Observable<SampleMaster> call(SampleMaster sampleMaster) {
+        return  sampleMaster.remoteSave();
+      }
+    }).subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Subscriber<SampleMaster>() {
+          @Override public void onCompleted() {
+            progressDialog.dismiss();
+            mRecordAdapter.notifyDataSetChanged();
+          }
+
+          @Override public void onError(Throwable e) {
+            progressDialog.dismiss();
+            Log.e("upload_all" , e.getMessage(), e);
+            Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+          }
+
+          @Override public void onNext(SampleMaster sampleMaster) {
+
+          }
+        });
+
+
   }
 
   private void getRecordData(){
