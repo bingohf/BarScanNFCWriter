@@ -8,14 +8,16 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import com.ledway.btprinter.R;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Created by togb on 2016/6/4.
  */
 public class DataAdapter extends RecyclerView.Adapter<BaseViewHolder>{
-  public final static int DATA_TYPE_PHOTO_1 =  0;
-  public final static int DATA_TYPE_PHOTO_2 =  1;
-  public final static int DATA_TYPE_MEMO =      2;
+  public final static int DATA_TYPE_MEMO =      0;
+  public final static int DATA_TYPE_PHOTO_1 =  1;
+  public final static int DATA_TYPE_PHOTO_2 =  2;
   public final static int DATA_TYPE_BARCODE =  3;
   public final static int DATA_TYPE_QR_CODE =  4;
 
@@ -25,11 +27,6 @@ public class DataAdapter extends RecyclerView.Adapter<BaseViewHolder>{
   public DataAdapter(Context context) {
     this.context = context;
 
-  }
-  public void init(){
-    mData.add(new TextData(DATA_TYPE_MEMO));
-    mData.add(new PhotoData(DATA_TYPE_PHOTO_1));
-    mData.add(new PhotoData(DATA_TYPE_PHOTO_2));
   }
 
   @Override public BaseViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -64,26 +61,12 @@ public class DataAdapter extends RecyclerView.Adapter<BaseViewHolder>{
   }
 
   public void addData(BaseData data){
-     switch (data.getType()){
-       case DATA_TYPE_MEMO:{
-         mData.remove(0);
-         mData.add(0,data);
-         break;
-       }
-       case DATA_TYPE_PHOTO_1:{
-         mData.remove(1);
-         mData.add(1,data);
-         break;
-       }
-       case DATA_TYPE_PHOTO_2:{
-         mData.remove(2);
-         mData.add(2,data);
-         break;
-       }
-       default:{
-         mData.add(data);
-       }
-     }
+     mData.add(data);
+    Collections.sort(mData, new Comparator<BaseData>() {
+      @Override public int compare(BaseData lhs, BaseData rhs) {
+        return lhs.getType() - rhs.getType();
+      }
+    });
     notifyDataSetChanged();
   }
 

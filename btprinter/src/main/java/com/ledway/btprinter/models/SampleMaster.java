@@ -97,7 +97,7 @@ public class SampleMaster extends Model implements Serializable {
   public Observable<SampleMaster> remoteSave() {
 
     String connectionString =
-        "jdbc:jtds:sqlserver://www.ledway.com.tw:1433;DatabaseName=iSamplePub;charset=UTF8";
+        "jdbc:jtds:sqlserver://vip.ledway.com.tw:1433;DatabaseName=iSamplePub;charset=UTF8";
     final RemoteDB  remoteDB = new RemoteDB(connectionString);
     allSave();
     Observable<SampleMaster> observableMaster =

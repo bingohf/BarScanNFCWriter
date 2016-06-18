@@ -121,7 +121,6 @@ public class ItemDetailActivity extends AppCompatActivity {
 
   private void setListView() {
     mDataAdapter = new DataAdapter(this);
-    mDataAdapter.init();
     LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
     linearLayoutManager.setAutoMeasureEnabled(true);
     mListViewProd.setLayoutManager(linearLayoutManager);
