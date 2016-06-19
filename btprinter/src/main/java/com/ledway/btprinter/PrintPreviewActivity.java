@@ -1,9 +1,11 @@
 package com.ledway.btprinter;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -13,18 +15,24 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.BaseAdapter;
 import android.widget.Toast;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+import com.ledway.btprinter.adapters.BaseData;
 import com.ledway.btprinter.adapters.DataAdapter;
 import com.ledway.btprinter.adapters.PhotoData;
 import com.ledway.btprinter.adapters.TextData;
 import com.ledway.btprinter.domain.BTPrinter;
 import com.ledway.btprinter.models.Prod;
 import com.ledway.btprinter.models.SampleMaster;
+import rx.Observable;
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 /**
@@ -60,24 +68,33 @@ public class PrintPreviewActivity extends AppCompatActivity {
     return  true;
   }
 
+
+
   private void doPrint() {
-    BTPrinter btPrinter = BTPrinter.getBtPrinter();
-    PhotoData photoData = (PhotoData) mDataAdapter.getItem(mDataAdapter.getItemCount() -1);
-    btPrinter.printBitmap(photoData.getBitmap()).subscribeOn(Schedulers.io())
-    .subscribe(new Subscriber<Boolean>() {
-      @Override public void onCompleted() {
+    final ProgressDialog progressDialog = ProgressDialog.show(this, getString(R.string.action_print), getString(R.string.wait_a_moment));
+    final BTPrinter btPrinter = BTPrinter.getBtPrinter();
+    Observable.from(mDataAdapter)
+        .flatMap(new Func1<BaseData, Observable<Boolean>>() {
+          @Override public Observable<Boolean> call(BaseData baseData) {
+            return btPrinter.print(baseData);
+          }
+        }).subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Subscriber<Boolean>() {
+          @Override public void onCompleted() {
+            progressDialog.dismiss();
+          }
 
-      }
+          @Override public void onError(Throwable e) {
+            progressDialog.dismiss();
+            Toast.makeText(PrintPreviewActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+          }
 
-      @Override public void onError(Throwable e) {
-        Log.e("bt_print", e.getMessage(), e);
-        Toast.makeText(PrintPreviewActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-      }
+          @Override public void onNext(Boolean aBoolean) {
 
-      @Override public void onNext(Boolean aBoolean) {
+          }
+        });
 
-      }
-    });
   }
 
   private void setListView() {
@@ -87,6 +104,11 @@ public class PrintPreviewActivity extends AppCompatActivity {
     mListView.setLayoutManager(linearLayoutManager);
     mListView.setAdapter(mDataAdapter);
 
+    PhotoData logoData = new PhotoData(DataAdapter.DATA_TYPE_LOGO);
+    Bitmap bmpLogo = BitmapFactory.decodeResource(getResources(),
+        R.drawable.logo);
+    logoData.setBitmap(bmpLogo);
+    mDataAdapter.addData(logoData);
     if (!TextUtils.isEmpty(mSampleMaster.desc)){
       TextData textData = new TextData(DataAdapter.DATA_TYPE_MEMO);
       textData.setText(mSampleMaster.desc);

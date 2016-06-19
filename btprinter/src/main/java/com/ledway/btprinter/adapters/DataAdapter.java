@@ -10,11 +10,13 @@ import com.ledway.btprinter.R;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 
 /**
  * Created by togb on 2016/6/4.
  */
-public class DataAdapter extends RecyclerView.Adapter<BaseViewHolder>{
+public class DataAdapter extends RecyclerView.Adapter<BaseViewHolder> implements Iterable<BaseData>{
+  public final static int DATA_TYPE_LOGO =      -1;
   public final static int DATA_TYPE_MEMO =      0;
   public final static int DATA_TYPE_PHOTO_1 =  1;
   public final static int DATA_TYPE_PHOTO_2 =  2;
@@ -38,6 +40,7 @@ public class DataAdapter extends RecyclerView.Adapter<BaseViewHolder>{
         View view = inflater.inflate(R.layout.list_item_text, parent, false);
         return new TextViewHolder(view);
       }
+      case DATA_TYPE_LOGO:
       case DATA_TYPE_QR_CODE:
       case DATA_TYPE_PHOTO_1:
       case DATA_TYPE_PHOTO_2:{
@@ -73,4 +76,7 @@ public class DataAdapter extends RecyclerView.Adapter<BaseViewHolder>{
     return mData.get(position);
   }
 
+  @Override public Iterator<BaseData> iterator() {
+    return mData.iterator();
+  }
 }

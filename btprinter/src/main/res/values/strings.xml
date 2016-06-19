@@ -17,4 +17,6 @@
   <string name="save_record">保存记录</string>
   <string name="bind_bt_printer">绑定打印机</string>
   <string name="hint_enable_bluetooth">请开启蓝牙</string>
+  <string name="card1">名片正面</string>
+  <string name="card2">名片背面</string>
 </resources>

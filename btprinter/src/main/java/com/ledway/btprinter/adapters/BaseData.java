@@ -1,5 +1,10 @@
 package com.ledway.btprinter.adapters;
 
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import java.io.IOException;
+import java.io.OutputStream;
+
 /**
  * Created by togb on 2016/6/4.
  */
@@ -11,5 +16,11 @@ public class BaseData {
 
   public int getType(){
     return type;
+  }
+
+
+
+  public void printTo(OutputStream outputStream) throws IOException {
+
   }
 }
