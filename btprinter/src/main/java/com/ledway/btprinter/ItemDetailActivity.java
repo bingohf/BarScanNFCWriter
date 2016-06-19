@@ -26,10 +26,8 @@ import com.ledway.btprinter.adapters.TextData;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.models.Prod;
 import com.ledway.framework.FullScannerActivity;
-import com.ledway.framework.RemoteDB;
 import com.zkc.Service.CaptureService;
 import java.io.ByteArrayOutputStream;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -188,7 +186,7 @@ public class ItemDetailActivity extends AppCompatActivity {
         uploadRecord();
         break;
       }
-      case R.id.action_print:{
+      case R.id.action_print_preview:{
         startActivity(new Intent(this, PrintPreviewActivity.class));
         break;
       }
