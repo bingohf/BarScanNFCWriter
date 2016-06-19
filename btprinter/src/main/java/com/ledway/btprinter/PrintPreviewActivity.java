@@ -62,7 +62,8 @@ public class PrintPreviewActivity extends AppCompatActivity {
 
   private void doPrint() {
     BTPrinter btPrinter = BTPrinter.getBtPrinter();
-    btPrinter.println(mSampleMaster.desc).subscribeOn(Schedulers.io())
+    PhotoData photoData = (PhotoData) mDataAdapter.getItem(mDataAdapter.getItemCount() -1);
+    btPrinter.printBitmap(photoData.getBitmap()).subscribeOn(Schedulers.io())
     .subscribe(new Subscriber<Boolean>() {
       @Override public void onCompleted() {
 
@@ -116,7 +117,7 @@ public class PrintPreviewActivity extends AppCompatActivity {
 
     try {
       QRCodeWriter writer = new QRCodeWriter();
-      BitMatrix bitMatrix = writer.encode(mSampleMaster.qrcode, BarcodeFormat.QR_CODE, 100, 100);
+      BitMatrix bitMatrix = writer.encode(mSampleMaster.qrcode, BarcodeFormat.QR_CODE, 200, 200);
       int width = bitMatrix.getWidth();
       int height = bitMatrix.getHeight();
       Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);

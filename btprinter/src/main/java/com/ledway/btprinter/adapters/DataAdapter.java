@@ -69,5 +69,8 @@ public class DataAdapter extends RecyclerView.Adapter<BaseViewHolder>{
     });
     notifyDataSetChanged();
   }
+  public BaseData getItem(int position){
+    return mData.get(position);
+  }
 
 }
