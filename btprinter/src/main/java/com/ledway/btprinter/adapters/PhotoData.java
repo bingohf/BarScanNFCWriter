@@ -61,12 +61,16 @@ public class PhotoData extends BaseData {
 
 
     Bitmap bitmap = this.getBitmap();
-    if (bitmap.getHeight() > 384 ){
-      bitmap = resizeImage(bitmap, 384, 384);
+    if (bitmap != null) {
+      if (bitmap.getHeight() > 384) {
+        bitmap = resizeImage(bitmap, 384, 384);
+      } else {
+        bitmap = resizeImage(bitmap, 384, bitmap.getHeight());
+      }
+      byte[] sendbuf = StartBmpToPrintCode(bitmap);
+      outputStream.write(sendbuf);
+      outputStream.flush();
     }
-    byte[] sendbuf = StartBmpToPrintCode(bitmap);
-    outputStream.write(sendbuf);
-    outputStream.flush();
   }
 
   private byte[] StartBmpToPrintCode(Bitmap bitmap) {

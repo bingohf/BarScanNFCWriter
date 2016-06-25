@@ -96,6 +96,7 @@ public class PrintPreviewActivity extends AppCompatActivity {
           }
 
           @Override public void onError(Throwable e) {
+            Log.e("error", e.getMessage(),e);
             progressDialog.dismiss();
             Toast.makeText(PrintPreviewActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
           }
