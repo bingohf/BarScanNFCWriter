@@ -72,6 +72,9 @@ public class SampleMaster extends Model implements Serializable {
   }
 
   public void allSave() {
+    if (!isHasData()){
+      return;
+    }
     if (TextUtils.isEmpty(guid)){
       guid  = MApp.getApplication().getSystemInfo().getDeviceId() + "_" + System.currentTimeMillis();
     }
@@ -81,6 +84,8 @@ public class SampleMaster extends Model implements Serializable {
 
     mac_address = MApp.getApplication().getSystemInfo().getDeviceId();
     update_date = new Date();
+    qrcode =
+        "http://vip.ledway.com.tw/i/s.aspx?series=" + guid;
     save();
     int i = 0;
     for(Prod prod :prods){
@@ -113,7 +118,7 @@ public class SampleMaster extends Model implements Serializable {
                 String returnMessage = (String) objects.get(1);
                 if (returnCode == 1) {
                   qrcode =
-                      "http://www.ledway.com.tw/isamplepub/samplegetforcus.aspx?series=" + guid;
+                      "http://vip.ledway.com.tw/i/s.aspx?series=" + guid;
                   save();
                   return Observable.just(SampleMaster.this);
                 } else {
@@ -155,4 +160,12 @@ public class SampleMaster extends Model implements Serializable {
   public boolean isUploaded() {
     return !isDirty;
   }
+
+
+  public boolean isHasData(){
+    return !TextUtils.isEmpty(desc) || (image1 != null && image1.length >0)
+        || (image2 != null && image2.length >0)
+        || (prods!= null && prods.size() >0);
+  }
+
 }

@@ -5,19 +5,27 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.text.TextUtils;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.adapters.BaseData;
+import com.ledway.btprinter.fragments.BindBTPrintDialogFragment;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.UUID;
 import rx.Observable;
 import rx.Subscriber;
+import rx.functions.Func1;
 
 /**
  * Created by togb on 2016/6/19.
  */
 public class BTPrinter {
   private static BTPrinter instance = null;
+
+  public String getMacAddress() {
+    return macAddress;
+  }
+
   private String macAddress;
   private static final UUID MY_UUID_SECURE =
       UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -43,8 +51,12 @@ public class BTPrinter {
 
   private void close() {
     try {
-      mOutput.close();
-      mSocket.close();
+      if (mOutput != null) {
+        mOutput.close();
+      }
+      if(mSocket != null) {
+        mSocket.close();
+      }
       mSocket = null;
     } catch (IOException e) {
       e.printStackTrace();
@@ -76,11 +88,14 @@ public class BTPrinter {
           prepareOutput();
           baseData.printTo(mOutput);
           subscriber.onNext(true);
+          Thread.sleep(700);
           subscriber.onCompleted();
         } catch (IOException e) {
           e.printStackTrace();
           subscriber.onError(e);
           close();
+        } catch (InterruptedException e) {
+          e.printStackTrace();
         }
       }
     }).retry(2);

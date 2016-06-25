@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 
+def shortName ="sales_edge"
 android {
   compileSdkVersion 23
   buildToolsVersion "23.0.3"
@@ -11,10 +12,40 @@ android {
     versionCode 1
     versionName "1.0"
   }
+  signingConfigs{
+    relase_signing_config{
+      keyAlias "androidrelease"
+      storePassword "ledway"
+      keyPassword "ledway"
+      storeFile file("../ledway.keystore.jks")
+    }
+  }
+  lintOptions {
+    abortOnError false
+  }
   buildTypes {
+    debug{
+      versionNameSuffix ".dev"
+    }
     release {
+      versionNameSuffix ".prod"
       minifyEnabled false
+      signingConfig signingConfigs.relase_signing_config
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+    }
+  }
+
+  applicationVariants.all { variant ->
+    variant.outputs.each { output ->
+      def outputFile = output.outputFile;
+      if (outputFile != null && outputFile.name.endsWith(".apk")){
+        def fileName = "${shortName}.v${variant.versionName}.apk"
+        output.outputFile = new File(
+            output.outputFile.parent,
+            fileName)
+      }
+
+
     }
   }
 }

@@ -66,6 +66,7 @@ public class PhotoData extends BaseData {
     }
     byte[] sendbuf = StartBmpToPrintCode(bitmap);
     outputStream.write(sendbuf);
+    outputStream.flush();
   }
 
   private byte[] StartBmpToPrintCode(Bitmap bitmap) {

@@ -128,7 +128,9 @@ public class MainActivity extends AppCompatActivity {
         break;
       }
       case REQUEST_TYPE_ADD_RECORD:{
-        mRecordAdapter.addData(0,currentData);
+        if (currentData.isHasData()) {
+          mRecordAdapter.addData(0, currentData);
+        }
         break;
       }
       case REQUEST_TYPE_MODIFY_RECORD:{

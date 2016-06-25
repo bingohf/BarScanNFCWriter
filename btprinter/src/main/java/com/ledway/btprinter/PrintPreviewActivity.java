@@ -26,8 +26,11 @@ import com.ledway.btprinter.adapters.DataAdapter;
 import com.ledway.btprinter.adapters.PhotoData;
 import com.ledway.btprinter.adapters.TextData;
 import com.ledway.btprinter.domain.BTPrinter;
+import com.ledway.btprinter.fragments.BindBTPrintDialogFragment;
 import com.ledway.btprinter.models.Prod;
 import com.ledway.btprinter.models.SampleMaster;
+import java.util.concurrent.TimeUnit;
+import org.w3c.dom.Text;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -71,8 +74,15 @@ public class PrintPreviewActivity extends AppCompatActivity {
 
 
   private void doPrint() {
-    final ProgressDialog progressDialog = ProgressDialog.show(this, getString(R.string.action_print), getString(R.string.wait_a_moment));
+
     final BTPrinter btPrinter = BTPrinter.getBtPrinter();
+    if (TextUtils.isEmpty(btPrinter.getMacAddress())){
+      BindBTPrintDialogFragment bindBTPrintDialogFragment = new BindBTPrintDialogFragment();
+      bindBTPrintDialogFragment.show(getSupportFragmentManager(), "dialog");
+      return;
+    }
+
+    final ProgressDialog progressDialog = ProgressDialog.show(this, getString(R.string.action_print), getString(R.string.wait_a_moment));
     Observable.from(mDataAdapter)
         .flatMap(new Func1<BaseData, Observable<Boolean>>() {
           @Override public Observable<Boolean> call(BaseData baseData) {

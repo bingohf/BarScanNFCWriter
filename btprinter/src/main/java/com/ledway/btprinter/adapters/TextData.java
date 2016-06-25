@@ -35,5 +35,6 @@ public class TextData extends BaseData{
     outputStream.write(new byte[]{0x1b,0x40});
     outputStream.write(s.getBytes("GBK"));
     outputStream.write(new byte[]{0x0a});
+    outputStream.flush();
   }
 }

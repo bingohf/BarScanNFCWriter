@@ -53,7 +53,7 @@ public class RecordAdapter extends BaseAdapter implements Iterable<SampleMaster>
     }
     SampleMaster sampleMaster = mDataList.get(position);
     String text = sampleMaster.create_date.toLocaleString()+ (TextUtils.isEmpty(sampleMaster.desc)?"": "\r\n" +sampleMaster.desc);
-    if (TextUtils.isEmpty(sampleMaster.qrcode) ){
+    if (!sampleMaster.isUploaded()){
       text = " * " + text;
     }
     holder.textView.setText(text);

@@ -183,11 +183,20 @@ public class ItemDetailActivity extends AppCompatActivity {
         break;
       }
       case R.id.action_upload:{
-        uploadRecord();
+        if(mSampleMaster.isHasData()) {
+          uploadRecord();
+        }else{
+          Toast.makeText(this, R.string.pls_input_data, Toast.LENGTH_LONG).show();
+        }
         break;
       }
       case R.id.action_print_preview:{
-        startActivity(new Intent(this, PrintPreviewActivity.class));
+        if(mSampleMaster.isHasData()) {
+          mSampleMaster.allSave();
+          startActivity(new Intent(this, PrintPreviewActivity.class));
+        }else {
+          Toast.makeText(this, R.string.pls_input_data, Toast.LENGTH_LONG).show();
+        }
         break;
       }
     }
