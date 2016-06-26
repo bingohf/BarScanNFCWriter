@@ -32,9 +32,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 /**
@@ -67,18 +70,21 @@ public class ItemDetailActivity extends AppCompatActivity {
 
 
   private void appendBarCode(String text) {
+    if (text.length() >30){
+      text = text.substring(0, 30);
+    }
     mSampleMaster.addProd(text);
     TextData textData = new TextData(DataAdapter.DATA_TYPE_BARCODE);
     textData.setText(text);
     mDataAdapter.addData(textData);
-
+    mListViewProd.scrollToPosition(mDataAdapter.getItemCount() -1 );
   }
 
 
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     mSampleMaster = (SampleMaster) MApp.getApplication().getSession().getValue("current_data");
-
+    mSampleMaster.reset();
     mSampleMaster.queryDetail();
     setContentView(R.layout.activity_item_detail);
     getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -125,6 +131,7 @@ public class ItemDetailActivity extends AppCompatActivity {
     mDataAdapter = new DataAdapter(this);
     LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
     linearLayoutManager.setAutoMeasureEnabled(true);
+    linearLayoutManager.setStackFromEnd(true);
     mListViewProd.setLayoutManager(linearLayoutManager);
     mListViewProd.setAdapter(mDataAdapter);
     mListViewProd.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
@@ -149,8 +156,12 @@ public class ItemDetailActivity extends AppCompatActivity {
   }
 
   @Override public void onBackPressed() {
+    if (mSampleMaster.isChanged()) {
+      mSampleMaster.allSave();
+    }else {
+      setResult(-1);
+    }
     super.onBackPressed();
-    mSampleMaster.allSave();
   }
 
   private void setEvent() {
@@ -241,8 +252,10 @@ public class ItemDetailActivity extends AppCompatActivity {
         case RESULT_TAKE_PHOTO_2: {
           if (resultCode == RESULT_OK) {
             Bitmap photo = (Bitmap) data.getExtras().get("data");
-            PhotoData photoData = new PhotoData(RESULT_TAKE_PHOTO_2 == requestCode? DataAdapter.DATA_TYPE_PHOTO_2: DataAdapter.DATA_TYPE_PHOTO_1);
+            int type = RESULT_TAKE_PHOTO_2 == requestCode? DataAdapter.DATA_TYPE_PHOTO_2: DataAdapter.DATA_TYPE_PHOTO_1;
+            PhotoData photoData = new PhotoData(type);
             photoData.setBitmap(photo);
+            mDataAdapter.removeByType(type);
             mDataAdapter.addData(photoData);
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             photo.compress(Bitmap.CompressFormat.PNG, 100, stream);
@@ -260,6 +273,7 @@ public class ItemDetailActivity extends AppCompatActivity {
           TextData textData = new TextData(DataAdapter.DATA_TYPE_MEMO);
           textData.setText(qrcode);
           mSampleMaster.setDesc(qrcode);
+          mDataAdapter.removeByType(DataAdapter.DATA_TYPE_MEMO);
           mDataAdapter.addData(textData);
           break;
         }

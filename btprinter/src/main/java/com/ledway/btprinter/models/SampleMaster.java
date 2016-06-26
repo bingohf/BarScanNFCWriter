@@ -43,8 +43,12 @@ import rx.functions.Func1;
 
   private boolean mIsChanged = false;
   protected boolean isLoadedAll = false;
-  private boolean isChanged(){
+  public boolean isChanged(){
     return mIsChanged;
+  }
+  public void reset(){
+    mIsChanged = false;
+    isLoadedAll = false;
   }
 
 
@@ -111,25 +115,29 @@ import rx.functions.Func1;
   }
 
   public void queryDetail() {
-    List<SampleMaster> record = new Select().from(this.getClass()).where("id = ?", getId()).execute();
-    SampleMaster temp = record.get(0);
-    create_date = temp.create_date;
-    update_date = temp.update_date;
-    desc = temp.desc;
-    image1 = temp.image1;
-    image2 = temp.image2;
-    line = temp.line;
-    reader = temp.reader;
-    qrcode = temp.qrcode;
-    isDirty = temp.isDirty;
-    guid = temp.guid;
-    mac_address = temp.mac_address;
+    reset();
+    if (getId() != null) {
+      List<SampleMaster> record = new Select().from(this.getClass()).where("id = ?", getId()).execute();
+      SampleMaster temp = record.get(0);
+      create_date = temp.create_date;
+      update_date = temp.update_date;
+      desc = temp.desc;
+      image1 = temp.image1;
+      image2 = temp.image2;
+      line = temp.line;
+      reader = temp.reader;
+      qrcode = temp.qrcode;
+      isDirty = temp.isDirty;
+      guid = temp.guid;
+      mac_address = temp.mac_address;
+    }
     if (getId() != null) {
       prods = items();
     } else {
       prods = new ArrayList<>();
     }
     isLoadedAll = true;
+
   }
 
   public Iterator<Prod> prodIterator(){

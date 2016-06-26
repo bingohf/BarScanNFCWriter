@@ -128,13 +128,15 @@ public class MainActivity extends AppCompatActivity {
         break;
       }
       case REQUEST_TYPE_ADD_RECORD:{
-        if (currentData.isHasData()) {
+        if (resultCode != -1) {
           mRecordAdapter.addData(0, currentData);
         }
         break;
       }
       case REQUEST_TYPE_MODIFY_RECORD:{
-        mRecordAdapter.moveToTop(currentData);
+        if(resultCode != -1) {
+          mRecordAdapter.moveToTop(currentData);
+        }
         break;
       }
     }

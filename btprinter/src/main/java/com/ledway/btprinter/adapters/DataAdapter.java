@@ -72,6 +72,14 @@ public class DataAdapter extends RecyclerView.Adapter<BaseViewHolder> implements
     });
     notifyDataSetChanged();
   }
+  public void removeByType(int type){
+    for (int i =0 ;i < mData.size();++i){
+      if (mData.get(i).getType() == type){
+        mData.remove(i);
+      }
+    }
+  }
+
   public BaseData getItem(int position){
     return mData.get(position);
   }
