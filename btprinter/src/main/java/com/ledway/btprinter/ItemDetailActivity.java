@@ -29,6 +29,7 @@ import com.ledway.framework.FullScannerActivity;
 import com.zkc.Service.CaptureService;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -43,6 +44,7 @@ public class ItemDetailActivity extends AppCompatActivity {
   private final static int RESULT_TAKE_PHOTO_1 = 1;
   private final static int RESULT_TAKE_PHOTO_2 = 2;
   private final static int RESULT_CAMERA_QR_CODE = 3;
+  private final static int RESULT_CAMERA_BAR_CODE = 4;
   private SampleMaster mSampleMaster;
   private RecyclerView mListViewProd;
   private List<Map<String, String>> mProdList = new ArrayList<>();
@@ -65,7 +67,7 @@ public class ItemDetailActivity extends AppCompatActivity {
 
 
   private void appendBarCode(String text) {
-    mSampleMaster.prods.add(new Prod(text));
+    mSampleMaster.addProd(text);
     TextData textData = new TextData(DataAdapter.DATA_TYPE_BARCODE);
     textData.setText(text);
     mDataAdapter.addData(textData);
@@ -76,6 +78,7 @@ public class ItemDetailActivity extends AppCompatActivity {
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     mSampleMaster = (SampleMaster) MApp.getApplication().getSession().getValue("current_data");
+
     mSampleMaster.queryDetail();
     setContentView(R.layout.activity_item_detail);
     getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -90,31 +93,32 @@ public class ItemDetailActivity extends AppCompatActivity {
   }
 
   private void setView() {
-    if (!TextUtils.isEmpty(mSampleMaster.desc)){
+    if (!TextUtils.isEmpty(mSampleMaster.getDesc())){
       TextData textData = new TextData(DataAdapter.DATA_TYPE_MEMO);
-      textData.setText(mSampleMaster.desc);
+      textData.setText(mSampleMaster.getDesc());
       mDataAdapter.addData(textData);
     }
-    if (mSampleMaster.image1 != null){
-      Bitmap bitmap =  BitmapFactory.decodeByteArray(mSampleMaster.image1 , 0, mSampleMaster.image1 .length);
+    if (mSampleMaster.getImage1() != null){
+      Bitmap bitmap =  BitmapFactory.decodeByteArray(mSampleMaster.getImage1() , 0, mSampleMaster.getImage1() .length);
       PhotoData photoData = new PhotoData(DataAdapter.DATA_TYPE_PHOTO_1);
       photoData.setBitmap(bitmap);
       mDataAdapter.addData(photoData);
     }
 
-    if (mSampleMaster.image2 != null){
-      Bitmap bitmap =  BitmapFactory.decodeByteArray(mSampleMaster.image2 , 0, mSampleMaster.image2 .length);
+    if (mSampleMaster.getImage2() != null){
+      Bitmap bitmap =  BitmapFactory.decodeByteArray(mSampleMaster.getImage2() , 0, mSampleMaster.getImage2() .length);
       PhotoData photoData = new PhotoData(DataAdapter.DATA_TYPE_PHOTO_2);
       photoData.setBitmap(bitmap);
       mDataAdapter.addData(photoData);
     }
 
-    for (Prod prod: mSampleMaster.prods){
+    Iterator<Prod> iterator = mSampleMaster.prodIterator();
+    while (iterator.hasNext()){
+      Prod prod = iterator.next();
       TextData textData = new TextData(DataAdapter.DATA_TYPE_BARCODE);
       textData.setText(prod.barcode);
       mDataAdapter.addData(textData);
     }
-
   }
 
   private void setListView() {
@@ -152,8 +156,9 @@ public class ItemDetailActivity extends AppCompatActivity {
   private void setEvent() {
     findViewById(R.id.btn_scan_barcode).setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
-        SerialPort.CleanBuffer();
-        CaptureService.scanGpio.openScan();
+       // SerialPort.CleanBuffer();
+       // CaptureService.scanGpio.openScan();
+        startActivityForResult(new Intent(ItemDetailActivity.this, FullScannerActivity.class), RESULT_CAMERA_BAR_CODE);
       }
     });
 
@@ -243,20 +248,24 @@ public class ItemDetailActivity extends AppCompatActivity {
             photo.compress(Bitmap.CompressFormat.PNG, 100, stream);
             byte[] byteArray = stream.toByteArray();
             if (RESULT_TAKE_PHOTO_1 == requestCode) {
-              mSampleMaster.image1 = byteArray;
+              mSampleMaster.setImage1(byteArray);
             } else {
-              mSampleMaster.image2 = byteArray;
+              mSampleMaster.setImage2(byteArray);
             }
           }
           break;
         }
         case RESULT_CAMERA_QR_CODE: {
-
           String qrcode = data.getStringExtra("barcode");
           TextData textData = new TextData(DataAdapter.DATA_TYPE_MEMO);
           textData.setText(qrcode);
-          mSampleMaster.desc = qrcode;
+          mSampleMaster.setDesc(qrcode);
           mDataAdapter.addData(textData);
+          break;
+        }
+        case RESULT_CAMERA_BAR_CODE:{
+          String barcode = data.getStringExtra("barcode");
+          appendBarCode(barcode);
           break;
         }
       }

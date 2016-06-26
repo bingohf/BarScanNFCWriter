@@ -29,6 +29,7 @@ import com.ledway.btprinter.domain.BTPrinter;
 import com.ledway.btprinter.fragments.BindBTPrintDialogFragment;
 import com.ledway.btprinter.models.Prod;
 import com.ledway.btprinter.models.SampleMaster;
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 import org.w3c.dom.Text;
 import rx.Observable;
@@ -120,33 +121,33 @@ public class PrintPreviewActivity extends AppCompatActivity {
         R.drawable.logo);
     logoData.setBitmap(bmpLogo);
     mDataAdapter.addData(logoData);
-    if (!TextUtils.isEmpty(mSampleMaster.desc)){
+    if (!TextUtils.isEmpty(mSampleMaster.getDesc())){
       TextData textData = new TextData(DataAdapter.DATA_TYPE_MEMO);
-      textData.setText(mSampleMaster.desc);
+      textData.setText(mSampleMaster.getDesc());
       mDataAdapter.addData(textData);
     }
 
-    if (mSampleMaster.image1 != null){
-      Bitmap bitmap =  BitmapFactory.decodeByteArray(mSampleMaster.image1 , 0, mSampleMaster.image1 .length);
+    if (mSampleMaster.getImage1() != null){
+      Bitmap bitmap =  BitmapFactory.decodeByteArray(mSampleMaster.getImage1() , 0, mSampleMaster.getImage1() .length);
       PhotoData photoData = new PhotoData(DataAdapter.DATA_TYPE_PHOTO_1);
       photoData.setBitmap(bitmap);
       mDataAdapter.addData(photoData);
     }
 
-    if (mSampleMaster.image2 != null){
-      Bitmap bitmap =  BitmapFactory.decodeByteArray(mSampleMaster.image2 , 0, mSampleMaster.image2 .length);
+    if (mSampleMaster.getImage2() != null){
+      Bitmap bitmap =  BitmapFactory.decodeByteArray(mSampleMaster.getImage2() , 0, mSampleMaster.getImage2() .length);
       PhotoData photoData = new PhotoData(DataAdapter.DATA_TYPE_PHOTO_2);
       photoData.setBitmap(bitmap);
       mDataAdapter.addData(photoData);
     }
 
-    for (Prod prod: mSampleMaster.prods){
+    Iterator<Prod> iterator = mSampleMaster.prodIterator();
+    while(iterator.hasNext()){
+      Prod prod = iterator.next();
       TextData textData = new TextData(DataAdapter.DATA_TYPE_BARCODE);
       textData.setText(prod.barcode);
       mDataAdapter.addData(textData);
     }
-
-
 
     try {
       QRCodeWriter writer = new QRCodeWriter();

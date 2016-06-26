@@ -52,7 +52,7 @@ public class RecordAdapter extends BaseAdapter implements Iterable<SampleMaster>
       holder = (ViewHolder)convertView.getTag();
     }
     SampleMaster sampleMaster = mDataList.get(position);
-    String text = sampleMaster.create_date.toLocaleString()+ (TextUtils.isEmpty(sampleMaster.desc)?"": "\r\n" +sampleMaster.desc);
+    String text = sampleMaster.create_date.toLocaleString()+ (TextUtils.isEmpty(sampleMaster.getDesc())?"": "\r\n" +sampleMaster.getDesc());
     if (!sampleMaster.isUploaded()){
       text = " * " + text;
     }

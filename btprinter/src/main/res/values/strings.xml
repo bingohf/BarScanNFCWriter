@@ -1,23 +1,23 @@
 <resources>
   <string name="app_name">Sales Edge</string>
-  <string name="barcode">条码</string>
-  <string name="scan_barcode">扫条码</string>
-  <string name="cust_contact">客户名片</string>
-  <string name="read_qr_code">读取名片二维码</string>
+  <string name="barcode">條碼</string>
+  <string name="scan_barcode">掃條碼</string>
+  <string name="cust_contact">客戶名片</string>
+  <string name="read_qr_code">讀取名片二維碼</string>
   <string name="take_photo_1">拍名片 正面</string>
   <string name="take_photo_2">拍名片 反面</string>
   <string name="action_save">保存</string>
   <string name="action_print">打印</string>
   <string name="action_add">新增</string>
-  <string name="action_preview">打印预览</string>
-  <string name="action_upload">上传</string>
-  <string name="action_bind_bt_printer">绑定打印机</string>
-  <string name="prod">布种:</string>
+  <string name="action_preview">打印預覽</string>
+  <string name="action_upload">上傳</string>
+  <string name="action_bind_bt_printer">綁定打印機</string>
+  <string name="prod">布種:</string>
   <string name="qr_card">名片信息:</string>
-  <string name="save_record">保存记录</string>
-  <string name="bind_bt_printer">绑定打印机</string>
-  <string name="hint_enable_bluetooth">请开启蓝牙</string>
+  <string name="save_record">保存記錄</string>
+  <string name="bind_bt_printer">綁定打印機</string>
+  <string name="hint_enable_bluetooth">請開啟藍牙</string>
   <string name="card1">名片正面</string>
   <string name="card2">名片背面</string>
-  <string name="pls_input_data">请先录入输入4</string>
+  <string name="pls_input_data">請先錄入輸入4</string>
 </resources>

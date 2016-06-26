@@ -199,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void getRecordData(){
-    List<SampleMaster> dataList = new Select().from(SampleMaster.class).orderBy(" update_date desc ").execute();
+    List<SampleMaster> dataList = new Select(new String[]{"create_date", "desc" ,"update_date","guid", "id","mac_address","isDirty","line","reader","qrcode"}).from(SampleMaster.class).orderBy(" update_date desc ").execute();
     mRecordAdapter.clear();
     for(SampleMaster sampleMaster:dataList){
       mRecordAdapter.addData(sampleMaster);
