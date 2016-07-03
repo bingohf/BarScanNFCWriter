@@ -28,7 +28,7 @@ public class TextData extends BaseData{
         break;
       }
       case DataAdapter.DATA_TYPE_BARCODE:{
-        s = MApp.getApplication().getString(R.string.prod)  + s;
+       // s = MApp.getApplication().getString(R.string.prod)  + s;
         break;
       }
     }

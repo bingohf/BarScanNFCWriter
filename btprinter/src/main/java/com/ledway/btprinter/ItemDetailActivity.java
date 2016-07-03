@@ -73,9 +73,9 @@ public class ItemDetailActivity extends AppCompatActivity {
     if (text.length() >30){
       text = text.substring(0, 30);
     }
-    mSampleMaster.addProd(text);
+    int ext = mSampleMaster.addProd(text);
     TextData textData = new TextData(DataAdapter.DATA_TYPE_BARCODE);
-    textData.setText(text);
+    textData.setText(ext + ": " + text);
     mDataAdapter.addData(textData);
     mListViewProd.scrollToPosition(mDataAdapter.getItemCount() -1 );
   }
@@ -122,7 +122,7 @@ public class ItemDetailActivity extends AppCompatActivity {
     while (iterator.hasNext()){
       Prod prod = iterator.next();
       TextData textData = new TextData(DataAdapter.DATA_TYPE_BARCODE);
-      textData.setText(prod.barcode);
+      textData.setText(prod.ext + ": " + prod.barcode);
       mDataAdapter.addData(textData);
     }
   }

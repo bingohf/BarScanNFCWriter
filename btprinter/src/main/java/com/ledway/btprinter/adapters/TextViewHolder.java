@@ -22,7 +22,7 @@ public class TextViewHolder extends BaseViewHolder {
     String label ="";
     switch (textData.getType()){
       case DataAdapter.DATA_TYPE_BARCODE:{
-        label = MApp.getApplication().getString(R.string.prod);
+        //label = MApp.getApplication().getString(R.string.prod);
         break;
       }
       case DataAdapter.DATA_TYPE_MEMO:{

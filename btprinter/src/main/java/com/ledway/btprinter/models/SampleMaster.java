@@ -145,10 +145,13 @@ import rx.functions.Func1;
     return prods.iterator();
   }
 
-  public void addProd(String prod){
+  public int  addProd(String text){
     isDirty = true;
     mIsChanged = true;
-    prods.add(new Prod(prod));
+    Prod prod = new Prod(text);
+    prods.add(prod);
+     prod.ext = prods.size();
+    return prod.ext;
   }
 
   public Observable<SampleMaster> remoteSave() {

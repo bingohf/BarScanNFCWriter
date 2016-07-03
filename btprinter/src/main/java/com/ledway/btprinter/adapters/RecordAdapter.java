@@ -56,6 +56,11 @@ public class RecordAdapter extends BaseAdapter implements Iterable<SampleMaster>
     if (!sampleMaster.isUploaded()){
       text = " * " + text;
     }
+    int backgroundColor =0x11000000;
+    if (position %2 ==1) {
+      backgroundColor = 0;
+    }
+    convertView.setBackgroundColor(backgroundColor);
     holder.textView.setText(text);
     return convertView;
   }
