@@ -38,6 +38,9 @@
     <activity android:name=".AppPreferences"/>
     <activity android:name=".ItemDetailActivity"/>
     <activity android:name=".PrintPreviewActivity"/>
+    <activity android:name=".ProdListActivity"
+        android:label="@string/update_prod"
+        />
     <activity
         android:theme="@style/AppOverlayTheme"
         android:name="com.ledway.framework.FullScannerActivity"/>
@@ -73,7 +76,7 @@
         android:value="1"/>
     <meta-data
         android:name="AA_MODELS"
-        android:value="com.ledway.btprinter.models.SampleMaster,com.ledway.btprinter.models.Prod"/>
+        android:value="com.ledway.btprinter.models.SampleMaster,com.ledway.btprinter.models.Prod,com.ledway.btprinter.models.TodoProd"/>
   </application>c
 
 </manifest>

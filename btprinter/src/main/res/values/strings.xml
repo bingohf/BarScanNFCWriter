@@ -19,5 +19,7 @@
   <string name="hint_enable_bluetooth">請開啟藍牙</string>
   <string name="card1">名片正面</string>
   <string name="card2">名片背面</string>
-  <string name="pls_input_data">請先錄入輸入4</string>
+  <string name="pls_input_data">請先錄入輸入</string>
+  <string name="action_update_prod">更新布种</string>
+  <string name="update_prod">更新布种</string>
 </resources>

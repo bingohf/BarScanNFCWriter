@@ -158,6 +158,9 @@ public class MainActivity extends AppCompatActivity {
         showSetDialog();
         break;
       }
+      case R.id.action_up_prod:{
+        startActivity(new Intent(this, ProdListActivity.class));
+      }
 
     }
     return true;

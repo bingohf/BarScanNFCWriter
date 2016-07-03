@@ -192,6 +192,13 @@ import rx.functions.Func1;
                     String outProdNo = (String) objects.get(2);
                     if (returnCode == 1) {
                       prod.outProdNo = outProdNo;
+
+                      if (!TextUtils.isEmpty(prod.outProdNo)){
+                        TodoProd todoProd = new TodoProd();
+                        todoProd.prodNo = prod.barcode;
+                        todoProd.created_time = new Date();
+                        todoProd.save();
+                      }
                       prod.save();
                       return Observable.just(SampleMaster.this);
                     } else {
