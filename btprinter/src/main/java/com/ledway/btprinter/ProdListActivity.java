@@ -1,11 +1,13 @@
 package com.ledway.btprinter;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.MotionEvent;
+import android.view.View;
 import com.activeandroid.Model;
 import com.activeandroid.query.Select;
 import com.ledway.btprinter.adapters.TodoProdAdapter;
@@ -34,21 +36,17 @@ public class ProdListActivity extends AppCompatActivity {
     linearLayoutManager.setAutoMeasureEnabled(true);
     recyclerView.setLayoutManager(linearLayoutManager);
     mTodoProdList = getToProds();
-    mAdapter = new TodoProdAdapter(mTodoProdList);
+    mAdapter = new TodoProdAdapter(this, mTodoProdList);
     recyclerView.setAdapter(mAdapter);
-    recyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
-      @Override public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-        return false;
+    recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, new RecyclerItemClickListener.OnItemClickListener() {
+      @Override public void onItemClick(View view, int position) {
+        TodoProd todoProd = mTodoProdList.get(position);
+        if (todoProd != null){
+          MApp.getApplication().getSession().put("current_todo_prod", todoProd);
+          startActivity(new Intent(ProdListActivity.this, TodoProdDetailActivity.class));
+        }
       }
-
-      @Override public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-
-      }
-
-      @Override public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-
-      }
-    });
+    }));
   }
 
   private List<TodoProd> getToProds(){

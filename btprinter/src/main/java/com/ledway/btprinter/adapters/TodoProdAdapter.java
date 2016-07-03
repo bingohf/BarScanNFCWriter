@@ -1,5 +1,6 @@
 package com.ledway.btprinter.adapters;
 
+import android.app.Activity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,9 +13,11 @@ import java.util.List;
 /**
  * Created by togb on 2016/7/3.
  */
-public class TodoProdAdapter extends RecyclerView.Adapter<ToProdViewHolder> {
+public class TodoProdAdapter extends RecyclerView.Adapter<ToProdViewHolder>{
   private List<TodoProd> todoProds;
-  public TodoProdAdapter(List<TodoProd> todoProds){
+  private Activity activity;
+  public TodoProdAdapter(Activity activity,List<TodoProd> todoProds){
+    this.activity = activity;
     this.todoProds = todoProds;
   }
 
@@ -33,6 +36,5 @@ public class TodoProdAdapter extends RecyclerView.Adapter<ToProdViewHolder> {
   @Override public int getItemCount() {
     return todoProds.size();
   }
-
 
 }

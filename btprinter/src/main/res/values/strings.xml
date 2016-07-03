@@ -22,4 +22,6 @@
   <string name="pls_input_data">請先錄入輸入</string>
   <string name="action_update_prod">更新布种</string>
   <string name="update_prod">更新布种</string>
+  <string name="hint_prod_image">点击拍照</string>
+  <string name="action_re_take_photo">重拍</string>
 </resources>

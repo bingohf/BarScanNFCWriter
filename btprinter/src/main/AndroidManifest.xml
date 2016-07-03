@@ -41,6 +41,7 @@
     <activity android:name=".ProdListActivity"
         android:label="@string/update_prod"
         />
+    <activity android:name=".TodoProdDetailActivity"/>
     <activity
         android:theme="@style/AppOverlayTheme"
         android:name="com.ledway.framework.FullScannerActivity"/>
