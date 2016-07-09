@@ -12,6 +12,7 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +33,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
   private ImageView mImageView;
   private TextView mTxtHint;
   private TodoProd mTodoProd ;
+  private EditText mEdtSpec;
 
   @Override public boolean onCreateOptionsMenu(Menu menu) {
     getMenuInflater().inflate(R.menu.todo_prod_menu, menu);
@@ -42,6 +44,10 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     switch (item.getItemId()){
       case R.id.action_re_take_photo:{
         startTakePhoto();
+        break;
+      }
+      case R.id.action_re_upload:{
+        uploadPicture();
         break;
       }
     }
@@ -58,8 +64,10 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     setContentView(R.layout.activity_todo_prod_detail);
     mImageView = (ImageView) findViewById(R.id.image);
     mTxtHint = (TextView) findViewById(R.id.txt_hint);
+    mEdtSpec = (EditText) findViewById(R.id.txt_spec);
     mTodoProd = (TodoProd) MApp.getApplication().getSession().getValue("current_todo_prod");
-
+    getSupportActionBar().setTitle(mTodoProd.prodNo);
+    mEdtSpec.setText(mTodoProd.spec_desc);
     if (mTodoProd.image1.length < 1){
       mTxtHint.setVisibility(View.VISIBLE);
       mImageView.setVisibility(View.GONE);
@@ -101,37 +109,47 @@ public class TodoProdDetailActivity extends AppCompatActivity {
           resized.compress(Bitmap.CompressFormat.PNG, 100, stream2);
           mTodoProd.image2 = stream2.toByteArray();
           mTodoProd.save();
+          uploadPicture();
 
-          final ProgressDialog progressDialog = ProgressDialog.show(this, getString(R.string.upload), getString(R.string.wait_a_moment), true);
-          mTodoProd.remoteSave().subscribeOn(Schedulers.io())
-              .observeOn(AndroidSchedulers.mainThread())
-              .subscribe(new Subscriber<ArrayList<Object>>() {
-                @Override public void onCompleted() {
-                  progressDialog.dismiss();
-                }
-
-                @Override public void onError(Throwable e) {
-                  progressDialog.dismiss();
-                  Toast.makeText(TodoProdDetailActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-                  e.printStackTrace();
-                }
-
-                @Override public void onNext(ArrayList<Object> objects) {
-                  int returnCode = (Integer) objects.get(0);
-                  String returnMessage = (String) objects.get(1);
-                  if (!TextUtils.isEmpty(returnMessage)){
-                    Toast.makeText(TodoProdDetailActivity.this, returnMessage, Toast.LENGTH_LONG).show();
-                  }
-                  if (requestCode == 1){
-                    mTodoProd.uploaded_time = new Date();
-                    mTodoProd.save();
-                  }
-
-                }
-              });
         }
         break;
       }
     }
+  }
+
+  @Override public boolean onPrepareOptionsMenu(Menu menu) {
+    menu.findItem(R.id.action_re_upload).setVisible(mTodoProd.image1 != null && mTodoProd.image1.length > 0);
+    return true;
+  }
+
+  private void uploadPicture(){
+    final ProgressDialog progressDialog = ProgressDialog.show(this, getString(R.string.upload), getString(R.string.wait_a_moment), true);
+    mTodoProd.remoteSave().subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Subscriber<ArrayList<Object>>() {
+          @Override public void onCompleted() {
+            progressDialog.dismiss();
+          }
+
+          @Override public void onError(Throwable e) {
+            progressDialog.dismiss();
+            Toast.makeText(TodoProdDetailActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+          }
+
+          @Override public void onNext(ArrayList<Object> objects) {
+            int returnCode = (Integer) objects.get(0);
+            String returnMessage = (String) objects.get(1);
+            if (!TextUtils.isEmpty(returnMessage)){
+              Toast.makeText(TodoProdDetailActivity.this, returnMessage, Toast.LENGTH_LONG).show();
+            }
+            if (returnCode == 1){
+              mTodoProd.uploaded_time = new Date();
+              mTodoProd.save();
+            }
+            invalidateOptionsMenu();
+
+          }
+        });
   }
 }

@@ -31,6 +31,11 @@ public class ProdListActivity extends AppCompatActivity {
     setView();
   }
 
+  @Override protected void onResume() {
+    super.onResume();
+    mAdapter.notifyDataSetChanged();
+  }
+
   private void setView() {
     LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
     linearLayoutManager.setAutoMeasureEnabled(true);

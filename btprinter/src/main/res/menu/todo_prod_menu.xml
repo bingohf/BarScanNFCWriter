@@ -6,4 +6,11 @@
       android:orderInCategory="100"
       android:title="@string/action_re_take_photo"
       app:showAsAction="ifRoom" />
+  <item
+      android:id="@+id/action_re_upload"
+      android:orderInCategory="100"
+      android:title="@string/action_re_uplaod"
+      app:showAsAction="ifRoom"
+      android:visible="false"
+      />
 </menu>

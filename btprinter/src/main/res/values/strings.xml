@@ -24,4 +24,5 @@
   <string name="update_prod">產品</string>
   <string name="hint_prod_image">点击拍照</string>
   <string name="action_re_take_photo">重拍</string>
+  <string name="action_re_uplaod">重新上传</string>
 </resources>
