@@ -67,9 +67,7 @@ public class BTPrinter {
    return Observable.create(new Observable.OnSubscribe<Boolean>() {
      @Override public void call(Subscriber<? super Boolean> subscriber) {
        try {
-          prepareOutput();
-         mOutput.write(new byte[]{0x1b,0x40});
-         mOutput.write(text.getBytes("GBK"));
+         // prepareOutput();
          mOutput.write(new byte[]{0x0a});
        } catch (IOException e) {
          e.printStackTrace();
@@ -78,7 +76,6 @@ public class BTPrinter {
        }
      }
    }).retry(2);
-
   }
 
   public Observable<Boolean> print(final BaseData baseData){
@@ -87,8 +84,8 @@ public class BTPrinter {
         try {
           prepareOutput();
           baseData.printTo(mOutput);
-          subscriber.onNext(true);
           Thread.sleep(700);
+          subscriber.onNext(true);
           subscriber.onCompleted();
         } catch (IOException e) {
           e.printStackTrace();

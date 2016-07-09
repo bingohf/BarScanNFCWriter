@@ -24,6 +24,7 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import com.ledway.btprinter.adapters.BaseData;
 import com.ledway.btprinter.adapters.DataAdapter;
 import com.ledway.btprinter.adapters.PhotoData;
+import com.ledway.btprinter.adapters.RecordAdapter;
 import com.ledway.btprinter.adapters.TextData;
 import com.ledway.btprinter.domain.BTPrinter;
 import com.ledway.btprinter.fragments.BindBTPrintDialogFragment;
@@ -85,6 +86,11 @@ public class PrintPreviewActivity extends AppCompatActivity {
 
     final ProgressDialog progressDialog = ProgressDialog.show(this, getString(R.string.action_print), getString(R.string.wait_a_moment));
     Observable.from(mDataAdapter)
+        .filter(new Func1<BaseData, Boolean>() {
+          @Override public Boolean call(BaseData baseData) {
+            return baseData.getType() != DataAdapter.DATA_TYPE_PHOTO_1 &&baseData.getType() != DataAdapter.DATA_TYPE_PHOTO_2 ;
+          }
+        })
         .flatMap(new Func1<BaseData, Observable<Boolean>>() {
           @Override public Observable<Boolean> call(BaseData baseData) {
             return btPrinter.print(baseData);
@@ -93,6 +99,7 @@ public class PrintPreviewActivity extends AppCompatActivity {
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new Subscriber<Boolean>() {
           @Override public void onCompleted() {
+            btPrinter.println("\n").subscribe();
             progressDialog.dismiss();
           }
 
@@ -127,7 +134,7 @@ public class PrintPreviewActivity extends AppCompatActivity {
       mDataAdapter.addData(textData);
     }
 
-    if (mSampleMaster.getImage1() != null){
+/*    if (mSampleMaster.getImage1() != null){
       Bitmap bitmap =  BitmapFactory.decodeByteArray(mSampleMaster.getImage1() , 0, mSampleMaster.getImage1() .length);
       PhotoData photoData = new PhotoData(DataAdapter.DATA_TYPE_PHOTO_1);
       photoData.setBitmap(bitmap);
@@ -139,7 +146,7 @@ public class PrintPreviewActivity extends AppCompatActivity {
       PhotoData photoData = new PhotoData(DataAdapter.DATA_TYPE_PHOTO_2);
       photoData.setBitmap(bitmap);
       mDataAdapter.addData(photoData);
-    }
+    }*/
 
     Iterator<Prod> iterator = mSampleMaster.prodIterator();
     while(iterator.hasNext()){

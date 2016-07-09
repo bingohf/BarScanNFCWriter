@@ -55,7 +55,7 @@ public class ProdListActivity extends AppCompatActivity {
   }
 
   private List<TodoProd> getToProds(){
-    List<TodoProd> todoProds =  new Select().from(TodoProd.class).orderBy("uploaded_time").execute();
+    List<TodoProd> todoProds =  new Select(new String[]{"id", "prodno","uploaded_time"}).from(TodoProd.class).orderBy("uploaded_time").execute();
     return todoProds;
   }
 

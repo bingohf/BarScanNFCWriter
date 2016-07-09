@@ -20,9 +20,10 @@
   <string name="card1">名片正面</string>
   <string name="card2">名片背面</string>
   <string name="pls_input_data">請先錄入輸入</string>
-  <string name="action_update_prod">更新布种</string>
+  <string name="action_update_prod">產品</string>
   <string name="update_prod">產品</string>
-  <string name="hint_prod_image">点击拍照</string>
+  <string name="hint_prod_image">點擊拍照</string>
   <string name="action_re_take_photo">重拍</string>
-  <string name="action_re_uplaod">重新上传</string>
+  <string name="action_re_uplaod">上傳</string>
+  <string name="hint_product_spec">産品描述</string>
 </resources>

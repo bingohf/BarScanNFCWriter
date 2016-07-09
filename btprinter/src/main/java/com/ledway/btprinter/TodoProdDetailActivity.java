@@ -47,7 +47,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
         break;
       }
       case R.id.action_re_upload:{
-        uploadPicture();
+        upload();
         break;
       }
     }
@@ -59,6 +59,12 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     startActivityForResult(takePicture, REQUEST_TAKE_IMAGE);
   }
 
+  @Override protected void onDestroy() {
+    super.onDestroy();
+    mTodoProd.image1 = null;
+    mTodoProd.image2 = null;
+  }
+
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_todo_prod_detail);
@@ -66,6 +72,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     mTxtHint = (TextView) findViewById(R.id.txt_hint);
     mEdtSpec = (EditText) findViewById(R.id.txt_spec);
     mTodoProd = (TodoProd) MApp.getApplication().getSession().getValue("current_todo_prod");
+    mTodoProd.queryAllField();
     getSupportActionBar().setTitle(mTodoProd.prodNo);
     mEdtSpec.setText(mTodoProd.spec_desc);
     if (mTodoProd.image1.length < 1){
@@ -83,7 +90,14 @@ public class TodoProdDetailActivity extends AppCompatActivity {
         startTakePhoto();
       }
     });
-
+    mEdtSpec.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+      @Override public void onFocusChange(View v, boolean hasFocus) {
+        if (!hasFocus){
+          mTodoProd.spec_desc = mEdtSpec.getText().toString();
+          mTodoProd.save();
+        }
+      }
+    });
 
 /*    Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
     startActivityForResult(takePicture, REQUEST_TAKE_IMAGE);//zero can be replaced with any action code*/
@@ -109,7 +123,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
           resized.compress(Bitmap.CompressFormat.PNG, 100, stream2);
           mTodoProd.image2 = stream2.toByteArray();
           mTodoProd.save();
-          uploadPicture();
+          upload();
 
         }
         break;
@@ -118,11 +132,13 @@ public class TodoProdDetailActivity extends AppCompatActivity {
   }
 
   @Override public boolean onPrepareOptionsMenu(Menu menu) {
-    menu.findItem(R.id.action_re_upload).setVisible(mTodoProd.image1 != null && mTodoProd.image1.length > 0);
+    //menu.findItem(R.id.action_re_upload).setVisible(mTodoProd.image1 != null && mTodoProd.image1.length > 0);
     return true;
   }
 
-  private void uploadPicture(){
+  private void upload(){
+    mTodoProd.spec_desc = mEdtSpec.getText().toString();
+    mTodoProd.save();
     final ProgressDialog progressDialog = ProgressDialog.show(this, getString(R.string.upload), getString(R.string.wait_a_moment), true);
     mTodoProd.remoteSave().subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())

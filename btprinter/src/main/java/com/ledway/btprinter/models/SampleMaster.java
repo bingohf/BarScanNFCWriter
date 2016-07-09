@@ -193,20 +193,11 @@ import rx.functions.Func1;
                     String outProdNo = (String) objects.get(2);
                     if (returnCode == 1) {
                       prod.outProdNo = outProdNo;
-                      if (!TextUtils.isEmpty(prod.outProdNo)){
-                        final TodoProd todoProd = new TodoProd();
-                        todoProd.prodNo = prod.barcode;
-                        todoProd.created_time = new Date();
-                        return todoProd.sync().doOnNext(new Action1<Boolean>() {
-                          @Override public void call(Boolean aBoolean) {
-                            todoProd.save();
-                          }
-                        }).map(new Func1<Boolean, SampleMaster>() {
-                          @Override public SampleMaster call(Boolean aBoolean) {
-                            return SampleMaster.this;
-                          }
-                        });
-                      }
+                      final TodoProd todoProd = new TodoProd();
+                      todoProd.prodNo = prod.barcode;
+                      todoProd.created_time = new Date();
+                      todoProd.save();
+
                       return Observable.just(SampleMaster.this);
                     }else{
                       return Observable.error(new Exception(returnMessage));
