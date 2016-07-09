@@ -81,7 +81,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     startActivityForResult(takePicture, REQUEST_TAKE_IMAGE);//zero can be replaced with any action code*/
   }
 
-  @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+  @Override protected void onActivityResult(final int requestCode, int resultCode, Intent data) {
     switch (requestCode){
       case REQUEST_TAKE_IMAGE:{
         if (RESULT_OK ==  resultCode){
@@ -121,7 +121,8 @@ public class TodoProdDetailActivity extends AppCompatActivity {
                   String returnMessage = (String) objects.get(1);
                   if (!TextUtils.isEmpty(returnMessage)){
                     Toast.makeText(TodoProdDetailActivity.this, returnMessage, Toast.LENGTH_LONG).show();
-                  }else{
+                  }
+                  if (requestCode == 1){
                     mTodoProd.uploaded_time = new Date();
                     mTodoProd.save();
                   }

@@ -11,7 +11,7 @@
   <string name="action_add">新增</string>
   <string name="action_preview">預覽</string>
   <string name="action_upload">上傳</string>
-  <string name="action_bind_bt_printer">藍芽印表機</string>
+  <string name="action_bind_bt_printer">藍芽</string>
   <string name="prod">布種:</string>
   <string name="qr_card">名片信息:</string>
   <string name="save_record">保存記錄</string>
@@ -21,7 +21,7 @@
   <string name="card2">名片背面</string>
   <string name="pls_input_data">請先錄入輸入</string>
   <string name="action_update_prod">更新布种</string>
-  <string name="update_prod">更新布种</string>
+  <string name="update_prod">產品</string>
   <string name="hint_prod_image">点击拍照</string>
   <string name="action_re_take_photo">重拍</string>
 </resources>
