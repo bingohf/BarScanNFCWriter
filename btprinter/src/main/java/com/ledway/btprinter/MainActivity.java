@@ -2,6 +2,7 @@ package com.ledway.btprinter;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
   private final static int REQUEST_TYPE_SETTING = 1;
   private final static int REQUEST_TYPE_ADD_RECORD = 2;
   private final static int REQUEST_TYPE_MODIFY_RECORD = 3;
+  private final static int REQUEST_AGREEMENT = 4;
   private RemoteDB remoteDB;
   private PublishSubject<Boolean> mSettingSubject = PublishSubject.create();
   private RecordAdapter mRecordAdapter;
@@ -88,6 +90,15 @@ public class MainActivity extends AppCompatActivity {
     });
 
     setListView();
+
+    checkAgreement();
+  }
+
+  private void checkAgreement() {
+    SharedPreferences sp = getSharedPreferences("agreement", Context.MODE_PRIVATE);
+    if (!sp.getBoolean("agree", false)){
+      startActivityForResult(new Intent(this, AgreementActivity.class), REQUEST_AGREEMENT);
+    }
   }
 
   private void setListView() {
@@ -136,6 +147,15 @@ public class MainActivity extends AppCompatActivity {
       case REQUEST_TYPE_MODIFY_RECORD:{
         if(resultCode != -1) {
           mRecordAdapter.moveToTop(currentData);
+        }
+        break;
+      }
+      case REQUEST_AGREEMENT:{
+        if (resultCode == RESULT_OK){
+          SharedPreferences sp = getSharedPreferences("agreement", Context.MODE_PRIVATE);
+          sp.edit().putBoolean("agree", true).apply();
+        }else{
+          finish();
         }
         break;
       }

@@ -42,6 +42,9 @@
         android:label="@string/update_prod"
         />
     <activity android:name=".TodoProdDetailActivity"/>
+    <activity android:name=".AgreementActivity"
+        android:label="@string/title_agreement"
+        />
     <activity
         android:theme="@style/AppOverlayTheme"
         android:name="com.ledway.framework.FullScannerActivity"/>
