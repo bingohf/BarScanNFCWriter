@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import rx.Observable;
+import rx.Subscriber;
 import rx.functions.Func1;
 
 /**
@@ -37,23 +38,23 @@ import rx.functions.Func1;
         image1, image2);
   }
 
-  public Observable<Boolean> sync(){
+  public Observable<TodoProd> sync(){
     String connectionString =
         "jdbc:jtds:sqlserver://vip.ledway.com.tw:1433;DatabaseName=iSamplePub;charset=UTF8";
     final RemoteDB remoteDB = new RemoteDB(connectionString);
-    return remoteDB.executeQuery("select specdesc from product where prodno=?", prodNo)
-        .map(new Func1<ResultSet, Boolean>() {
-          @Override public Boolean call(ResultSet resultSet) {
+    return remoteDB.executeQuery("select specdesc from product where prodno=? and empNo =?", prodNo, MApp.getApplication().getSystemInfo().getDeviceId())
+        .map(new Func1<ResultSet, TodoProd>() {
+          @Override public TodoProd call(ResultSet resultSet) {
             try {
               while(resultSet.next()){
                 spec_desc = resultSet.getString("specdesc");
-                return true;
+                return TodoProd.this;
               }
             } catch (SQLException e) {
               e.printStackTrace();
-              return false;
+              return TodoProd.this;
             }
-            return false;
+            return TodoProd.this;
           }
         });
   }
@@ -69,5 +70,36 @@ import rx.functions.Func1;
       spec_desc = temp.spec_desc;
     }
   }
+  public static Observable<TodoProd> getTodoProd(final String prodNo){
+    return Observable.create(new Observable.OnSubscribe<TodoProd>() {
+      @Override public void call(final Subscriber<? super TodoProd> subscriber) {
+        List<TodoProd> records = new Select(new String[]{"id","prodno","spec_desc"}).from(TodoProd.class).where("prodno=?", prodNo).execute();
+        if (records.size() ==1){
+          subscriber.onNext(records.get(0));
+          subscriber.onCompleted();
+        }else{
+          TodoProd todoProd = new TodoProd();
+          todoProd.prodNo = prodNo;
+          todoProd.created_time = new Date();
+          todoProd.save();
+          todoProd.sync().subscribe(new Subscriber<TodoProd>() {
+            @Override public void onCompleted() {
+              subscriber.onCompleted();
+            }
+
+            @Override public void onError(Throwable e) {
+              subscriber.onError(e);
+            }
+
+            @Override public void onNext(TodoProd todoProd) {
+              subscriber.onNext(todoProd);
+            }
+          });
+
+        }
+      }
+    });
+  }
+
 
 }

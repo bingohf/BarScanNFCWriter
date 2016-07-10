@@ -8,8 +8,8 @@ import java.io.Serializable;
 /**
  * Created by togb on 2016/5/29.
  */
-@Table(name = "product")
-public class Product extends Model implements Serializable {
+@Table(name = "Prod")
+public class Prod extends Model implements Serializable {
   @Column(name = "bar_code")
   public String barcode;
   @Column(name = "cust_record")
@@ -21,11 +21,11 @@ public class Product extends Model implements Serializable {
   @Column(name = "outProdNo")
   public String outProdNo;
 
-  public Product(){
+  public Prod(){
 
   }
 
-  public Product(String barcode){
+  public Prod(String barcode){
     this.barcode = barcode;
   }
 

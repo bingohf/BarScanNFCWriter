@@ -1,11 +1,15 @@
 package com.ledway.btprinter.models;
 
+import android.database.Cursor;
 import android.text.TextUtils;
+import com.activeandroid.Cache;
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
+import com.activeandroid.query.From;
 import com.activeandroid.query.Select;
 import com.ledway.btprinter.MApp;
+import com.ledway.btprinter.R;
 import com.ledway.framework.RemoteDB;
 import java.io.Serializable;
 import java.sql.Types;
@@ -14,6 +18,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import rx.Observable;
+import rx.Subscriber;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
@@ -23,7 +28,7 @@ import rx.functions.Func1;
  */
 
 @Table(name = "sample_master") public class SampleMaster extends Model implements Serializable {
-  private List<Prod> prods;
+  public List<SampleProdLink> sampleProdLinks;
 
   @Column(name = "guid", unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)
   public String guid;
@@ -88,8 +93,29 @@ import rx.functions.Func1;
     this.desc = desc;
   }
 
-  public List<Prod> items() {
-    return getMany(Prod.class, "cust_record");
+  public List<SampleProdLink> items() {
+    From query =
+        new Select(new String[] { "todo_prod.spec_desc,SampleProdLink.*" }).from(SampleProdLink.class)
+            .join(TodoProd.class)
+            .on("SampleProdLink.prod_id = todo_prod.prodno")
+            .where("SampleProdLink.sample_id=?", guid);
+    Cursor cursor = Cache.openDatabase().rawQuery(query.toSql(),query.getArguments());
+    ArrayList<SampleProdLink> sampleProdLinks = new ArrayList<>();
+    if(cursor.moveToFirst()){
+      do{
+        SampleProdLink sampleProdLink = new SampleProdLink();
+        sampleProdLink.ext = cursor.getInt(cursor.getColumnIndex("ext"));
+        sampleProdLink.create_date = new Date(cursor.getLong(cursor.getColumnIndex("create_date")));
+        sampleProdLink.prod_id = cursor.getString(cursor.getColumnIndex("prod_id"));
+        sampleProdLink.sample_id = cursor.getString(cursor.getColumnIndex("sample_id"));
+        sampleProdLink.link_id = cursor.getString(cursor.getColumnIndex("link_id"));
+        sampleProdLink.spec_desc = cursor.getString(cursor.getColumnIndex("spec_desc"));
+        sampleProdLinks.add(sampleProdLink);
+      }
+      while (cursor.moveToNext());
+    }
+
+    return sampleProdLinks;
   }
 
   public void allSave() {
@@ -108,10 +134,10 @@ import rx.functions.Func1;
     qrcode = "http://vip.ledway.com.tw/i/s.aspx?series=" + guid;
     save();
     int i = 0;
-    for (Prod prod : prods) {
-      prod.sampleMaster = this;
-      prod.ext = ++i;
-      prod.save();
+    for (SampleProdLink sampleProdLink : sampleProdLinks) {
+      sampleProdLink.ext = ++i;
+      sampleProdLink.sample_id = guid;
+      sampleProdLink.save();
     }
   }
 
@@ -133,26 +159,64 @@ import rx.functions.Func1;
       mac_address = temp.mac_address;
     }
     if (getId() != null) {
-      prods = items();
+      sampleProdLinks = items();
     } else {
-      prods = new ArrayList<>();
+      sampleProdLinks = new ArrayList<>();
     }
     isLoadedAll = true;
 
   }
 
-  public Iterator<Prod> prodIterator(){
+  public Iterator<SampleProdLink> prodIterator(){
 
-    return prods.iterator();
+    return sampleProdLinks.iterator();
   }
 
-  public int  addProd(String text){
-    isDirty = true;
-    mIsChanged = true;
-    Prod prod = new Prod(text);
-    prods.add(prod);
-     prod.ext = prods.size();
-    return prod.ext;
+  public Observable<SampleProdLink>  addProd(final String prodno){
+    return Observable.create(new Observable.OnSubscribe<SampleProdLink>() {
+      @Override public void call(final Subscriber<? super SampleProdLink> subscriber) {
+        if (isExist(prodno)){
+          subscriber.onError(new Exception(MApp.getApplication().getString(R.string.prod_exists)));
+        }else {
+          isDirty = true;
+          mIsChanged = true;
+          final SampleProdLink sampleProdLink = new SampleProdLink();
+          sampleProdLink.link_id = guid +"_" + prodno;
+          sampleProdLink.prod_id = prodno;
+          sampleProdLink.sample_id = guid;
+          sampleProdLink.ext = sampleProdLinks.size() + 1;
+          sampleProdLink.create_date = new Date();
+          TodoProd.getTodoProd(prodno).subscribe(new Subscriber<TodoProd>() {
+            @Override public void onCompleted() {
+              subscriber.onCompleted();
+            }
+
+            @Override public void onError(Throwable e) {
+              subscriber.onError(e);
+            }
+
+            @Override public void onNext(TodoProd todoProd) {
+              sampleProdLink.save();
+              sampleProdLinks.add(sampleProdLink);
+              subscriber.onNext(sampleProdLink);
+              subscriber.onCompleted();
+            }
+          });
+
+        }
+
+      }
+    });
+
+  }
+
+  private boolean isExist(String prodNo){
+    for(SampleProdLink sampleProdLink : sampleProdLinks){
+      if (sampleProdLink.prod_id.equals(prodNo)){
+        return true;
+      }
+    }
+    return false;
   }
 
   public Observable<SampleMaster> remoteSave() {
@@ -181,23 +245,17 @@ import rx.functions.Func1;
             });
 
     Observable<SampleMaster> observableDetail =
-        Observable.from(prods).flatMap(new Func1<Prod, Observable<SampleMaster>>() {
-          @Override public Observable<SampleMaster> call(final Prod prod) {
+        Observable.from(sampleProdLinks).flatMap(new Func1<SampleProdLink, Observable<SampleMaster>>() {
+          @Override public Observable<SampleMaster> call(final SampleProdLink sampleProdLink) {
             return remoteDB.executeProcedure("{call sp_UpSampleDetail(?,?,?,?,?,?,?,?,?,?)}",
                 new int[] { Types.INTEGER, Types.VARCHAR, Types.VARCHAR }, 1, 1, mac_address, guid,
-                prod.barcode, prod.ext, 1)
+                sampleProdLink.prod_id, sampleProdLink.ext, 1)
                 .flatMap(new Func1<ArrayList<Object>, Observable<SampleMaster>>() {
                   @Override public Observable<SampleMaster> call(ArrayList<Object> objects) {
                     int returnCode = (Integer) objects.get(0);
                     String returnMessage = (String) objects.get(1);
                     String outProdNo = (String) objects.get(2);
                     if (returnCode == 1) {
-                      prod.outProdNo = outProdNo;
-                      final TodoProd todoProd = new TodoProd();
-                      todoProd.prodNo = prod.barcode;
-                      todoProd.created_time = new Date();
-                      todoProd.save();
-
                       return Observable.just(SampleMaster.this);
                     }else{
                       return Observable.error(new Exception(returnMessage));
@@ -220,7 +278,7 @@ import rx.functions.Func1;
 
   public boolean isHasData() {
     return !TextUtils.isEmpty(desc) || (image1 != null && image1.length > 0) || (image2 != null
-        && image2.length > 0) || (prods != null && prods.size() > 0);
+        && image2.length > 0) || (sampleProdLinks != null && sampleProdLinks.size() > 0);
   }
 
 

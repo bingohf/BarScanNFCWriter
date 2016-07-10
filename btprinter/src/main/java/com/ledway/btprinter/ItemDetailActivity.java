@@ -9,7 +9,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.serialport.api.SerialPort;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -24,20 +23,16 @@ import com.ledway.btprinter.adapters.DataAdapter;
 import com.ledway.btprinter.adapters.PhotoData;
 import com.ledway.btprinter.adapters.TextData;
 import com.ledway.btprinter.models.SampleMaster;
-import com.ledway.btprinter.models.Prod;
+import com.ledway.btprinter.models.SampleProdLink;
 import com.ledway.framework.FullScannerActivity;
-import com.zkc.Service.CaptureService;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 /**
@@ -52,43 +47,60 @@ public class ItemDetailActivity extends AppCompatActivity {
   private RecyclerView mListViewProd;
   private List<Map<String, String>> mProdList = new ArrayList<>();
   private DataAdapter mDataAdapter;
-  private BroadcastReceiver scanBroadcastReceiver = new BroadcastReceiver(){
+  private BroadcastReceiver scanBroadcastReceiver = new BroadcastReceiver() {
 
-    @Override
-    public void onReceive(Context context, Intent intent) {
+    @Override public void onReceive(Context context, Intent intent) {
       String text = intent.getExtras().getString("code");
-      if (text.length() < 10){
+      if (text.length() < 10) {
         Toast.makeText(ItemDetailActivity.this, R.string.invalid_barcode, Toast.LENGTH_LONG).show();
       }
       Pattern pattern = Pattern.compile("[^0-9a-zA-Z_ ]");
-      if(!pattern.matcher(text).matches()) {
+      if (!pattern.matcher(text).matches()) {
         appendBarCode(text);
       }
     }
-
   };
 
-
   private void appendBarCode(String text) {
-    if (text.length() >30){
+    if (text.length() > 30) {
       text = text.substring(0, 30);
     }
-    int ext = mSampleMaster.addProd(text);
-    TextData textData = new TextData(DataAdapter.DATA_TYPE_BARCODE);
-    textData.setText(ext + ": " + text);
-    mDataAdapter.addData(textData);
-    mListViewProd.scrollToPosition(mDataAdapter.getItemCount() -1 );
-  }
+    final ProgressDialog progressDialog = ProgressDialog.show(this,getString(R.string.loading), getString(R.string.wait_a_moment));
+    mSampleMaster.addProd(text)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Subscriber<SampleProdLink>() {
+          @Override public void onCompleted() {
+            progressDialog.dismiss();
+          }
 
+          @Override public void onError(Throwable e) {
+            progressDialog.dismiss();
+            Toast.makeText(ItemDetailActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+          }
+
+          @Override public void onNext(SampleProdLink sampleProdLink) {
+            TextData textData = new TextData(DataAdapter.DATA_TYPE_BARCODE);
+            textData.setText(sampleProdLink.ext + ": " + sampleProdLink.prod_id + "  " + sampleProdLink.spec_desc);
+            mDataAdapter.addData(textData);
+            mListViewProd.scrollToPosition(mDataAdapter.getItemCount() - 1);
+          }
+        });
+
+
+  }
 
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     mSampleMaster = (SampleMaster) MApp.getApplication().getSession().getValue("current_data");
+    if (TextUtils.isEmpty(mSampleMaster.guid)) {
+      mSampleMaster. guid = MApp.getApplication().getSystemInfo().getDeviceId() + "_" + System.currentTimeMillis();
+    }
     mSampleMaster.reset();
     mSampleMaster.queryDetail();
     setContentView(R.layout.activity_item_detail);
     getSupportActionBar().setDisplayShowHomeEnabled(true);
-    mListViewProd = (RecyclerView)findViewById(R.id.list_data);
+    mListViewProd = (RecyclerView) findViewById(R.id.list_data);
     IntentFilter intentFilter = new IntentFilter();
     intentFilter.addAction("com.zkc.scancode");
     registerReceiver(scanBroadcastReceiver, intentFilter);
@@ -99,30 +111,32 @@ public class ItemDetailActivity extends AppCompatActivity {
   }
 
   private void setView() {
-    if (!TextUtils.isEmpty(mSampleMaster.getDesc())){
+    if (!TextUtils.isEmpty(mSampleMaster.getDesc())) {
       TextData textData = new TextData(DataAdapter.DATA_TYPE_MEMO);
       textData.setText(mSampleMaster.getDesc());
       mDataAdapter.addData(textData);
     }
-    if (mSampleMaster.getImage1() != null){
-      Bitmap bitmap =  BitmapFactory.decodeByteArray(mSampleMaster.getImage1() , 0, mSampleMaster.getImage1() .length);
+    if (mSampleMaster.getImage1() != null) {
+      Bitmap bitmap = BitmapFactory.decodeByteArray(mSampleMaster.getImage1(), 0,
+          mSampleMaster.getImage1().length);
       PhotoData photoData = new PhotoData(DataAdapter.DATA_TYPE_PHOTO_1);
       photoData.setBitmap(bitmap);
       mDataAdapter.addData(photoData);
     }
 
-    if (mSampleMaster.getImage2() != null){
-      Bitmap bitmap =  BitmapFactory.decodeByteArray(mSampleMaster.getImage2() , 0, mSampleMaster.getImage2() .length);
+    if (mSampleMaster.getImage2() != null) {
+      Bitmap bitmap = BitmapFactory.decodeByteArray(mSampleMaster.getImage2(), 0,
+          mSampleMaster.getImage2().length);
       PhotoData photoData = new PhotoData(DataAdapter.DATA_TYPE_PHOTO_2);
       photoData.setBitmap(bitmap);
       mDataAdapter.addData(photoData);
     }
 
-    Iterator<Prod> iterator = mSampleMaster.prodIterator();
-    while (iterator.hasNext()){
-      Prod prod = iterator.next();
+    Iterator<SampleProdLink> iterator = mSampleMaster.prodIterator();
+    while (iterator.hasNext()) {
+      SampleProdLink prod = iterator.next();
       TextData textData = new TextData(DataAdapter.DATA_TYPE_BARCODE);
-      textData.setText(prod.ext + ": " + prod.barcode);
+      textData.setText(prod.ext + ": " + prod.prod_id + "  " + prod.spec_desc);
       mDataAdapter.addData(textData);
     }
   }
@@ -147,7 +161,6 @@ public class ItemDetailActivity extends AppCompatActivity {
 
       }
     });
-
   }
 
   @Override protected void onDestroy() {
@@ -158,7 +171,7 @@ public class ItemDetailActivity extends AppCompatActivity {
   @Override public void onBackPressed() {
     if (mSampleMaster.isChanged()) {
       mSampleMaster.allSave();
-    }else {
+    } else {
       setResult(-1);
     }
     super.onBackPressed();
@@ -167,50 +180,55 @@ public class ItemDetailActivity extends AppCompatActivity {
   private void setEvent() {
     findViewById(R.id.btn_scan_barcode).setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
-       // SerialPort.CleanBuffer();
-       // CaptureService.scanGpio.openScan();
-        startActivityForResult(new Intent(ItemDetailActivity.this, FullScannerActivity.class), RESULT_CAMERA_BAR_CODE);
+        // SerialPort.CleanBuffer();
+        // CaptureService.scanGpio.openScan();
+      //  appendBarCode("C163003401001");
+        startActivityForResult(new Intent(ItemDetailActivity.this, FullScannerActivity.class),
+            RESULT_CAMERA_BAR_CODE);
       }
     });
 
     findViewById(R.id.btn_take_photo_1).setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
         Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(takePicture, RESULT_TAKE_PHOTO_1);//zero can be replaced with any action code
+        startActivityForResult(takePicture,
+            RESULT_TAKE_PHOTO_1);//zero can be replaced with any action code
       }
     });
     findViewById(R.id.btn_take_photo_2).setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
         Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(takePicture, RESULT_TAKE_PHOTO_2);//zero can be replaced with any action code
+        startActivityForResult(takePicture,
+            RESULT_TAKE_PHOTO_2);//zero can be replaced with any action code
       }
     });
     findViewById(R.id.btn_qr_code).setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
-        startActivityForResult(new Intent(ItemDetailActivity.this, FullScannerActivity.class), RESULT_CAMERA_QR_CODE);
+        startActivityForResult(new Intent(ItemDetailActivity.this, FullScannerActivity.class),
+            RESULT_CAMERA_QR_CODE);
       }
     });
   }
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
-    switch (item.getItemId()){
-      case android.R.id.home:{
+    switch (item.getItemId()) {
+      case android.R.id.home: {
         onBackPressed();
         break;
       }
-      case R.id.action_upload:{
-        if(mSampleMaster.isHasData()) {
+      case R.id.action_upload: {
+        if (mSampleMaster.isHasData()) {
           uploadRecord();
-        }else{
+        } else {
           Toast.makeText(this, R.string.pls_input_data, Toast.LENGTH_LONG).show();
         }
         break;
       }
-      case R.id.action_print_preview:{
-        if(mSampleMaster.isHasData()) {
+      case R.id.action_print_preview: {
+        if (mSampleMaster.isHasData()) {
           mSampleMaster.allSave();
           startActivity(new Intent(this, PrintPreviewActivity.class));
-        }else {
+        } else {
           Toast.makeText(this, R.string.pls_input_data, Toast.LENGTH_LONG).show();
         }
         break;
@@ -219,9 +237,11 @@ public class ItemDetailActivity extends AppCompatActivity {
     return true;
   }
 
-  private void uploadRecord(){
-    final ProgressDialog progressDialog = ProgressDialog.show(this, getString(R.string.save_record), getString(R.string.wait_a_moment));
-    mSampleMaster.remoteSave().subscribeOn(Schedulers.io())
+  private void uploadRecord() {
+    final ProgressDialog progressDialog = ProgressDialog.show(this, getString(R.string.save_record),
+        getString(R.string.wait_a_moment));
+    mSampleMaster.remoteSave()
+        .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new Subscriber<SampleMaster>() {
           @Override public void onCompleted() {
@@ -239,10 +259,10 @@ public class ItemDetailActivity extends AppCompatActivity {
           }
         });
   }
-  @Override public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.item_detail_menu,menu);
-    return true;
 
+  @Override public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.item_detail_menu, menu);
+    return true;
   }
 
   @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -252,7 +272,8 @@ public class ItemDetailActivity extends AppCompatActivity {
         case RESULT_TAKE_PHOTO_2: {
           if (resultCode == RESULT_OK) {
             Bitmap photo = (Bitmap) data.getExtras().get("data");
-            int type = RESULT_TAKE_PHOTO_2 == requestCode? DataAdapter.DATA_TYPE_PHOTO_2: DataAdapter.DATA_TYPE_PHOTO_1;
+            int type = RESULT_TAKE_PHOTO_2 == requestCode ? DataAdapter.DATA_TYPE_PHOTO_2
+                : DataAdapter.DATA_TYPE_PHOTO_1;
             PhotoData photoData = new PhotoData(type);
             photoData.setBitmap(photo);
             mDataAdapter.removeByType(type);
@@ -277,7 +298,7 @@ public class ItemDetailActivity extends AppCompatActivity {
           mDataAdapter.addData(textData);
           break;
         }
-        case RESULT_CAMERA_BAR_CODE:{
+        case RESULT_CAMERA_BAR_CODE: {
           String barcode = data.getStringExtra("barcode");
           appendBarCode(barcode);
           break;

@@ -30,6 +30,7 @@ import com.ledway.btprinter.domain.BTPrinter;
 import com.ledway.btprinter.fragments.BindBTPrintDialogFragment;
 import com.ledway.btprinter.models.Prod;
 import com.ledway.btprinter.models.SampleMaster;
+import com.ledway.btprinter.models.SampleProdLink;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 import org.w3c.dom.Text;
@@ -148,11 +149,11 @@ public class PrintPreviewActivity extends AppCompatActivity {
       mDataAdapter.addData(photoData);
     }*/
 
-    Iterator<Prod> iterator = mSampleMaster.prodIterator();
+    Iterator<SampleProdLink> iterator = mSampleMaster.prodIterator();
     while(iterator.hasNext()){
-      Prod prod = iterator.next();
+      SampleProdLink prod = iterator.next();
       TextData textData = new TextData(DataAdapter.DATA_TYPE_BARCODE);
-      textData.setText(prod.ext +": " + prod.barcode);
+      textData.setText(prod.ext +": " + prod.prod_id + "  " + prod.spec_desc);
       mDataAdapter.addData(textData);
     }
 
