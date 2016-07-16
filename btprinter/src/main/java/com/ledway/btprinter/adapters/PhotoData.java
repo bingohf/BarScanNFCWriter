@@ -65,7 +65,12 @@ public class PhotoData extends BaseData {
       if (bitmap.getHeight() > 384) {
         bitmap = resizeImage(bitmap, 384, 384);
       } else {
-        bitmap = resizeImage(bitmap, 384, bitmap.getHeight());
+        if (type == DataAdapter.DATA_TYPE_QR_CODE){
+          bitmap = resizeImage(bitmap, 200, bitmap.getHeight());
+        }else {
+          bitmap = resizeImage(bitmap, 480, bitmap.getHeight());
+        }
+
       }
       byte[] sendbuf = StartBmpToPrintCode(bitmap);
       outputStream.write(sendbuf);
