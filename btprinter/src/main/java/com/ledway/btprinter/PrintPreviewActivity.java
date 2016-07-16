@@ -153,7 +153,7 @@ public class PrintPreviewActivity extends AppCompatActivity {
     while(iterator.hasNext()){
       SampleProdLink prod = iterator.next();
       TextData textData = new TextData(DataAdapter.DATA_TYPE_BARCODE);
-      textData.setText(prod.ext +": " + prod.prod_id + "  " + prod.spec_desc);
+      textData.setText(prod.ext +": " + prod.prod_id + "  " + prod.getSpec());
       mDataAdapter.addData(textData);
     }
 

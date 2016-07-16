@@ -1,5 +1,6 @@
 package com.ledway.btprinter.models;
 
+import android.text.TextUtils;
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
@@ -26,5 +27,12 @@ public class SampleProdLink extends Model{
   public int ext;
 
   public String spec_desc = "";
+
+  public String getSpec(){
+    if(TextUtils.isEmpty(spec_desc)){
+      return "";
+    }
+    return spec_desc;
+  }
 
 }

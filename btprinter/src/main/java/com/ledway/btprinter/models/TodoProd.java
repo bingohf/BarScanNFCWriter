@@ -82,7 +82,9 @@ import rx.functions.Func1;
           todoProd.prodNo = prodNo;
           todoProd.created_time = new Date();
           todoProd.save();
-          todoProd.sync().subscribe(new Subscriber<TodoProd>() {
+          subscriber.onNext(todoProd);
+          subscriber.onCompleted();
+         /* todoProd.sync().subscribe(new Subscriber<TodoProd>() {
             @Override public void onCompleted() {
               subscriber.onCompleted();
             }
@@ -94,7 +96,7 @@ import rx.functions.Func1;
             @Override public void onNext(TodoProd todoProd) {
               subscriber.onNext(todoProd);
             }
-          });
+          });*/
 
         }
       }
