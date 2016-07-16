@@ -59,8 +59,18 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     startActivityForResult(takePicture, REQUEST_TAKE_IMAGE);
   }
 
+  @Override public void onBackPressed() {
+    if (!mEdtSpec.getText().toString().equals(mTodoProd.spec_desc)){
+      mTodoProd.uploaded_time = null;
+    }
+    mTodoProd.spec_desc = mEdtSpec.getText().toString();
+    mTodoProd.save();
+    super.onBackPressed();
+  }
+
   @Override protected void onDestroy() {
     super.onDestroy();
+
     mTodoProd.image1 = null;
     mTodoProd.image2 = null;
   }
@@ -94,6 +104,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
       @Override public void onFocusChange(View v, boolean hasFocus) {
         if (!hasFocus){
           mTodoProd.spec_desc = mEdtSpec.getText().toString();
+          mTodoProd.uploaded_time = null;
           mTodoProd.save();
         }
       }
@@ -122,8 +133,9 @@ public class TodoProdDetailActivity extends AppCompatActivity {
           ByteArrayOutputStream stream2 = new ByteArrayOutputStream();
           resized.compress(Bitmap.CompressFormat.PNG, 100, stream2);
           mTodoProd.image2 = stream2.toByteArray();
+          mTodoProd.uploaded_time = null;
           mTodoProd.save();
-          upload();
+       //   upload();
 
         }
         break;

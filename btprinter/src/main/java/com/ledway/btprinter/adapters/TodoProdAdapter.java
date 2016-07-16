@@ -30,7 +30,7 @@ public class TodoProdAdapter extends RecyclerView.Adapter<ToProdViewHolder>{
 
   @Override public void onBindViewHolder(ToProdViewHolder holder, int position) {
     TodoProd todoProd = todoProds.get(position);
-    String text = todoProd.prodNo;
+    String text = todoProd.prodNo + (todoProd.spec_desc == null? "": " "+todoProd.spec_desc);
     if (todoProd.uploaded_time == null){
       text = "* " + text;
     }

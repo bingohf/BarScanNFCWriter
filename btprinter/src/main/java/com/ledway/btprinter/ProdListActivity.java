@@ -33,7 +33,6 @@ public class ProdListActivity extends AppCompatActivity {
 
   @Override protected void onResume() {
     super.onResume();
-    mAdapter.notifyDataSetChanged();
   }
 
   private void setView() {
@@ -48,15 +47,18 @@ public class ProdListActivity extends AppCompatActivity {
         TodoProd todoProd = mTodoProdList.get(position);
         if (todoProd != null){
           MApp.getApplication().getSession().put("current_todo_prod", todoProd);
-          startActivity(new Intent(ProdListActivity.this, TodoProdDetailActivity.class));
+          startActivityForResult(new Intent(ProdListActivity.this, TodoProdDetailActivity.class),0);
         }
       }
     }));
   }
 
   private List<TodoProd> getToProds(){
-    List<TodoProd> todoProds =  new Select(new String[]{"id", "prodno","uploaded_time"}).from(TodoProd.class).orderBy("uploaded_time").execute();
+    List<TodoProd> todoProds =  new Select(new String[]{"id", "prodno","uploaded_time","spec_desc"}).from(TodoProd.class).orderBy("uploaded_time").execute();
     return todoProds;
   }
 
+  @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    mAdapter.notifyDataSetChanged();
+  }
 }
