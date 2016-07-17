@@ -4,8 +4,10 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +20,7 @@ import android.view.MenuItem;
 import android.widget.BaseAdapter;
 import android.widget.Toast;
 import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
@@ -31,7 +34,9 @@ import com.ledway.btprinter.fragments.BindBTPrintDialogFragment;
 import com.ledway.btprinter.models.Prod;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.models.SampleProdLink;
+import java.util.EnumMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.w3c.dom.Text;
 import rx.Observable;
@@ -158,24 +163,43 @@ public class PrintPreviewActivity extends AppCompatActivity {
     }
 
     try {
-      QRCodeWriter writer = new QRCodeWriter();
-      BitMatrix bitMatrix = writer.encode(mSampleMaster.qrcode, BarcodeFormat.QR_CODE, 200, 200);
-      int width = bitMatrix.getWidth();
-      int height = bitMatrix.getHeight();
-      Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-      for (int x = 0; x < width; x++) {
-        for (int y = 0; y < height; y++) {
-          bmp.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
-        }
-      }
+      Bitmap comboBmp = Bitmap.createBitmap(410, 200, Bitmap.Config.RGB_565);
+      Canvas c = new Canvas(comboBmp);
+      Bitmap bmp1 = createQRBitMap(mSampleMaster.qrcode);
+      Bitmap bmp2 = createQRBitMap("http://www.ledway.com.tw/uploads/sales_edge.apk");
+      Paint paint = new Paint();
+      paint.setColor(0xFFFFffFF);
+      c.drawRect(0,0, 410, 200,paint);
+      paint.setColor(0xFF000000);
+      paint.setTextSize(20);
+      c.drawText("樣品追蹤", 0,20,paint);
+      c.drawBitmap(bmp1, 0,25 ,null);
+      c.drawText("下載app", 250,20,paint);
+      c.drawBitmap(bmp2, 250, 25, null);
       PhotoData photoData = new PhotoData(DataAdapter.DATA_TYPE_QR_CODE);
-      photoData.setBitmap(bmp);
+      photoData.setBitmap(comboBmp);
       mDataAdapter.addData(photoData);
     } catch (WriterException e) {
       e.printStackTrace();
     }
-
-
-
   }
+
+  private Bitmap createQRBitMap(String text) throws WriterException {
+    QRCodeWriter writer = new QRCodeWriter();
+    Map<EncodeHintType, Object> hints = new EnumMap<EncodeHintType, Object>(EncodeHintType.class);
+    hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
+    hints.put(EncodeHintType.MARGIN, 0); /* default = 4 */
+
+    BitMatrix bitMatrix = writer.encode(text, BarcodeFormat.QR_CODE, 160, 160,hints);
+    int width = bitMatrix.getWidth();
+    int height = bitMatrix.getHeight();
+    Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+    for (int x = 0; x < width; x++) {
+      for (int y = 0; y < height; y++) {
+        bmp.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
+      }
+    }
+    return bmp;
+  }
+
 }
