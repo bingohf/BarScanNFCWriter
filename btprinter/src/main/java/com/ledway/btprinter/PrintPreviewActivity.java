@@ -186,9 +186,9 @@ public class PrintPreviewActivity extends AppCompatActivity {
       c.drawRect(0, 0, 410, 200, paint);
       paint.setColor(0xFF000000);
       paint.setTextSize(20);
-      c.drawText("樣品追蹤", 0, 20, paint);
+      c.drawText("樣品追蹤", 15, 20, paint);
       c.drawBitmap(bmp1, 0, 25, null);
-      c.drawText("下載app", 250, 20, paint);
+      c.drawText("下載app", 265, 20, paint);
       c.drawBitmap(bmp2, 250, 25, null);
       PhotoData photoData = new PhotoData(DataAdapter.DATA_TYPE_QR_CODE);
       photoData.setBitmap(comboBmp);
