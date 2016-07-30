@@ -105,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
     ListView listView = (ListView) findViewById(R.id.list_record);
     mRecordAdapter = new RecordAdapter(this);
     listView.setAdapter(mRecordAdapter);
+    RecordAdapter.setSingletonInstance(mRecordAdapter);
     getRecordData();
     listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -114,6 +115,11 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(new Intent(MainActivity.this, ItemDetailActivity.class), REQUEST_TYPE_MODIFY_RECORD);
       }
     });
+  }
+
+  @Override protected void onDestroy() {
+    super.onDestroy();
+    RecordAdapter.setSingletonInstance(null);
   }
 
   private void reset() {
@@ -160,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
         break;
       }
     }
-
+    mRecordAdapter.notifyDataSetChanged();
   }
 
   @Override public boolean onCreateOptionsMenu(Menu menu) {

@@ -24,9 +24,19 @@ public class RecordAdapter extends BaseAdapter implements Iterable<SampleMaster>
   private final LayoutInflater mInflater;
   private ArrayList<SampleMaster> mDataList = new ArrayList<>();
   private Context mContext;
+  private static RecordAdapter singletonInstance;
+
   public RecordAdapter(Context context){
     mContext = context;
     mInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+  }
+
+  public static void setSingletonInstance(RecordAdapter singletonInstance) {
+    RecordAdapter.singletonInstance = singletonInstance;
+  }
+
+  public static RecordAdapter getSingletonInstance(){
+    return singletonInstance;
   }
   @Override public int getCount() {
     return mDataList.size();

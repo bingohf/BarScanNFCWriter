@@ -14,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -21,6 +22,7 @@ import android.view.View;
 import android.widget.Toast;
 import com.ledway.btprinter.adapters.DataAdapter;
 import com.ledway.btprinter.adapters.PhotoData;
+import com.ledway.btprinter.adapters.RecordAdapter;
 import com.ledway.btprinter.adapters.TextData;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.models.SampleProdLink;
@@ -31,8 +33,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 /**
@@ -218,7 +222,7 @@ public class ItemDetailActivity extends AppCompatActivity {
       }
       case R.id.action_upload: {
         if (mSampleMaster.isHasData()) {
-          uploadRecord();
+          uploadAll();
         } else {
           Toast.makeText(this, R.string.pls_input_data, Toast.LENGTH_LONG).show();
         }
@@ -305,6 +309,38 @@ public class ItemDetailActivity extends AppCompatActivity {
         }
       }
     }
+  }
+
+  private void uploadAll() {
+    final ProgressDialog progressDialog = ProgressDialog.show(this,getString(R.string.upload), getString(R.string.wait_a_moment), false);
+    Observable.from(RecordAdapter.getSingletonInstance()).filter(new Func1<SampleMaster, Boolean>() {
+      @Override public Boolean call(SampleMaster sampleMaster) {
+        return ! sampleMaster.isUploaded();
+      }
+    }).flatMap(new Func1<SampleMaster, Observable<SampleMaster>>() {
+      @Override public Observable<SampleMaster> call(SampleMaster sampleMaster) {
+        return  sampleMaster.remoteSave();
+      }
+    }).subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Subscriber<SampleMaster>() {
+          @Override public void onCompleted() {
+            progressDialog.dismiss();
+            RecordAdapter.getSingletonInstance().notifyDataSetChanged();
+          }
+
+          @Override public void onError(Throwable e) {
+            progressDialog.dismiss();
+            Log.e("upload_all" , e.getMessage(), e);
+            Toast.makeText(ItemDetailActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+          }
+
+          @Override public void onNext(SampleMaster sampleMaster) {
+
+          }
+        });
+
+
   }
 }
 
