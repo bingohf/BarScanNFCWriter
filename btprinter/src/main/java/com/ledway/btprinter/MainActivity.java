@@ -186,7 +186,13 @@ public class MainActivity extends AppCompatActivity {
       }
       case R.id.action_up_prod:{
         startActivity(new Intent(this, ProdListActivity.class));
+        break;
       }
+      case R.id.action_my_business_card:{
+        startActivity(new Intent(this, BusinessCardActivity.class));
+        break;
+      }
+
 
     }
     return true;

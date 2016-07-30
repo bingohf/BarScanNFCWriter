@@ -45,6 +45,9 @@
     <activity android:name=".AgreementActivity"
         android:label="@string/title_agreement"
         />
+    <activity android:name=".BusinessCardActivity"
+        android:label="@string/title_my_business_card"
+        />
     <activity
         android:theme="@style/AppOverlayTheme"
         android:name="com.ledway.framework.FullScannerActivity"/>

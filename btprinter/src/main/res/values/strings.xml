@@ -33,4 +33,20 @@
   <string name="btn_agree">同意</string>
   <string name="loading">Loading...</string>
   <string name="prod_exists">重複産品</string>
+  <string name="title_my_business_card">我的名片</string>
+  <string name="action_my_business_card">我的名片</string>
+  <string name="default_my_business_card">威虹資訊\n
+    台灣免付費服務專線: 080-0717688\n
+
+香港地區服務專線: 81776008\n\n
+
+威虹資訊股份有限公司(台北): (02)22799889 葉經理 (週末專線:0932081448) r\n
+台北市大安區復興南路一段368號13樓\n
+
+威虹軟件有限公司(上海): (021)53530368 \n
+上海市黃埔區雲南北路59號1303室\n
+
+威虹Call Center Skype: callcenter.ledway\n
+誠徵大陸&amp;香港地區代理商 請洽台北葉經理
+  </string>
 </resources>
