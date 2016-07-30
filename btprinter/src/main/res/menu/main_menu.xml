@@ -14,15 +14,16 @@
       android:orderInCategory="100"
       android:title="@string/action_my_business_card"
       app:showAsAction="ifRoom" />
-  <item
-      android:id="@+id/action_bind_bt_printer"
-      android:orderInCategory="100"
-      android:title="@string/action_bind_bt_printer"
-      app:showAsAction="ifRoom" />
+
 
   <item
       android:id="@+id/action_up_prod"
       android:orderInCategory="100"
       android:title="@string/action_update_prod"
+      app:showAsAction="ifRoom" />
+  <item
+      android:id="@+id/action_bind_bt_printer"
+      android:orderInCategory="100"
+      android:title="@string/action_bind_bt_printer"
       app:showAsAction="ifRoom" />
 </menu>

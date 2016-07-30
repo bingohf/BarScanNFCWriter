@@ -9,8 +9,8 @@ android {
     applicationId "com.ledway.btprinter"
     minSdkVersion 17
     targetSdkVersion 17
-    versionCode 17
-    versionName "1.7"
+    versionCode 18
+    versionName "1.8"
   }
   signingConfigs{
     relase_signing_config{
