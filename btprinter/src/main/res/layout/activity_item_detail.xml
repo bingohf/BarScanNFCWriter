@@ -36,6 +36,7 @@
           android:layout_height="wrap_content"
           android:layout_weight="1"
           android:text="@string/take_photo_1"
+          android:textAllCaps="false"
           />
       <View
           android:layout_width="8dp"
@@ -47,6 +48,7 @@
           android:layout_height="wrap_content"
           android:layout_weight="1"
           android:text="@string/take_photo_2"
+          android:textAllCaps="false"
           />
     </LinearLayout>
     <LinearLayout
@@ -62,6 +64,7 @@
           android:layout_height="wrap_content"
           android:layout_weight="1"
           android:text="@string/read_qr_code"
+          android:textAllCaps="false"
           />
       <View
           android:layout_width="8dp"
@@ -73,6 +76,7 @@
           android:layout_height="wrap_content"
           android:layout_weight="1"
           android:text="@string/scan_barcode"
+          android:textAllCaps="false"
           />
     </LinearLayout>
 
