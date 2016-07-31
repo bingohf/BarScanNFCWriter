@@ -10,8 +10,14 @@ import com.activeandroid.query.From;
 import com.activeandroid.query.Select;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
+import com.ledway.btprinter.utils.IOUtil;
 import com.ledway.framework.RemoteDB;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -228,9 +234,15 @@ import rx.functions.Func1;
         "jdbc:jtds:sqlserver://vip.ledway.com.tw:1433;DatabaseName=iSamplePub;charset=UTF8";
     final RemoteDB remoteDB = new RemoteDB(connectionString);
     allSave();
+    byte[] imageBuffer = new byte[]{};
+    try {
+      imageBuffer = IOUtil.readFile(image1);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
     Observable<SampleMaster> observableMaster =
         remoteDB.executeProcedure("{call sp_UpSample(?,?,?,?,?,?,?,?)}",
-            new int[] { Types.INTEGER, Types.VARCHAR }, 1, 1, guid, mac_address, desc, image1)
+            new int[] { Types.INTEGER, Types.VARCHAR }, 1, 1, guid, mac_address, desc, imageBuffer)
             .flatMap(new Func1<ArrayList<Object>, Observable<SampleMaster>>() {
               @Override public Observable<SampleMaster> call(ArrayList<Object> objects) {
                 int returnCode = (Integer) objects.get(0);

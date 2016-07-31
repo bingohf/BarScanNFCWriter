@@ -81,7 +81,9 @@ public class RemoteDB {
           CallableStatement callableStatement = connection.prepareCall(sql);
           int i =0;
           for(;i < args.length ;++i){
-            if (args[i] instanceof String){
+            if(args[i] == null){
+              callableStatement.setNull(i +1, Types.VARCHAR);
+            }else if (args[i] instanceof String){
               callableStatement.setString(i + 1, (String)args[i]);
             } else if (args[i] instanceof Integer){
               callableStatement.setInt(i + 1, (Integer) args[i]);
@@ -90,8 +92,8 @@ public class RemoteDB {
             } else if (args[i] instanceof Date){
               Date date = (Date) args[i];
               callableStatement.setTimestamp(i +1, new java.sql.Timestamp(date.getTime()));
-            }else if (args[i] == null){
-              callableStatement.setNull(i +1, Types.VARCHAR);
+            }else  if(args[i] instanceof InputStream){
+              callableStatement.setBinaryStream(i +1,(InputStream) args[i]);
             }
             else if (args[i] instanceof byte[]){
               callableStatement.setBytes(i + 1, (byte[])args[i]);
