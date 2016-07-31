@@ -4,9 +4,11 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -17,7 +19,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.ledway.btprinter.models.TodoProd;
+import com.ledway.btprinter.utils.IOUtil;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import rx.Subscriber;
@@ -34,6 +42,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
   private TextView mTxtHint;
   private TodoProd mTodoProd ;
   private EditText mEdtSpec;
+  private String mCurrentPhotoPath;
 
   @Override public boolean onCreateOptionsMenu(Menu menu) {
     getMenuInflater().inflate(R.menu.todo_prod_menu, menu);
@@ -43,7 +52,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()){
       case R.id.action_re_take_photo:{
-        startTakePhoto();
+        startTakePhoto(1);
         break;
       }
       case R.id.action_re_upload:{
@@ -54,10 +63,6 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     return true;
   }
 
-  private void startTakePhoto(){
-    Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-    startActivityForResult(takePicture, REQUEST_TAKE_IMAGE);
-  }
 
   @Override public void onBackPressed() {
     if (!mEdtSpec.getText().toString().equals(mTodoProd.spec_desc)){
@@ -85,19 +90,19 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     mTodoProd.queryAllField();
     getSupportActionBar().setTitle(mTodoProd.prodNo);
     mEdtSpec.setText(mTodoProd.spec_desc);
-    if (mTodoProd.image1.length < 1){
+    if (TextUtils.isEmpty(mTodoProd.image1)){
       mTxtHint.setVisibility(View.VISIBLE);
       mImageView.setVisibility(View.GONE);
     }else{
       mImageView.setVisibility(View.VISIBLE);
       mTxtHint.setVisibility(View.GONE);
 
-      Bitmap bitmap =  BitmapFactory.decodeByteArray(mTodoProd.image1 , 0, mTodoProd.image1 .length);
+      Bitmap bitmap =  IOUtil.loadImage(mTodoProd.image1, 800,800);
       mImageView.setImageBitmap(bitmap);
     }
     mTxtHint.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
-        startTakePhoto();
+        startTakePhoto(1);
       }
     });
     mEdtSpec.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -118,23 +123,37 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     switch (requestCode){
       case REQUEST_TAKE_IMAGE:{
         if (RESULT_OK ==  resultCode){
-          Bitmap photo = (Bitmap) data.getExtras().get("data");
-          mImageView.setImageBitmap(photo);
-          mImageView.setVisibility(View.VISIBLE);
-          mTxtHint.setVisibility(View.GONE);
-
-          ByteArrayOutputStream stream = new ByteArrayOutputStream();
-          photo.compress(Bitmap.CompressFormat.PNG, 100, stream);
-          byte[] byteArray = stream.toByteArray();
-          mTodoProd.image1 = byteArray;
-
-
-          Bitmap resized = Bitmap.createScaledBitmap(photo, 110, 110, true);
-          ByteArrayOutputStream stream2 = new ByteArrayOutputStream();
-          resized.compress(Bitmap.CompressFormat.PNG, 100, stream2);
-          mTodoProd.image2 = stream2.toByteArray();
-          mTodoProd.uploaded_time = null;
-          mTodoProd.save();
+          File f = new File(mCurrentPhotoPath);
+          if (f.exists()){
+            if (f.length() < 1){
+              f.delete();
+            }
+          }
+          if (f.exists()){
+            mTodoProd.image1 = mCurrentPhotoPath;
+            Bitmap bitmap = IOUtil.loadImage(mCurrentPhotoPath, 800, 800);
+            File file2 = new File(MApp.getApplication().getPicPath() + "/" + getProdNoFileName() + "_type_" + 2 +".jpeg");
+            if (!file2.exists()){
+              try {
+                file2.createNewFile();
+              } catch (IOException e) {
+                e.printStackTrace();
+              }
+            }
+            try {
+              OutputStream outputStream = new FileOutputStream(file2);
+              Bitmap resized = Bitmap.createScaledBitmap(bitmap, 110, 110, true);
+              bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+              mTodoProd.image2 = file2.getAbsolutePath();
+            } catch (FileNotFoundException e) {
+              e.printStackTrace();
+            }
+            mImageView.setVisibility(View.VISIBLE);
+            mTxtHint.setVisibility(View.GONE);
+            mImageView.setImageBitmap(bitmap);
+            mTodoProd.uploaded_time = null;
+            mTodoProd.save();
+          }
        //   upload();
 
         }
@@ -180,4 +199,31 @@ public class TodoProdDetailActivity extends AppCompatActivity {
           }
         });
   }
+
+
+  private void startTakePhoto(int type){
+    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+    if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+      File photoFile = null;
+      try {
+        photoFile =
+            new File(MApp.getApplication().getPicPath() + "/" + getProdNoFileName() + "_type_" + type +".jpeg");
+        mCurrentPhotoPath =  photoFile.getAbsolutePath();
+        photoFile.createNewFile();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      if (photoFile != null) {
+        Uri photoURI =
+            FileProvider.getUriForFile(TodoProdDetailActivity.this, "com.ledway.btprinter.fileprovider", photoFile);
+        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+        startActivityForResult(takePictureIntent, type);
+      }
+    }
+  }
+
+  private String getProdNoFileName(){
+    return mTodoProd.prodNo.replace("[\\*\\/\\\\\\?]","_");
+  }
+
 }

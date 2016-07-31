@@ -1,11 +1,14 @@
 package com.ledway.btprinter.models;
 
+import android.text.TextUtils;
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 import com.ledway.btprinter.MApp;
+import com.ledway.btprinter.utils.IOUtil;
 import com.ledway.framework.RemoteDB;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -22,8 +25,8 @@ import rx.functions.Func1;
 @Table(name = "todo_prod") public class TodoProd extends Model {
   @Column(name = "prodno", unique = true, onUniqueConflict = Column.ConflictAction.FAIL)
   public String prodNo;
-  @Column(name = "image1") public byte[] image1 = new byte[] {};
-  @Column(name = "image2") public byte[] image2 = new byte[] {};
+  @Column(name = "image1") public String image1;
+  @Column(name = "image2") public String image2;
   @Column(name = "uploaded_time") public Date uploaded_time;
   @Column(name = "created_time") public Date created_time;
   @Column(name = "spec_desc") public String spec_desc;
@@ -33,9 +36,25 @@ import rx.functions.Func1;
     String connectionString =
         "jdbc:jtds:sqlserver://vip.ledway.com.tw:1433;DatabaseName=iSamplePub;charset=UTF8";
     final RemoteDB remoteDB = new RemoteDB(connectionString);
+    byte[] image1Buffer = new byte[]{};
+    byte[] image2Buffer = new byte[]{};
+    if(!TextUtils.isEmpty(image1)){
+      try {
+        image1Buffer = IOUtil.readFile(image1);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+    if(! TextUtils.isEmpty(image2)){
+      try {
+        image2Buffer = IOUtil.readFile(image2);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
     return remoteDB.executeProcedure("{call sp_UpProduct(?,?,?,?,?,?,?,?,?)}",
         new int[] { Types.INTEGER, Types.VARCHAR }, 1, 1, mac_address, prodNo,spec_desc,
-        image1, image2);
+        image1Buffer, image2Buffer);
   }
 
   public Observable<TodoProd> sync(){

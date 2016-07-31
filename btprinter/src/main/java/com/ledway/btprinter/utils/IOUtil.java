@@ -1,5 +1,7 @@
 package com.ledway.btprinter.utils;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import java.io.*;
 
 public class IOUtil {
@@ -26,4 +28,25 @@ public class IOUtil {
             f.close();
         }
     }
+
+    public static Bitmap loadImage(String path, int width ,int height){
+        int targetW = width;
+        int targetH = height;
+
+
+        // Get the dimensions of the bitmap
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(path, bmOptions);
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+
+        // Determine how much to scale down the image
+        int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
+        bmOptions.inPurgeable = true;
+        return  BitmapFactory.decodeFile(path, bmOptions);
+}
+
 }
