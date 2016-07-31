@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -11,15 +12,8 @@ import java.io.OutputStream;
  * Created by togb on 2016/6/4.
  */
 public class PhotoData extends BaseData {
+  private String bitmapPath;
   private Bitmap bitmap;
-  public Bitmap getBitmap() {
-    return bitmap;
-  }
-
-  public void setBitmap(Bitmap bitmap) {
-    this.bitmap = bitmap;
-  }
-
 
   public PhotoData(int type) {
     super(type);
@@ -41,7 +35,7 @@ public class PhotoData extends BaseData {
   }
 
   @Override public void printTo(OutputStream outputStream) throws IOException {
-    String label = "";
+/*    String label = "";
     switch (type){
       case DataAdapter.DATA_TYPE_PHOTO_1:{
         label = MApp.getApplication().getString(R.string.card1);
@@ -76,7 +70,7 @@ public class PhotoData extends BaseData {
       byte[] sendbuf = StartBmpToPrintCode(bitmap);
       outputStream.write(sendbuf);
       outputStream.flush();
-    }
+    }*/
   }
 
   private byte[] StartBmpToPrintCode(Bitmap bitmap) {
@@ -153,4 +147,19 @@ public class PhotoData extends BaseData {
 
     f = false;
   }
+
+  public void setBitmapPath(String bitmapPath) {
+    this.bitmapPath = bitmapPath;
+  }
+  public String getBitmapPath(){
+    return bitmapPath;
+  }
+  public void setBitmap(Bitmap bitmap) {
+    this.bitmap = bitmap;
+  }
+  public Bitmap getBitmap(){
+    return bitmap;
+  }
+
 }
+

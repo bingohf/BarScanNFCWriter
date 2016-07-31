@@ -11,6 +11,7 @@ import com.activeandroid.query.Select;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.framework.RemoteDB;
+import java.io.File;
 import java.io.Serializable;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -42,8 +43,8 @@ import rx.functions.Func1;
   @Column(name = "line") public String line;
   @Column(name = "reader") public String reader;
   @Column(name = "qrcode") public String qrcode;
-  @Column(name = "image1") private byte[] image1 = new byte[] {};
-  @Column(name = "image2") private byte[] image2 = new byte[] {};
+  @Column(name = "image1") private String image1;
+  @Column(name = "image2") private String image2;
   @Column(name = "desc") private String desc;
   @Column(name = "isDirty") private boolean isDirty = true;
 
@@ -62,21 +63,21 @@ import rx.functions.Func1;
     super();
   }
 
-  public byte[] getImage1() {
+  public String getImage1() {
     return image1;
   }
 
-  public void setImage1(byte[] image1) {
+  public void setImage1(String image1) {
     mIsChanged = true;
     isDirty = true;
     this.image1 = image1;
   }
 
-  public byte[] getImage2() {
+  public String getImage2() {
     return image2;
   }
 
-  public void setImage2(byte[] image2) {
+  public void setImage2(String image2) {
     mIsChanged = true;
     isDirty = true;
     this.image2 = image2;
@@ -277,8 +278,17 @@ import rx.functions.Func1;
   }
 
   public boolean isHasData() {
-    return !TextUtils.isEmpty(desc) || (image1 != null && image1.length > 0) || (image2 != null
-        && image2.length > 0) || (sampleProdLinks != null && sampleProdLinks.size() > 0);
+    File file1 = null;
+    if (!TextUtils.isEmpty(image1)) {
+      file1 =new File(image1);
+    }
+    File file2 = null;
+    if (!TextUtils.isEmpty(image2)) {
+      file2 = new File(image2);
+    }
+
+    return !TextUtils.isEmpty(desc) || ( file1 != null & file1.length() > 0 ) || (file2 != null
+        && file2.length() > 0) || (sampleProdLinks != null && sampleProdLinks.size() > 0);
   }
 
 

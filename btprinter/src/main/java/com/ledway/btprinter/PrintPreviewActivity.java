@@ -135,7 +135,7 @@ public class PrintPreviewActivity extends AppCompatActivity {
     mListView.setAdapter(mDataAdapter);
 
     PhotoData logoData = new PhotoData(DataAdapter.DATA_TYPE_LOGO);
-    logoData.setBitmap(    getLogoBitMap());
+    logoData.setBitmapPath(    getLogoBitMap());
 
     mDataAdapter.addData(logoData);
     if (!TextUtils.isEmpty(mSampleMaster.getDesc())) {
@@ -216,7 +216,7 @@ public class PrintPreviewActivity extends AppCompatActivity {
     return bmp;
   }
 
-  private Bitmap getLogoBitMap()  {
+  private String getLogoBitMap() {
     final File cacheFile = new File(getCacheDir() + "logo.png");
     OkHttpClient client = new OkHttpClient();
     Request request =
@@ -245,16 +245,21 @@ public class PrintPreviewActivity extends AppCompatActivity {
         }
       }
     });
-    if (cacheFile.exists()) {
-      InputStream inputStream = null;
+    if (!cacheFile.exists()) {
+      FileOutputStream outStream = null;
       try {
-        inputStream = new FileInputStream(cacheFile);
-        BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-        return BitmapFactory.decodeStream(bufferedInputStream);
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
+        outStream = new FileOutputStream(cacheFile);
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outStream);
+        outStream.flush();
+        outStream.close();
       } catch (FileNotFoundException e) {
+        e.printStackTrace();
+      } catch (IOException e) {
         e.printStackTrace();
       }
     }
-    return BitmapFactory.decodeResource(getResources(), R.drawable.logo);
+    return cacheFile.getAbsolutePath();
   }
+
 }

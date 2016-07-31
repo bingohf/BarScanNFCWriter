@@ -1,11 +1,13 @@
 package com.ledway.btprinter;
 
 import android.app.Application;
+import android.os.Environment;
 import com.activeandroid.ActiveAndroid;
 import com.facebook.stetho.Stetho;
 import com.ledway.btprinter.models.SystemInfo;
 import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
+import java.io.File;
 
 /**
  * Created by togb on 2016/5/29.
@@ -30,6 +32,11 @@ public class MApp extends Application {
     built.setLoggingEnabled(true);
     Picasso.setSingletonInstance(built);
   }
+  public String getPicPath(){
+    File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+    return storageDir.getAbsolutePath();
+  }
+
   public static MApp getApplication(){
     return instance;
   }

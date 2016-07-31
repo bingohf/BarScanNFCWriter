@@ -7,9 +7,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -28,6 +30,8 @@ import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.models.SampleProdLink;
 import com.ledway.framework.FullScannerActivity;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -51,6 +55,7 @@ public class ItemDetailActivity extends AppCompatActivity {
   private RecyclerView mListViewProd;
   private List<Map<String, String>> mProdList = new ArrayList<>();
   private DataAdapter mDataAdapter;
+  public String mCurrentPhotoPath;
   private BroadcastReceiver scanBroadcastReceiver = new BroadcastReceiver() {
 
     @Override public void onReceive(Context context, Intent intent) {
@@ -120,19 +125,15 @@ public class ItemDetailActivity extends AppCompatActivity {
       textData.setText(mSampleMaster.getDesc());
       mDataAdapter.addData(textData);
     }
-    if (mSampleMaster.getImage1() != null) {
-      Bitmap bitmap = BitmapFactory.decodeByteArray(mSampleMaster.getImage1(), 0,
-          mSampleMaster.getImage1().length);
+    if (!TextUtils.isEmpty(mSampleMaster.getImage1())) {
       PhotoData photoData = new PhotoData(DataAdapter.DATA_TYPE_PHOTO_1);
-      photoData.setBitmap(bitmap);
+      photoData.setBitmapPath(mSampleMaster.getImage1());
       mDataAdapter.addData(photoData);
     }
 
-    if (mSampleMaster.getImage2() != null) {
-      Bitmap bitmap = BitmapFactory.decodeByteArray(mSampleMaster.getImage2(), 0,
-          mSampleMaster.getImage2().length);
+    if (!TextUtils.isEmpty(mSampleMaster.getImage2())) {
       PhotoData photoData = new PhotoData(DataAdapter.DATA_TYPE_PHOTO_2);
-      photoData.setBitmap(bitmap);
+      photoData.setBitmapPath(mSampleMaster.getImage2());
       mDataAdapter.addData(photoData);
     }
 
@@ -194,16 +195,12 @@ public class ItemDetailActivity extends AppCompatActivity {
 
     findViewById(R.id.btn_take_photo_1).setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
-        Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(takePicture,
-            RESULT_TAKE_PHOTO_1);//zero can be replaced with any action code
+        startTakePhoto(RESULT_TAKE_PHOTO_1);
       }
     });
     findViewById(R.id.btn_take_photo_2).setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
-        Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(takePicture,
-            RESULT_TAKE_PHOTO_2);//zero can be replaced with any action code
+        startTakePhoto(RESULT_TAKE_PHOTO_2);
       }
     });
     findViewById(R.id.btn_qr_code).setOnClickListener(new View.OnClickListener() {
@@ -214,6 +211,26 @@ public class ItemDetailActivity extends AppCompatActivity {
     });
   }
 
+  private void startTakePhoto(int type){
+    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+    if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+      File photoFile = null;
+      try {
+        photoFile =
+            new File(MApp.getApplication().getPicPath() + "/" + mSampleMaster.guid + "_type_" + type +".jpeg");
+        mCurrentPhotoPath =  photoFile.getAbsolutePath();
+        photoFile.createNewFile();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      if (photoFile != null) {
+        Uri photoURI =
+            FileProvider.getUriForFile(ItemDetailActivity.this, "com.ledway.btprinter.fileprovider", photoFile);
+        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+        startActivityForResult(takePictureIntent, type);
+      }
+    }
+  }
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
       case android.R.id.home: {
@@ -275,20 +292,24 @@ public class ItemDetailActivity extends AppCompatActivity {
         case RESULT_TAKE_PHOTO_1:
         case RESULT_TAKE_PHOTO_2: {
           if (resultCode == RESULT_OK) {
-            Bitmap photo = (Bitmap) data.getExtras().get("data");
-            int type = RESULT_TAKE_PHOTO_2 == requestCode ? DataAdapter.DATA_TYPE_PHOTO_2
-                : DataAdapter.DATA_TYPE_PHOTO_1;
-            PhotoData photoData = new PhotoData(type);
-            photoData.setBitmap(photo);
-            mDataAdapter.removeByType(type);
-            mDataAdapter.addData(photoData);
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            photo.compress(Bitmap.CompressFormat.PNG, 100, stream);
-            byte[] byteArray = stream.toByteArray();
-            if (RESULT_TAKE_PHOTO_1 == requestCode) {
-              mSampleMaster.setImage1(byteArray);
-            } else {
-              mSampleMaster.setImage2(byteArray);
+            File f = new File(mCurrentPhotoPath);
+            if (f.exists()){
+              if (f.length() < 1){
+                f.delete();
+              }
+            }
+            if (f.exists()){
+              int type = RESULT_TAKE_PHOTO_2 == requestCode ? DataAdapter.DATA_TYPE_PHOTO_2
+                  : DataAdapter.DATA_TYPE_PHOTO_1;
+              PhotoData photoData = new PhotoData(type);
+              photoData.setBitmapPath(f.getAbsolutePath());
+              mDataAdapter.removeByType(type);
+              mDataAdapter.addData(photoData);
+              if (RESULT_TAKE_PHOTO_1 == requestCode) {
+                mSampleMaster.setImage1(f.getAbsolutePath());
+              } else {
+                mSampleMaster.setImage2(f.getAbsolutePath());
+              }
             }
           }
           break;
