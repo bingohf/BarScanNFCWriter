@@ -7,6 +7,7 @@ import android.graphics.Point;
 import android.support.v7.widget.RecyclerView;
 import android.view.Display;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
@@ -27,8 +28,8 @@ public class PhotoViewHolder extends BaseViewHolder{
     if (photoData.getBitmap() == null) {
       File file = new File(photoData.getBitmapPath());
       if (file.exists() && file.length() > 0) {
-        int targetW = Math.max(imageView.getWidth(), 800);
-        int targetH = Math.max(imageView.getHeight(),800);
+        int targetW = 500;
+        int targetH = Math.max(imageView.getHeight(),200);
 
         // Get the dimensions of the bitmap
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
@@ -39,7 +40,7 @@ public class PhotoViewHolder extends BaseViewHolder{
 
         // Determine how much to scale down the image
         int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
-
+        scaleFactor = Math.max(scaleFactor, 1);
         // Decode the image file into a Bitmap sized to fill the View
         bmOptions.inJustDecodeBounds = false;
         bmOptions.inSampleSize = scaleFactor;
@@ -47,6 +48,10 @@ public class PhotoViewHolder extends BaseViewHolder{
 
         Bitmap bitmap = BitmapFactory.decodeFile(photoData.getBitmapPath(), bmOptions);
         imageView.setImageBitmap(bitmap);
+        ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
+        layoutParams.width = bitmap.getWidth();
+        layoutParams.height = bitmap.getHeight();
+
       } else {
         imageView.setImageBitmap(null);
       }
