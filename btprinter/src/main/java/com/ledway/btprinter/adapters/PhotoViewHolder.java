@@ -11,16 +11,17 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
+import com.ledway.btprinter.views.MImageView;
 import java.io.File;
 
 /**
  * Created by togb on 2016/6/4.
  */
 public class PhotoViewHolder extends BaseViewHolder{
-  private ImageView imageView;
+  private MImageView imageView;
   public PhotoViewHolder(View itemView) {
     super(itemView);
-    imageView = (ImageView) itemView.findViewById(R.id.image_photo);
+    imageView = (MImageView) itemView.findViewById(R.id.image_photo);
   }
 
   @Override public void changeData(BaseData baseData) {
@@ -28,26 +29,13 @@ public class PhotoViewHolder extends BaseViewHolder{
     if (photoData.getBitmap() == null) {
       File file = new File(photoData.getBitmapPath());
       if (file.exists() && file.length() > 0) {
-        int targetW = 500;
-        int targetH = Math.max(imageView.getHeight(),200);
+        int targetW = MApp.getApplication().point.x - 200;
+        int targetH = Math.max(imageView.getHeight(),MApp.getApplication().point.y/3);
 
-        // Get the dimensions of the bitmap
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        bmOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(photoData.getBitmapPath(), bmOptions);
-        int photoW = bmOptions.outWidth;
-        int photoH = bmOptions.outHeight;
 
-        // Determine how much to scale down the image
-        int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
-        scaleFactor = Math.max(scaleFactor, 1);
-        // Decode the image file into a Bitmap sized to fill the View
-        bmOptions.inJustDecodeBounds = false;
-        bmOptions.inSampleSize = scaleFactor;
-        bmOptions.inPurgeable = true;
-
-        Bitmap bitmap = BitmapFactory.decodeFile(photoData.getBitmapPath(), bmOptions);
+        Bitmap bitmap = photoData.getFileBitmap(targetW, targetH);
         imageView.setImageBitmap(bitmap);
+        imageView.setImagePath(photoData.getBitmapPath());
         ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
         layoutParams.width = bitmap.getWidth();
         layoutParams.height = bitmap.getHeight();
@@ -57,6 +45,7 @@ public class PhotoViewHolder extends BaseViewHolder{
       }
     }else{
       imageView.setImageBitmap(photoData.getBitmap());
+      imageView.setImagePath(null);
     }
   }
 

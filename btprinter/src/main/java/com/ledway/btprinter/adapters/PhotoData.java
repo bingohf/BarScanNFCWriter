@@ -1,6 +1,7 @@
 package com.ledway.btprinter.adapters;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
@@ -35,7 +36,7 @@ public class PhotoData extends BaseData {
   }
 
   @Override public void printTo(OutputStream outputStream) throws IOException {
-/*    String label = "";
+    String label = "";
     switch (type){
       case DataAdapter.DATA_TYPE_PHOTO_1:{
         label = MApp.getApplication().getString(R.string.card1);
@@ -54,7 +55,7 @@ public class PhotoData extends BaseData {
     }
 
 
-    Bitmap bitmap = this.getBitmap();
+    Bitmap bitmap = getPrintableBitmap();
     if (bitmap != null) {
       if (bitmap.getHeight() > 384) {
         bitmap = resizeImage(bitmap, 384, 384);
@@ -70,9 +71,32 @@ public class PhotoData extends BaseData {
       byte[] sendbuf = StartBmpToPrintCode(bitmap);
       outputStream.write(sendbuf);
       outputStream.flush();
-    }*/
+    }
   }
 
+  private Bitmap getPrintableBitmap(){
+    if (bitmap != null){
+      return bitmap;
+    }
+    return getFileBitmap(384,384);
+  }
+
+  public Bitmap getFileBitmap(int targetW, int targetH){
+    BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+    bmOptions.inJustDecodeBounds = true;
+    BitmapFactory.decodeFile(bitmapPath, bmOptions);
+    int photoW = bmOptions.outWidth;
+    int photoH = bmOptions.outHeight;
+    int scaleFactor = Math.max(photoW / targetW, photoH / targetH);
+    scaleFactor = Math.max(scaleFactor, 1);
+    // Decode the image file into a Bitmap sized to fill the View
+    bmOptions.inJustDecodeBounds = false;
+    bmOptions.inSampleSize = scaleFactor;
+    bmOptions.inPurgeable = true;
+    bitmap = BitmapFactory.decodeFile(bitmapPath, bmOptions);
+    return bitmap;
+
+  }
   private byte[] StartBmpToPrintCode(Bitmap bitmap) {
     byte temp = 0;
     int j = 7;

@@ -38,7 +38,9 @@
       </intent-filter>
     </activity>
     <activity android:name=".AppPreferences"/>
-    <activity android:name=".ItemDetailActivity"/>
+    <activity android:name=".ItemDetailActivity"
+        android:screenOrientation="portrait"
+        />
     <activity android:name=".PrintPreviewActivity"/>
     <activity android:name=".ProdListActivity"
         android:label="@string/update_prod"

@@ -20,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.ledway.btprinter.models.TodoProd;
 import com.ledway.btprinter.utils.IOUtil;
+import com.ledway.btprinter.views.MImageView;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -38,7 +39,7 @@ import rx.schedulers.Schedulers;
 public class TodoProdDetailActivity extends AppCompatActivity {
   private static final int REQUEST_TAKE_IMAGE = 1;
 
-  private ImageView mImageView;
+  private MImageView mImageView;
   private TextView mTxtHint;
   private TodoProd mTodoProd ;
   private EditText mEdtSpec;
@@ -83,7 +84,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_todo_prod_detail);
-    mImageView = (ImageView) findViewById(R.id.image);
+    mImageView = (MImageView) findViewById(R.id.image);
     mTxtHint = (TextView) findViewById(R.id.txt_hint);
     mEdtSpec = (EditText) findViewById(R.id.txt_spec);
     mTodoProd = (TodoProd) MApp.getApplication().getSession().getValue("current_todo_prod");
@@ -99,6 +100,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
 
       Bitmap bitmap =  IOUtil.loadImage(mTodoProd.image1, 800,800);
       mImageView.setImageBitmap(bitmap);
+      mImageView.setImagePath(mTodoProd.image1);
     }
     mTxtHint.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
@@ -151,6 +153,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
             mImageView.setVisibility(View.VISIBLE);
             mTxtHint.setVisibility(View.GONE);
             mImageView.setImageBitmap(bitmap);
+            mImageView.setImagePath(f.getAbsolutePath());
             mTodoProd.uploaded_time = null;
             mTodoProd.save();
           }

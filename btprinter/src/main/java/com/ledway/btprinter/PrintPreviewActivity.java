@@ -79,6 +79,9 @@ public class PrintPreviewActivity extends AppCompatActivity {
         doPrint();
         break;
       }
+      case android.R.id.home:{
+        finish();
+      }
     }
     return true;
   }

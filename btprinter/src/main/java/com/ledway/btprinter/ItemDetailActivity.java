@@ -218,12 +218,14 @@ public class ItemDetailActivity extends AppCompatActivity {
       try {
         photoFile =
             new File(MApp.getApplication().getPicPath() + "/" + mSampleMaster.guid + "_type_" + type +".jpeg");
+        if (!photoFile.exists()){
+          photoFile.createNewFile();
+        }
         mCurrentPhotoPath =  photoFile.getAbsolutePath();
-        photoFile.createNewFile();
       } catch (IOException e) {
         e.printStackTrace();
       }
-      if (photoFile != null) {
+      if (photoFile != null && photoFile.exists()) {
         Uri photoURI =
             FileProvider.getUriForFile(ItemDetailActivity.this, "com.ledway.btprinter.fileprovider", photoFile);
         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
