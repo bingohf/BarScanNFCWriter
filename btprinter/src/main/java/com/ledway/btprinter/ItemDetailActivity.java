@@ -5,6 +5,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -212,7 +214,12 @@ public class ItemDetailActivity extends AppCompatActivity {
   }
 
   private void startTakePhoto(int type){
+
+
+
     Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+    takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION )
+    .addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
     if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
       File photoFile = null;
       try {
@@ -229,6 +236,14 @@ public class ItemDetailActivity extends AppCompatActivity {
         Uri photoURI =
             FileProvider.getUriForFile(ItemDetailActivity.this, "com.ledway.btprinter.fileprovider", photoFile);
         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+
+        List<ResolveInfo> resolvedIntentActivities = getPackageManager().queryIntentActivities(takePictureIntent, PackageManager.MATCH_DEFAULT_ONLY);
+        for (ResolveInfo resolvedIntentInfo : resolvedIntentActivities) {
+          String packageName = resolvedIntentInfo.activityInfo.packageName;
+
+          grantUriPermission(packageName, photoURI, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        }
+
         startActivityForResult(takePictureIntent, type);
       }
     }
