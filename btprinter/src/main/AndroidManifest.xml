@@ -28,9 +28,12 @@
       android:icon="@drawable/ic_launcher"
       android:label="@string/app_name"
       android:supportsRtl="true"
-      android:theme="@style/AppTheme">
+      android:theme="@style/AppTheme"
+
+      >
     <activity android:name=".MainActivity"
-        android:theme="@style/AppTheme.NoActionBar">
+        android:theme="@style/AppTheme.NoActionBar"
+        android:screenOrientation="portrait">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
 
@@ -43,9 +46,10 @@
         />
     <activity android:name=".PrintPreviewActivity"/>
     <activity android:name=".ProdListActivity"
+        android:screenOrientation="portrait"
         android:label="@string/update_prod"
         />
-    <activity android:name=".TodoProdDetailActivity"/>
+    <activity android:name=".TodoProdDetailActivity"    android:screenOrientation="portrait"/>
     <activity android:name=".AgreementActivity"
         android:label="@string/title_agreement"
         />

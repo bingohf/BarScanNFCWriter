@@ -23,6 +23,7 @@ import com.activeandroid.Model;
 import com.activeandroid.query.Select;
 import com.ledway.btprinter.adapters.RecordAdapter;
 import com.ledway.btprinter.fragments.BindBTPrintDialogFragment;
+import com.ledway.btprinter.fragments.NewVersionDialogFragment;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.framework.RemoteDB;
 import com.zkc.Service.CaptureService;
@@ -92,6 +93,16 @@ public class MainActivity extends AppCompatActivity {
     setListView();
 
     checkAgreement();
+
+    checkVersion();
+  }
+
+  private void checkVersion() {
+    NewVersionDialogFragment newVersionDialogFragment = new NewVersionDialogFragment();
+    Bundle args = new Bundle();
+    args.putString("url", "http://");
+    newVersionDialogFragment.setArguments(args);
+    newVersionDialogFragment.show(getSupportFragmentManager(),"dialog");
   }
 
   private void checkAgreement() {

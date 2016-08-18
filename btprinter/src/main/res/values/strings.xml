@@ -37,4 +37,7 @@
   <string name="action_my_business_card">我的名片</string>
   <string name="default_my_business_card">威虹資訊\n台灣免付費服務專線: 080-0717688\n香港地區服務專線: 81776008
   </string>
+  <string name="title_new_version">发现新版本</string>
+  <string name="btn_install">安装</string>
+  <string name="message_find_latest_version">发现新版本</string>
 </resources>
