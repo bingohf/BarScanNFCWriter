@@ -7,4 +7,5 @@ public class ApkVersionResponse {
   public String url;
   public int minVersion;
   public int curVersion ;
+  public String desc;
 }

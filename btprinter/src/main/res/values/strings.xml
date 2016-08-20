@@ -1,5 +1,5 @@
 <resources>
-  <string name="app_name">Sales Edge</string>
+  <string name="app_name">Sales Edgexxx</string>
   <string name="barcode">條碼</string>
   <string name="scan_barcode">4 掃描產品條碼</string>
   <string name="cust_contact">客戶名片</string>
@@ -35,9 +35,12 @@
   <string name="prod_exists">重複産品</string>
   <string name="title_my_business_card">我的名片</string>
   <string name="action_my_business_card">我的名片</string>
-  <string name="default_my_business_card">威虹資訊\n台灣免付費服務專線: 080-0717688\n香港地區服務專線: 81776008
+  <string name="default_my_business_card">威虹資訊\n臺灣免付費服務專線: 080-0717688\n香港地區服務專線: 81776008
   </string>
-  <string name="title_new_version">发现新版本</string>
-  <string name="btn_install">安装</string>
-  <string name="message_find_latest_version">发现新版本</string>
+  <string name="title_new_version">發現新版本</string>
+  <string name="btn_install">安裝</string>
+
+  <string name="message_find_latest_version">發現新版本</string>
+  <string name="btn_cancel">取消</string>
+  <string name="btn_upgrade">下載</string>
 </resources>
