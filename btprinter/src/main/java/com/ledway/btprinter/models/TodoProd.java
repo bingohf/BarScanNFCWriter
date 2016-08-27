@@ -31,6 +31,12 @@ import rx.functions.Func1;
   @Column(name = "created_time") public Date created_time;
   @Column(name = "spec_desc") public String spec_desc;
 
+  public int todayCount;
+
+  public int totalCount;
+
+
+
   public Observable<ArrayList<Object>> remoteSave(){
     String mac_address = MApp.getApplication().getSystemInfo().getDeviceId();
     String connectionString =

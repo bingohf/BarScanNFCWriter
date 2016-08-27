@@ -3,6 +3,7 @@ package com.ledway.btprinter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -10,14 +11,22 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.MotionEvent;
 import android.view.View;
+import com.activeandroid.Cache;
 import com.activeandroid.Model;
+import com.activeandroid.TableInfo;
 import com.activeandroid.query.Select;
+import com.activeandroid.util.Log;
+import com.activeandroid.util.SQLiteUtils;
 import com.ledway.btprinter.adapters.TodoProdAdapter;
 import com.ledway.btprinter.models.TodoProd;
 import com.ledway.framework.RemoteDB;
+import java.lang.reflect.Constructor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -63,8 +72,61 @@ public class ProdListActivity extends AppCompatActivity {
   }
 
   private List<TodoProd> getToProds(){
-    List<TodoProd> todoProds =  new Select(new String[]{"id", "prodno","uploaded_time","spec_desc"}).from(TodoProd.class).orderBy("uploaded_time").execute();
-    return todoProds;
+
+    Calendar calendar = Calendar.getInstance();
+    calendar.setTime(new Date());
+    calendar.set(Calendar.HOUR,0);
+    calendar.set(Calendar.MINUTE,0);
+    calendar.set(Calendar.MILLISECOND,0);
+    calendar.set(Calendar.SECOND,0);
+    Cursor cursor = Cache.openDatabase().rawQuery("select todo_prod.*,a.totalCount,b.todayCount from todo_prod "
+        + "left join (select count(*) totalCount, prod_id from SampleProdLink group by prod_id) a on a.prod_id = prodno "
+        + " left join(select count(*) todayCount ,prod_id from SampleProdLink where create_date >= "+  calendar.getTimeInMillis() +" group by prod_id ) b on b.prod_id = prodno"
+        + " order by todo_prod.uploaded_time", new String[]{});
+    TableInfo tableInfo = Cache.getTableInfo(TodoProd.class);
+    String idName = tableInfo.getIdName();
+    final List<TodoProd> entities = new ArrayList<TodoProd>();
+
+    try {
+      Constructor<?> entityConstructor = TodoProd.class.getConstructor();
+
+      if (cursor.moveToFirst()) {
+        /**
+         * Obtain the columns ordered to fix issue #106 (https://github.com/pardom/ActiveAndroid/issues/106)
+         * when the cursor have multiple columns with same name obtained from join tables.
+         */
+        List<String> columnsOrdered = new ArrayList<String>(Arrays.asList(cursor.getColumnNames()));
+        do {
+          TodoProd entity =
+              (TodoProd) Cache.getEntity(TodoProd.class, cursor.getLong(columnsOrdered.indexOf(idName)));
+          if (entity == null) {
+            entity = (TodoProd) entityConstructor.newInstance();
+          }
+          entity.loadFromCursor(cursor);
+          entity.totalCount = cursor.getInt(cursor.getColumnIndex("totalCount"));
+          entity.todayCount = cursor.getInt(cursor.getColumnIndex("todayCount"));
+          entities.add((TodoProd) entity);
+        }
+        while (cursor.moveToNext());
+      }
+
+    }
+    catch (NoSuchMethodException e) {
+      throw new RuntimeException(
+          "Your model "  + " does not define a default " +
+              "constructor. The default constructor is required for " +
+              "now in ActiveAndroid models, as the process to " +
+              "populate the ORM model is : " +
+              "1. instantiate default model " +
+              "2. populate fields"
+      );
+    }
+    catch (Exception e) {
+      Log.e("Failed to process cursor.", e);
+    }
+
+    return entities;
+
   }
 
   @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
