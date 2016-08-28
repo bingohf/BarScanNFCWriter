@@ -9,6 +9,8 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import com.activeandroid.Cache;
@@ -36,11 +38,13 @@ import rx.schedulers.Schedulers;
  * Created by togb on 2016/7/3.
  */
 public class ProdListActivity extends AppCompatActivity {
-
+  private static final int MODE_ALL = 0;
+  private static final int MODE_TODAY = 1;
   private RecyclerView recyclerView;
   private List<TodoProd> mTodoProdList;
   private TodoProdAdapter mAdapter;
-
+  private List<TodoProd> mTempProdList = new ArrayList<>();
+  private int mMode = MODE_ALL;
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_prod_list);
@@ -69,6 +73,57 @@ public class ProdListActivity extends AppCompatActivity {
         }
       }
     }));
+  }
+
+  @Override public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.prod_list_menu, menu);
+    return true;
+  }
+
+  @Override public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()){
+      case R.id.action_today:{
+        toggleMode(item);
+        break;
+      }
+    }
+    return true;
+  }
+
+  private void toggleMode(MenuItem trigger){
+    switch (mMode){
+      case MODE_ALL:{
+        mTempProdList.clear();
+        for(TodoProd prod: mTodoProdList){
+          mTempProdList.add(prod);
+        }
+        for(int i =0;i < mTodoProdList.size() ;){
+          if(mTodoProdList.get(i).todayCount < 1){
+            mTodoProdList.remove(i);
+          }else{
+            ++i;
+          }
+        }
+
+        mMode = MODE_TODAY;
+        break;
+      }
+      case MODE_TODAY:{
+        mTodoProdList.clear();
+        for(TodoProd prod: mTempProdList){
+          mTodoProdList.add(prod);
+        }
+        mMode = MODE_ALL;
+        break;
+      }
+    }
+    mAdapter.notifyDataSetChanged();
+    invalidateOptionsMenu();
+  }
+
+  @Override public boolean onPrepareOptionsMenu(Menu menu) {
+    menu.findItem(R.id.action_today).setTitle(mMode == MODE_TODAY ?"All":"Today");
+    return true;
   }
 
   private List<TodoProd> getToProds(){

@@ -26,6 +26,10 @@ public class SampleProdLink extends Model{
   @Column(name = "ext")
   public int ext;
 
+  @Column(name = "shareTo")
+  public String shareTo;
+
+
   public String spec_desc = "";
 
   public String getSpec(){
