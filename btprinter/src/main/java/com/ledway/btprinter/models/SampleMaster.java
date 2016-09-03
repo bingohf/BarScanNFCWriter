@@ -53,6 +53,7 @@ import rx.functions.Func1;
   @Column(name = "image2") private String image2;
   @Column(name = "desc") private String desc;
   @Column(name = "isDirty") private boolean isDirty = true;
+  @Column(name ="ShareToDeviceId") public String shareToDeviceId;
 
   private boolean mIsChanged = false;
   protected boolean isLoadedAll = false;
@@ -98,6 +99,12 @@ import rx.functions.Func1;
     isDirty = true;
     mIsChanged = true;
     this.desc = desc;
+  }
+
+  public void setShareToDeviceId(String deviceId){
+    isDirty = true;
+    mIsChanged = true;
+    this.shareToDeviceId = deviceId;
   }
 
   public List<SampleProdLink> items() {
@@ -241,8 +248,8 @@ import rx.functions.Func1;
       e.printStackTrace();
     }
     Observable<SampleMaster> observableMaster =
-        remoteDB.executeProcedure("{call sp_UpSample(?,?,?,?,?,?,?,?)}",
-            new int[] { Types.INTEGER, Types.VARCHAR }, 1, 1, guid, mac_address, desc, imageBuffer)
+        remoteDB.executeProcedure("{call sp_UpSample(?,?,?,?,?,?,?,?,?)}",
+            new int[] { Types.INTEGER, Types.VARCHAR }, 1, 1, guid, mac_address, desc,shareToDeviceId, imageBuffer)
             .flatMap(new Func1<ArrayList<Object>, Observable<SampleMaster>>() {
               @Override public Observable<SampleMaster> call(ArrayList<Object> objects) {
                 int returnCode = (Integer) objects.get(0);
@@ -299,8 +306,8 @@ import rx.functions.Func1;
       file2 = new File(image2);
     }
 
-    return !TextUtils.isEmpty(desc) || ( file1 != null && file1.length() > 0 ) || (file2 != null
-        && file2.length() > 0) || (sampleProdLinks != null && sampleProdLinks.size() > 0);
+    return !TextUtils.isEmpty(desc) || !TextUtils.isEmpty(shareToDeviceId)|| ( file1 != null && file1.length() > 0 ) || (file2 != null
+        && file2.length() > 0) || (sampleProdLinks != null && sampleProdLinks.size() > 0) ;
   }
 
 

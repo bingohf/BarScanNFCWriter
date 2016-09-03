@@ -146,7 +146,6 @@ public class PrintPreviewActivity extends AppCompatActivity {
       textData.setText(mSampleMaster.getDesc());
       mDataAdapter.addData(textData);
     }
-
 /*    if (mSampleMaster.getImage1() != null){
       Bitmap bitmap =  BitmapFactory.decodeByteArray(mSampleMaster.getImage1() , 0, mSampleMaster.getImage1() .length);
       PhotoData photoData = new PhotoData(DataAdapter.DATA_TYPE_PHOTO_1);

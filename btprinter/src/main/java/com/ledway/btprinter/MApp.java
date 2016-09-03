@@ -69,6 +69,7 @@ public class MApp extends Application {
     });
   }
   public String getPicPath(){
+
     File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
     return storageDir.getAbsolutePath();
   }

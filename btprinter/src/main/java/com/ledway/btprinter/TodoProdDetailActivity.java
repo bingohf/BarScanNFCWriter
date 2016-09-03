@@ -147,7 +147,9 @@ public class TodoProdDetailActivity extends AppCompatActivity {
             }
             try {
               OutputStream outputStream = new FileOutputStream(file2);
-              Bitmap resized = Bitmap.createScaledBitmap(bitmap, 110, 110, true);
+              float rate = 110f / bitmap.getWidth();
+              Bitmap resized = Bitmap.createScaledBitmap(bitmap, 110,
+                  (int) (rate * bitmap.getHeight()), true);
               resized.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
               mTodoProd.image2 = file2.getAbsolutePath();
             } catch (FileNotFoundException e) {

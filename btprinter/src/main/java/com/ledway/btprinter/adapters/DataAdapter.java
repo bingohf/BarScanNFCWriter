@@ -17,11 +17,13 @@ import java.util.Iterator;
  */
 public class DataAdapter extends RecyclerView.Adapter<BaseViewHolder> implements Iterable<BaseData>{
   public final static int DATA_TYPE_LOGO =      -1;
-  public final static int DATA_TYPE_MEMO =      0;
-  public final static int DATA_TYPE_PHOTO_1 =  1;
-  public final static int DATA_TYPE_PHOTO_2 =  2;
-  public final static int DATA_TYPE_BARCODE =  3;
-  public final static int DATA_TYPE_QR_CODE =  4;
+  public final static int DATA_TYPE_PHOTO_1 =  0;
+  public final static int DATA_TYPE_PHOTO_2 =  1;
+  public final static int DATA_TYPE_MEMO =      2;
+  public final static int DATA_TYPE_SHARE_TO =      3;
+  public final static int DATA_TYPE_BARCODE =  4;
+  public final static int DATA_TYPE_QR_CODE =  5;
+
 
   private Context context;
   private ArrayList<BaseData> mData = new ArrayList<>();
@@ -35,6 +37,7 @@ public class DataAdapter extends RecyclerView.Adapter<BaseViewHolder> implements
     LayoutInflater inflater = LayoutInflater.from(parent.getContext());
     BaseViewHolder viewHolder = null;
     switch (viewType){
+      case DATA_TYPE_SHARE_TO:
       case DATA_TYPE_BARCODE:
       case DATA_TYPE_MEMO:{
         View view = inflater.inflate(R.layout.list_item_text, parent, false);

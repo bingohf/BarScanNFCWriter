@@ -30,6 +30,7 @@ public class TextViewHolder extends BaseViewHolder {
         break;
       }
 
+
     }
     mTxtLabel.setText(label);
     mTxtValue.setText(((TextData)textData).getText());

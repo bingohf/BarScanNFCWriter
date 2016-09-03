@@ -3,6 +3,7 @@ package com.ledway.btprinter;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -14,15 +15,18 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 import com.ledway.btprinter.adapters.DataAdapter;
 import com.ledway.btprinter.adapters.PhotoData;
@@ -53,6 +57,7 @@ public class ItemDetailActivity extends AppCompatActivity {
   private final static int RESULT_TAKE_PHOTO_2 = 2;
   private final static int RESULT_CAMERA_QR_CODE = 3;
   private final static int RESULT_CAMERA_BAR_CODE = 4;
+  private final static int RESULT_CAMERA_SHARE_TO = 5;
   private SampleMaster mSampleMaster;
   private RecyclerView mListViewProd;
   private List<Map<String, String>> mProdList = new ArrayList<>();
@@ -139,6 +144,11 @@ public class ItemDetailActivity extends AppCompatActivity {
       mDataAdapter.addData(photoData);
     }
 
+    if(!TextUtils.isEmpty(mSampleMaster.shareToDeviceId)){
+      TextData textData = new TextData(DataAdapter.DATA_TYPE_SHARE_TO);
+      textData.setText(mSampleMaster.shareToDeviceId);
+      mDataAdapter.addData(textData);
+    }
     Iterator<SampleProdLink> iterator = mSampleMaster.prodIterator();
     while (iterator.hasNext()) {
       SampleProdLink prod = iterator.next();
@@ -209,6 +219,40 @@ public class ItemDetailActivity extends AppCompatActivity {
       @Override public void onClick(View v) {
         startActivityForResult(new Intent(ItemDetailActivity.this, FullScannerActivity.class),
             RESULT_CAMERA_QR_CODE);
+      }
+    });
+
+    findViewById(R.id.btn_shareto).setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View v) {
+        startActivityForResult(new Intent(ItemDetailActivity.this, FullScannerActivity.class),
+            RESULT_CAMERA_SHARE_TO);
+      }
+    });
+    findViewById(R.id.btn_input_barcode).setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View v) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(ItemDetailActivity.this);
+        builder.setTitle(R.string.input_barcode);
+        final EditText input = new EditText(ItemDetailActivity.this);
+        input.setHint(R.string.input_barcode);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+
+        builder.setView(input);
+        // Set up the buttons
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+          @Override
+          public void onClick(DialogInterface dialog, int which) {
+            if (!TextUtils.isEmpty(input.getText())){
+              appendBarCode(input.getText().toString());
+            }
+          }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+          @Override
+          public void onClick(DialogInterface dialog, int which) {
+            dialog.cancel();
+          }
+        });
+        builder.show();
       }
     });
   }
@@ -337,6 +381,15 @@ public class ItemDetailActivity extends AppCompatActivity {
           textData.setText(qrcode);
           mSampleMaster.setDesc(qrcode);
           mDataAdapter.removeByType(DataAdapter.DATA_TYPE_MEMO);
+          mDataAdapter.addData(textData);
+          break;
+        }
+        case RESULT_CAMERA_SHARE_TO:{
+          String qrcode =getString(R.string.share_to_title) + data.getStringExtra("barcode");
+          mSampleMaster.setShareToDeviceId(qrcode);
+          TextData textData = new TextData(DataAdapter.DATA_TYPE_SHARE_TO);
+          textData.setText(qrcode);
+          mDataAdapter.removeByType(DataAdapter.DATA_TYPE_SHARE_TO);
           mDataAdapter.addData(textData);
           break;
         }

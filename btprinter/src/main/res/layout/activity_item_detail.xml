@@ -42,6 +42,22 @@
           android:layout_width="8dp"
           android:layout_height="1dp"
           />
+
+      <Button
+          android:id="@+id/btn_shareto"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="@string/share_to"
+          android:textAllCaps="false"
+          />
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
       <Button
           android:id="@+id/btn_take_photo_2"
           android:layout_width="0dp"
@@ -50,7 +66,21 @@
           android:text="@string/take_photo_2"
           android:textAllCaps="false"
           />
+
+      <View
+          android:layout_width="8dp"
+          android:layout_height="1dp"
+          />
+      <Button
+          android:id="@+id/btn_input_barcode"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="@string/input_barcode"
+          android:textAllCaps="false"
+          />
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -79,7 +109,6 @@
           android:textAllCaps="false"
           />
     </LinearLayout>
-
   </LinearLayout>
 
 </LinearLayout>

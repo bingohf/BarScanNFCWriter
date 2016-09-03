@@ -1,7 +1,7 @@
 <resources>
   <string name="app_name">Sales Edge</string>
   <string name="barcode">條碼</string>
-  <string name="scan_barcode">4 掃描產品條碼</string>
+  <string name="scan_barcode">6 掃描產品條碼</string>
   <string name="cust_contact">客戶名片</string>
   <string name="read_qr_code">3 讀取名片QRCode</string>
   <string name="take_photo_1">1 拍名片 正面</string>
@@ -45,4 +45,7 @@
   <string name="btn_upgrade">下載</string>
   <string name="today">Today</string>
   <string name="titile_id">我的ID</string>
+  <string name="share_to">4 扫描接收方ID</string>
+  <string name="input_barcode">5 输入产品编码</string>
+  <string name="share_to_title">接收方ID:</string>
 </resources>
