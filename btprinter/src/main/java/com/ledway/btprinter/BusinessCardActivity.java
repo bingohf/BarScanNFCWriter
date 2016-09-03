@@ -26,6 +26,7 @@ import com.ledway.btprinter.adapters.MyProfileViewPagerAdapter;
 import com.ledway.btprinter.fragments.BusinessCardFragment;
 import com.ledway.btprinter.fragments.MyIDFragment;
 import com.ledway.btprinter.fragments.PagerFragment;
+import com.ledway.btprinter.fragments.ShareAppFragment;
 import java.util.Hashtable;
 import java.util.concurrent.TimeUnit;
 import rx.android.schedulers.AndroidSchedulers;
@@ -44,7 +45,7 @@ public class BusinessCardActivity extends AppCompatActivity {
 
 
     mViewPager = (ViewPager) findViewById(R.id.viewpager);
-    mViewPager.setAdapter(new MyProfileViewPagerAdapter(getSupportFragmentManager(), new PagerFragment[]{new BusinessCardFragment(), new MyIDFragment()}));
+    mViewPager.setAdapter(new MyProfileViewPagerAdapter(getSupportFragmentManager(), new PagerFragment[]{new BusinessCardFragment(), new MyIDFragment(), new ShareAppFragment()}));
     // END_INCLUDE (setup_viewpager)
 
     // BEGIN_INCLUDE (setup_slidingtablayout)
