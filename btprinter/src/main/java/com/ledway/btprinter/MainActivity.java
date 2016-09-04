@@ -30,6 +30,7 @@ import com.ledway.btprinter.fragments.MainFragment;
 import com.ledway.btprinter.fragments.MyIDFragment;
 import com.ledway.btprinter.fragments.NewVersionDialogFragment;
 import com.ledway.btprinter.fragments.PagerFragment;
+import com.ledway.btprinter.fragments.ReceiveSampleFragment;
 import com.ledway.btprinter.fragments.ShareAppFragment;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.network.ApkVersionResponse;
@@ -82,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
     });
     checkSetting();
 
+    /*
     findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
         SampleMaster sampleMaster = new SampleMaster();
@@ -90,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
             AppConstants.REQUEST_TYPE_ADD_RECORD);
       }
     });
+    */
 
 
     checkAgreement();
@@ -97,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
     checkVersion();
 
     ViewPager mViewPager = (ViewPager) findViewById(R.id.viewpager);
-    mViewPager.setAdapter(new MyProfileViewPagerAdapter(getSupportFragmentManager(), new PagerFragment[]{new MainFragment()}));
+    mViewPager.setAdapter(new MyProfileViewPagerAdapter(getSupportFragmentManager(), new PagerFragment[]{new MainFragment(), new ReceiveSampleFragment()}));
     SlidingTabLayout mSlidingTabLayout = (SlidingTabLayout) findViewById(R.id.sliding_tabs);
     mSlidingTabLayout.setViewPager(mViewPager);
 
@@ -196,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
 
   @Override public boolean onCreateOptionsMenu(Menu menu) {
     getMenuInflater().inflate(R.menu.main_menu, menu);
-    return false;
+    return  super.onCreateOptionsMenu(menu);
   }
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {

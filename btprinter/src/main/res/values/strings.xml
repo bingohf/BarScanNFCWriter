@@ -50,4 +50,5 @@
   <string name="input_barcode">5 輸入產品編碼</string>
   <string name="share_to_title">接收方ID:</string>
   <string name="my_sample">我的取样单</string>
+  <string name="title_receive_sample">接收的取样单</string>
 </resources>

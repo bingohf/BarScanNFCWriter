@@ -75,13 +75,23 @@ public class MainFragment extends PagerFragment {
         startActivityForResult(new Intent(getActivity(), ItemDetailActivity.class), AppConstants.REQUEST_TYPE_MODIFY_RECORD);
       }
     });
+
+    getActivity().findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View v) {
+        SampleMaster sampleMaster = new SampleMaster();
+        MApp.getApplication().getSession().put("current_data", sampleMaster);
+        startActivityForResult(new Intent(getActivity(), ItemDetailActivity.class),
+            AppConstants.REQUEST_TYPE_ADD_RECORD);
+      }
+    });
+
   }
 
   private void getRecordData() {
     List<SampleMaster> dataList = new Select(new String[] {
         "create_date", "desc", "update_date", "guid", "id", "mac_address", "isDirty", "line",
         "reader", "qrcode"
-    }).from(SampleMaster.class).orderBy(" update_date desc ").execute();
+    }).from(SampleMaster.class).where("dataFrom = ''").orderBy(" update_date desc ").execute();
     mRecordAdapter.clear();
     for (SampleMaster sampleMaster : dataList) {
       mRecordAdapter.addData(sampleMaster);

@@ -54,6 +54,7 @@ import rx.functions.Func1;
   @Column(name = "desc") private String desc;
   @Column(name = "isDirty") private boolean isDirty = true;
   @Column(name ="ShareToDeviceId") public String shareToDeviceId;
+  @Column(name = "dataFrom") private String dataFrom = "";
 
   private boolean mIsChanged = false;
   protected boolean isLoadedAll = false;
