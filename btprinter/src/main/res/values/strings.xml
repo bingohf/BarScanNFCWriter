@@ -44,9 +44,10 @@
   <string name="btn_cancel">取消</string>
   <string name="btn_upgrade">下載</string>
   <string name="today">Today</string>
-  <string name="titile_id">我的ID</string>
+  <string name="titile_id">接收ID</string>
   <string name="titile_share_app">分享App</string>
-  <string name="share_to">4 扫描接收方ID</string>
-  <string name="input_barcode">5 输入产品编码</string>
+  <string name="share_to">4 掃描接收方ID</string>
+  <string name="input_barcode">5 輸入產品編碼</string>
   <string name="share_to_title">接收方ID:</string>
+  <string name="my_sample">我的取样单</string>
 </resources>

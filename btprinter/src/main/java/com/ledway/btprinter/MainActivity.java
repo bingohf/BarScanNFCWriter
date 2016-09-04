@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -20,9 +21,16 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 import com.activeandroid.query.Select;
+import com.example.android.common.view.SlidingTabLayout;
+import com.ledway.btprinter.adapters.MyProfileViewPagerAdapter;
 import com.ledway.btprinter.adapters.RecordAdapter;
 import com.ledway.btprinter.fragments.BindBTPrintDialogFragment;
+import com.ledway.btprinter.fragments.BusinessCardFragment;
+import com.ledway.btprinter.fragments.MainFragment;
+import com.ledway.btprinter.fragments.MyIDFragment;
 import com.ledway.btprinter.fragments.NewVersionDialogFragment;
+import com.ledway.btprinter.fragments.PagerFragment;
+import com.ledway.btprinter.fragments.ShareAppFragment;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.network.ApkVersionResponse;
 import com.ledway.btprinter.network.MyProjectApi;
@@ -41,13 +49,7 @@ import rx.subjects.PublishSubject;
 import rx.subscriptions.CompositeSubscription;
 
 public class MainActivity extends AppCompatActivity {
-  private final static int REQUEST_TYPE_SETTING = 1;
-  private final static int REQUEST_TYPE_ADD_RECORD = 2;
-  private final static int REQUEST_TYPE_MODIFY_RECORD = 3;
-  private final static int REQUEST_AGREEMENT = 4;
-  private RemoteDB remoteDB;
   private PublishSubject<Boolean> mSettingSubject = PublishSubject.create();
-  private RecordAdapter mRecordAdapter;
   private CompositeSubscription mSubscriptions = new CompositeSubscription();
 
   @Override protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
               .setPositiveButton(R.string.setting, new DialogInterface.OnClickListener() {
                 @Override public void onClick(DialogInterface dialog, int which) {
                   Intent intent = new Intent(MainActivity.this, AppPreferences.class);
-                  startActivityForResult(intent, REQUEST_TYPE_SETTING);
+                  startActivityForResult(intent, AppConstants.REQUEST_TYPE_SETTING);
                 }
               })
               .setCancelable(false);
@@ -85,15 +87,21 @@ public class MainActivity extends AppCompatActivity {
         SampleMaster sampleMaster = new SampleMaster();
         MApp.getApplication().getSession().put("current_data", sampleMaster);
         startActivityForResult(new Intent(MainActivity.this, ItemDetailActivity.class),
-            REQUEST_TYPE_ADD_RECORD);
+            AppConstants.REQUEST_TYPE_ADD_RECORD);
       }
     });
 
-    setListView();
 
     checkAgreement();
 
     checkVersion();
+
+    ViewPager mViewPager = (ViewPager) findViewById(R.id.viewpager);
+    mViewPager.setAdapter(new MyProfileViewPagerAdapter(getSupportFragmentManager(), new PagerFragment[]{new MainFragment()}));
+    SlidingTabLayout mSlidingTabLayout = (SlidingTabLayout) findViewById(R.id.sliding_tabs);
+    mSlidingTabLayout.setViewPager(mViewPager);
+
+
   }
 
   @Override public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
@@ -140,26 +148,10 @@ public class MainActivity extends AppCompatActivity {
   private void checkAgreement() {
     SharedPreferences sp = getSharedPreferences("agreement", Context.MODE_PRIVATE);
     if (!sp.getBoolean("agree", false)) {
-      startActivityForResult(new Intent(this, AgreementActivity.class), REQUEST_AGREEMENT);
+      startActivityForResult(new Intent(this, AgreementActivity.class),AppConstants. REQUEST_AGREEMENT);
     }
   }
 
-  private void setListView() {
-    ListView listView = (ListView) findViewById(R.id.list_record);
-    mRecordAdapter = new RecordAdapter(this);
-    listView.setAdapter(mRecordAdapter);
-    RecordAdapter.setSingletonInstance(mRecordAdapter);
-    getRecordData();
-    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-      @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        SampleMaster sampleMaster = mRecordAdapter.getItem(position);
-        MApp.getApplication().getSession().put("current_data", sampleMaster);
-        startActivityForResult(new Intent(MainActivity.this, ItemDetailActivity.class),
-            REQUEST_TYPE_MODIFY_RECORD);
-      }
-    });
-  }
 
   @Override protected void onDestroy() {
     super.onDestroy();
@@ -182,26 +174,15 @@ public class MainActivity extends AppCompatActivity {
   }
 
   @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode,resultCode, data);
     SampleMaster currentData =
         (SampleMaster) MApp.getApplication().getSession().getValue("current_data");
     switch (requestCode) {
-      case REQUEST_TYPE_SETTING: {
+      case AppConstants.REQUEST_TYPE_SETTING: {
         checkSetting();
         break;
       }
-      case REQUEST_TYPE_ADD_RECORD: {
-        if (resultCode != -1) {
-          mRecordAdapter.addData(0, currentData);
-        }
-        break;
-      }
-      case REQUEST_TYPE_MODIFY_RECORD: {
-        if (resultCode != -1) {
-          mRecordAdapter.moveToTop(currentData);
-        }
-        break;
-      }
-      case REQUEST_AGREEMENT: {
+      case AppConstants.REQUEST_AGREEMENT: {
         if (resultCode == RESULT_OK) {
           SharedPreferences sp = getSharedPreferences("agreement", Context.MODE_PRIVATE);
           sp.edit().putBoolean("agree", true).apply();
@@ -211,20 +192,15 @@ public class MainActivity extends AppCompatActivity {
         break;
       }
     }
-    mRecordAdapter.notifyDataSetChanged();
   }
 
   @Override public boolean onCreateOptionsMenu(Menu menu) {
     getMenuInflater().inflate(R.menu.main_menu, menu);
-    return true;
+    return false;
   }
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
-      case R.id.action_upload: {
-        uploadAll();
-        break;
-      }
       case R.id.action_bind_bt_printer: {
         showSetDialog();
         break;
@@ -238,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
         break;
       }
     }
-    return true;
+    return false;
   }
 
   private void showSetDialog() {
@@ -246,49 +222,5 @@ public class MainActivity extends AppCompatActivity {
     bindBTPrintDialogFragment.show(getSupportFragmentManager(), "dialog");
   }
 
-  private void uploadAll() {
-    final ProgressDialog progressDialog =
-        ProgressDialog.show(this, getString(R.string.upload), getString(R.string.wait_a_moment),
-            false);
-    Observable.from(mRecordAdapter)
-        .filter(new Func1<SampleMaster, Boolean>() {
-          @Override public Boolean call(SampleMaster sampleMaster) {
-            return !sampleMaster.isUploaded();
-          }
-        })
-        .flatMap(new Func1<SampleMaster, Observable<SampleMaster>>() {
-          @Override public Observable<SampleMaster> call(SampleMaster sampleMaster) {
-            return sampleMaster.remoteSave();
-          }
-        })
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Subscriber<SampleMaster>() {
-          @Override public void onCompleted() {
-            progressDialog.dismiss();
-            mRecordAdapter.notifyDataSetChanged();
-          }
 
-          @Override public void onError(Throwable e) {
-            progressDialog.dismiss();
-            Log.e("upload_all", e.getMessage(), e);
-            Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-          }
-
-          @Override public void onNext(SampleMaster sampleMaster) {
-
-          }
-        });
-  }
-
-  private void getRecordData() {
-    List<SampleMaster> dataList = new Select(new String[] {
-        "create_date", "desc", "update_date", "guid", "id", "mac_address", "isDirty", "line",
-        "reader", "qrcode"
-    }).from(SampleMaster.class).orderBy(" update_date desc ").execute();
-    mRecordAdapter.clear();
-    for (SampleMaster sampleMaster : dataList) {
-      mRecordAdapter.addData(sampleMaster);
-    }
-  }
 }
