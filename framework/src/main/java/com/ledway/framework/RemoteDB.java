@@ -24,6 +24,11 @@ public class RemoteDB {
   public RemoteDB(String connectionString){
     mConnectiongString = connectionString;
   }
+  public static RemoteDB getDefault(){
+    String connectionString =
+        "jdbc:jtds:sqlserver://vip.ledway.com.tw:1433;DatabaseName=iSamplePub;charset=UTF8";
+    return new RemoteDB(connectionString);
+  }
 
   public Observable<Boolean> execute(final String sql, final Object... args){
     return Observable.create(new Observable.OnSubscribe<Boolean>() {

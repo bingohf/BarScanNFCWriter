@@ -2,7 +2,7 @@
   <string name="app_name">Sales Edge</string>
   <string name="barcode">條碼</string>
   <string name="scan_barcode">6 掃描產品條碼</string>
-  <string name="cust_contact">客戶名片</string>
+  <string name="cust_contact">客護名片</string>
   <string name="read_qr_code">3 讀取名片QRCode</string>
   <string name="take_photo_1">1 拍名片 正面</string>
   <string name="take_photo_2">2 拍名片 反面</string>
@@ -15,7 +15,7 @@
   <string name="prod">布種:</string>
   <string name="qr_card">名片信息:</string>
   <string name="save_record">保存記錄</string>
-  <string name="bind_bt_printer">綁定打印機</string>
+  <string name="bind_bt_printer">邦定打印機</string>
   <string name="hint_enable_bluetooth">請開啟藍牙</string>
   <string name="card1">名片正面</string>
   <string name="card2">名片背面</string>
@@ -49,6 +49,6 @@
   <string name="share_to">4 掃描接收方ID</string>
   <string name="input_barcode">5 輸入產品編碼</string>
   <string name="share_to_title">接收方ID:</string>
-  <string name="my_sample">我的取样单</string>
-  <string name="title_receive_sample">接收的取样单</string>
+  <string name="my_sample">我的取樣單</string>
+  <string name="title_receive_sample">接收的取樣單</string>
 </resources>

@@ -51,8 +51,8 @@ import rx.functions.Func1;
   @Column(name = "qrcode") public String qrcode;
   @Column(name = "image1") private String image1;
   @Column(name = "image2") private String image2;
-  @Column(name = "desc") private String desc;
-  @Column(name = "isDirty") private boolean isDirty = true;
+  @Column(name = "desc") public String desc;
+  @Column(name = "isDirty") public boolean isDirty = true;
   @Column(name ="ShareToDeviceId") public String shareToDeviceId;
   @Column(name = "dataFrom") private String dataFrom = "";
 
@@ -244,7 +244,9 @@ import rx.functions.Func1;
     allSave();
     byte[] imageBuffer = new byte[]{};
     try {
-      imageBuffer = IOUtil.readFile(image1);
+      if(!TextUtils.isEmpty(image1)) {
+        imageBuffer = IOUtil.readFile(image1);
+      }
     } catch (IOException e) {
       e.printStackTrace();
     }

@@ -103,8 +103,6 @@ public class MainActivity extends AppCompatActivity {
     mViewPager.setAdapter(new MyProfileViewPagerAdapter(getSupportFragmentManager(), new PagerFragment[]{new MainFragment(), new ReceiveSampleFragment()}));
     SlidingTabLayout mSlidingTabLayout = (SlidingTabLayout) findViewById(R.id.sliding_tabs);
     mSlidingTabLayout.setViewPager(mViewPager);
-
-
   }
 
   @Override public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
