@@ -56,6 +56,8 @@ public class ReceiveSampleFragment extends PagerFragment{
     loadData();
     listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        SampleMaster sampleMaster = mRecordAdapter.getItem(position);
+        MApp.getApplication().getSession().put("current_data", sampleMaster);
         startActivity(new Intent(getActivity(), SampleReadonlyActivity.class));
       }
     });
