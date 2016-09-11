@@ -385,7 +385,7 @@ public class ItemDetailActivity extends AppCompatActivity {
           break;
         }
         case RESULT_CAMERA_SHARE_TO:{
-          String qrcode =getString(R.string.share_to_title) + data.getStringExtra("barcode");
+          String qrcode = data.getStringExtra("barcode");
           mSampleMaster.setShareToDeviceId(qrcode);
           TextData textData = new TextData(DataAdapter.DATA_TYPE_SHARE_TO);
           textData.setText(qrcode);

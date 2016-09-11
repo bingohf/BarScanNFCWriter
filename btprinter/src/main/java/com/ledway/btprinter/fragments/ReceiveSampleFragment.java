@@ -3,6 +3,7 @@ package com.ledway.btprinter.fragments;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,6 +40,7 @@ import rx.schedulers.Schedulers;
 public class ReceiveSampleFragment extends PagerFragment{
   private RecordAdapter mRecordAdapter;
   private RemoteDB remoteDB = RemoteDB.getDefault();
+  private SwipeRefreshLayout swipeRefreshLayout;
 
   @Override public String getTitle() {
     return MApp.getApplication().getString(R.string.title_receive_sample);
@@ -53,7 +55,9 @@ public class ReceiveSampleFragment extends PagerFragment{
   }
 
   private void initView(View view) {
-    ListView listView = (ListView) view;
+    ListView listView = (ListView) view.findViewById(R.id.list_view);
+    swipeRefreshLayout =
+        (SwipeRefreshLayout) view.findViewById(R.id.swiperefresh);
     mRecordAdapter = new RecordAdapter(getActivity());
     listView.setAdapter(mRecordAdapter);
     loadData();
@@ -64,12 +68,19 @@ public class ReceiveSampleFragment extends PagerFragment{
         startActivity(new Intent(getActivity(), SampleReadonlyActivity.class));
       }
     });
+    swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+      @Override public void onRefresh() {
+        loadData();
+      }
+    });
   }
 
   private void loadData() {
+    swipeRefreshLayout.setRefreshing(true);
+    mRecordAdapter.clear();
     remoteDB.executeQuery("select a.json, b.CardPic "
         + " from PRODUCTAPPGET a left join CUSTOMER b on b.custno = a.custno  "
-        +" where a.json <>? and a.json <>''", MApp.getApplication().getSystemInfo().getDeviceId())
+        +" where a.shareToDeviceId like ? and a.json <>''", MApp.getApplication().getSystemInfo().getDeviceId() +"%")
         .subscribeOn(Schedulers.io())
 
         .flatMap(new Func1<ResultSet, Observable<SampleMaster>>() {
@@ -109,8 +120,6 @@ public class ReceiveSampleFragment extends PagerFragment{
                     }else {
                       sampleMaster.image1 = photoFile.getAbsolutePath();
                     }
-
-
                     subscriber.onNext(sampleMaster);
                   }
                   subscriber.onCompleted();
@@ -126,6 +135,7 @@ public class ReceiveSampleFragment extends PagerFragment{
         .subscribe(new Subscriber<SampleMaster>() {
           @Override public void onCompleted() {
             mRecordAdapter.notifyDataSetChanged();
+            swipeRefreshLayout.setRefreshing(false);
           }
 
           @Override public void onError(Throwable e) {

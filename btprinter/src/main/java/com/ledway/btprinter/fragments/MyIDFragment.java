@@ -1,5 +1,7 @@
 package com.ledway.btprinter.fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -43,15 +45,31 @@ public class MyIDFragment extends PagerFragment {
 
   @Override public void onStart() {
     super.onStart();
-    getQrCode(MApp.getApplication().getSystemInfo().getDeviceId(), 300)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(
-        new Action1<Bitmap>() {
-          @Override public void call(Bitmap bitmap) {
-            mImageView.setImageBitmap(bitmap);
-          }
-        });
+  }
+
+  @Override public void setUserVisibleHint(boolean isVisibleToUser) {
+    super.setUserVisibleHint(isVisibleToUser);
+    if(isVisibleToUser){
+      SharedPreferences sp = getActivity().getSharedPreferences("qrcode", Context.MODE_PRIVATE);
+      String qrcode = sp.getString("qrcode","");
+      String[] ss = qrcode.split("\\r|\\n");
+      String px ="";
+      if (ss.length > 0){
+        px = ss[0].trim();
+      }
+      if(ss.length >1){
+        px += " " + ss[1].trim();
+      }
+      getQrCode(MApp.getApplication().getSystemInfo().getDeviceId() +"\t" + px, 300)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(
+              new Action1<Bitmap>() {
+                @Override public void call(Bitmap bitmap) {
+                  mImageView.setImageBitmap(bitmap);
+                }
+              });
+    }
   }
 
   private Observable<Bitmap> getQrCode(final String qrCode, final int size) {

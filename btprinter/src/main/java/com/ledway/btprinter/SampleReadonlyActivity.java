@@ -34,7 +34,6 @@ public class SampleReadonlyActivity extends AppCompatActivity {
     mDataAdapter = new DataAdapter(this);
     LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
     linearLayoutManager.setAutoMeasureEnabled(true);
-    linearLayoutManager.setStackFromEnd(true);
     mListViewProd.setLayoutManager(linearLayoutManager);
     mListViewProd.setAdapter(mDataAdapter);
 

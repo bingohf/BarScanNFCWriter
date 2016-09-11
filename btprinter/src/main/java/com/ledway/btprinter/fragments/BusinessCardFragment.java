@@ -56,6 +56,7 @@ public class BusinessCardFragment extends PagerFragment {
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new Action1<CharSequence>() {
           @Override public void call(CharSequence charSequence) {
+            saveInput();
             try {
               if (!TextUtils.isEmpty(charSequence)) {
                 str2QRCode(charSequence.toString());

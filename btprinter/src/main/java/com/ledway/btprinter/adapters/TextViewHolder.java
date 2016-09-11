@@ -29,6 +29,10 @@ public class TextViewHolder extends BaseViewHolder {
         label = MApp.getApplication().getString(R.string.qr_card);
         break;
       }
+      case DataAdapter.DATA_TYPE_SHARE_TO:{
+        label = MApp.getApplication().getString(R.string.share_to_title);
+        break;
+      }
 
 
     }
