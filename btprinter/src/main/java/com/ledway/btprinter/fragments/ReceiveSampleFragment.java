@@ -21,7 +21,10 @@ import com.ledway.btprinter.SampleReadonlyActivity;
 import com.ledway.btprinter.adapters.RecordAdapter;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.framework.RemoteDB;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import rx.Observable;
@@ -64,8 +67,8 @@ public class ReceiveSampleFragment extends PagerFragment{
   }
 
   private void loadData() {
-    remoteDB.executeQuery("select a.json "
-        + " from PRODUCTAPPGET a   "
+    remoteDB.executeQuery("select a.json, b.CardPic "
+        + " from PRODUCTAPPGET a left join CUSTOMER b on b.custno = a.custno  "
         +" where a.json <>? and a.json <>''", MApp.getApplication().getSystemInfo().getDeviceId())
         .subscribeOn(Schedulers.io())
 
@@ -79,9 +82,35 @@ public class ReceiveSampleFragment extends PagerFragment{
                 try {
                   while(resultSet.next()){
                     String json = resultSet.getString("json");
+
                     SampleMaster sampleMaster = objectMapper.readValue(json, SampleMaster.class);
+                    File photoFile = new File(MApp.getApplication().getPicPath()
+                        + "/"
+                        + sampleMaster.guid
+                        + "_type_"
+                        + 1
+                        + ".jpeg");
                     sampleMaster.image1 = null;
                     sampleMaster.image2 = null;
+                    if(!photoFile.exists()){
+                      InputStream inputStream = resultSet.getBinaryStream("CardPic");
+                      if (inputStream != null && inputStream.available() >0){
+                        FileOutputStream outputStream =
+                            new FileOutputStream(photoFile);
+                        byte[] buffer = new byte[1024];
+                        int read;
+                        while ((read = inputStream.read(buffer)) != -1) {
+                          outputStream.write(buffer, 0, read);
+                        }
+                        outputStream.flush();
+                        outputStream.close();
+                        sampleMaster.image1 = photoFile.getAbsolutePath();
+                      }
+                    }else {
+                      sampleMaster.image1 = photoFile.getAbsolutePath();
+                    }
+
+
                     subscriber.onNext(sampleMaster);
                   }
                   subscriber.onCompleted();
