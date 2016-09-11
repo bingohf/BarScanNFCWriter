@@ -8,6 +8,8 @@ import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 import com.activeandroid.query.From;
 import com.activeandroid.query.Select;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ledway.btprinter.MApp;
@@ -72,27 +74,27 @@ import rx.functions.Func1;
   public SampleMaster() {
     super();
   }
-
+  @JsonIgnore
   public String getImage1() {
     return image1;
   }
 
+  @JsonIgnore
   public void setImage1(String image1) {
     mIsChanged = true;
     isDirty = true;
     this.image1 = image1;
   }
-
   public String getImage2() {
     return image2;
   }
-
+  @JsonIgnore
   public void setImage2(String image2) {
     mIsChanged = true;
     isDirty = true;
     this.image2 = image2;
   }
-
+  @JsonIgnore
   public String getDesc() {
     return desc;
   }
@@ -318,6 +320,7 @@ import rx.functions.Func1;
 
   private String toJson(){
     ObjectMapper mapper = new ObjectMapper();
+    mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     try {
       return mapper.writeValueAsString(this);
     } catch (JsonProcessingException e) {

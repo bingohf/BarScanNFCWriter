@@ -4,6 +4,7 @@ import android.text.TextUtils;
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
 
 /**
@@ -11,6 +12,7 @@ import java.util.Date;
  */
 @Table(name = "SampleProdLink")
 public class SampleProdLink extends Model{
+
   @Column(name = "link_id", unique = true, onUniqueConflict = Column.ConflictAction.FAIL)
   public String link_id;
 
@@ -26,12 +28,11 @@ public class SampleProdLink extends Model{
   @Column(name = "ext")
   public int ext;
 
-  @Column(name = "shareTo")
-  public String shareTo;
 
-
+  @JsonIgnore
   public String spec_desc = "";
 
+  @JsonIgnore
   public String getSpec(){
     if(TextUtils.isEmpty(spec_desc)){
       return "";

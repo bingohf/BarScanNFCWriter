@@ -7,11 +7,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import com.activeandroid.util.Log;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.adapters.RecordAdapter;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.framework.RemoteDB;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import rx.Subscriber;
@@ -46,13 +52,9 @@ public class ReceiveSampleFragment extends PagerFragment{
   }
 
   private void loadData() {
-    remoteDB.executeQuery("select a.series guid,"
-        + " a.salesno mac_address,"
-        + "a.updatedate create_date,"
-        + " a.updatedate update_date,"
-        + "b.memo [desc] "
+    remoteDB.executeQuery("select a.json "
         + " from PRODUCTAPPGET a "
-        + " join CUSTOMER b on a.custno = b.custno where a.shareTodeviceId=?", MApp.getApplication().getSystemInfo().getDeviceId())
+        +" where a.json <>? and a.json <>''", MApp.getApplication().getSystemInfo().getDeviceId())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new Subscriber<ResultSet>() {
@@ -66,18 +68,22 @@ public class ReceiveSampleFragment extends PagerFragment{
 
           @Override public void onNext(ResultSet resultSet) {
             try {
+              ObjectMapper objectMapper = new ObjectMapper();
+              objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+              objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
               while(resultSet.next()){
-                SampleMaster sampleMaster = new SampleMaster();
-                sampleMaster.guid = resultSet.getString("guid");
-                sampleMaster.create_date = resultSet.getDate("create_date");
-                sampleMaster.update_date = resultSet.getDate("update_date");
-                sampleMaster.mac_address = resultSet.getString("mac_address");
-                sampleMaster.desc = resultSet.getString("desc");
-                sampleMaster.isDirty = false;
+                String json = resultSet.getString("json");
+                SampleMaster sampleMaster = objectMapper.readValue(json, SampleMaster.class);
                mRecordAdapter.addData(sampleMaster);
               }
               mRecordAdapter.notifyDataSetChanged();
             } catch (SQLException e) {
+              e.printStackTrace();
+            } catch (JsonParseException e) {
+              e.printStackTrace();
+            } catch (JsonMappingException e) {
+              e.printStackTrace();
+            } catch (IOException e) {
               e.printStackTrace();
             }
           }
