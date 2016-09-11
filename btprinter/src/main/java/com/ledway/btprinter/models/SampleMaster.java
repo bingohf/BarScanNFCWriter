@@ -8,6 +8,8 @@ import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 import com.activeandroid.query.From;
 import com.activeandroid.query.Select;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.utils.IOUtil;
@@ -251,8 +253,8 @@ import rx.functions.Func1;
       e.printStackTrace();
     }
     Observable<SampleMaster> observableMaster =
-        remoteDB.executeProcedure("{call sp_UpSample(?,?,?,?,?,?,?,?,?)}",
-            new int[] { Types.INTEGER, Types.VARCHAR }, 1, 1, guid, mac_address, desc,shareToDeviceId, imageBuffer)
+        remoteDB.executeProcedure("{call sp_UpSample_v3(?,?,?,?,?,?,?,?,?,?)}",
+            new int[] { Types.INTEGER, Types.VARCHAR }, 1, 1, guid, mac_address, desc,shareToDeviceId,toJson(), imageBuffer)
             .flatMap(new Func1<ArrayList<Object>, Observable<SampleMaster>>() {
               @Override public Observable<SampleMaster> call(ArrayList<Object> objects) {
                 int returnCode = (Integer) objects.get(0);
@@ -311,6 +313,17 @@ import rx.functions.Func1;
 
     return !TextUtils.isEmpty(desc) || !TextUtils.isEmpty(shareToDeviceId)|| ( file1 != null && file1.length() > 0 ) || (file2 != null
         && file2.length() > 0) || (sampleProdLinks != null && sampleProdLinks.size() > 0) ;
+  }
+
+
+  private String toJson(){
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      return mapper.writeValueAsString(this);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+      return "";
+    }
   }
 
 
