@@ -1,11 +1,14 @@
 package com.ledway.btprinter.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 import com.activeandroid.util.Log;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -14,14 +17,17 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
+import com.ledway.btprinter.SampleReadonlyActivity;
 import com.ledway.btprinter.adapters.RecordAdapter;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.framework.RemoteDB;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 /**
@@ -47,45 +53,59 @@ public class ReceiveSampleFragment extends PagerFragment{
     ListView listView = (ListView) view;
     mRecordAdapter = new RecordAdapter(getActivity());
     listView.setAdapter(mRecordAdapter);
-    RecordAdapter.setSingletonInstance(mRecordAdapter);
     loadData();
+    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+      @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        startActivity(new Intent(getActivity(), SampleReadonlyActivity.class));
+      }
+    });
   }
 
   private void loadData() {
     remoteDB.executeQuery("select a.json "
-        + " from PRODUCTAPPGET a "
+        + " from PRODUCTAPPGET a   "
         +" where a.json <>? and a.json <>''", MApp.getApplication().getSystemInfo().getDeviceId())
         .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Subscriber<ResultSet>() {
-          @Override public void onCompleted() {
 
+        .flatMap(new Func1<ResultSet, Observable<SampleMaster>>() {
+          @Override public Observable<SampleMaster> call(final ResultSet resultSet) {
+            return Observable.create(new Observable.OnSubscribe<SampleMaster>() {
+              @Override public void call(Subscriber<? super SampleMaster> subscriber) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+                objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                try {
+                  while(resultSet.next()){
+                    String json = resultSet.getString("json");
+                    SampleMaster sampleMaster = objectMapper.readValue(json, SampleMaster.class);
+                    sampleMaster.image1 = null;
+                    sampleMaster.image2 = null;
+                    subscriber.onNext(sampleMaster);
+                  }
+                  subscriber.onCompleted();
+                } catch (Exception e) {
+                  e.printStackTrace();
+                  subscriber.onError(e);
+                }
+              }
+            });
+          }
+        })
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Subscriber<SampleMaster>() {
+          @Override public void onCompleted() {
+            mRecordAdapter.notifyDataSetChanged();
           }
 
           @Override public void onError(Throwable e) {
-            Log.e(e.getMessage(),e);
+            Log.e("error", e.getMessage(), e);
+            e.printStackTrace();
+            Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
           }
 
-          @Override public void onNext(ResultSet resultSet) {
-            try {
-              ObjectMapper objectMapper = new ObjectMapper();
-              objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-              objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-              while(resultSet.next()){
-                String json = resultSet.getString("json");
-                SampleMaster sampleMaster = objectMapper.readValue(json, SampleMaster.class);
-               mRecordAdapter.addData(sampleMaster);
-              }
-              mRecordAdapter.notifyDataSetChanged();
-            } catch (SQLException e) {
-              e.printStackTrace();
-            } catch (JsonParseException e) {
-              e.printStackTrace();
-            } catch (JsonMappingException e) {
-              e.printStackTrace();
-            } catch (IOException e) {
-              e.printStackTrace();
-            }
+          @Override public void onNext(SampleMaster sampleMaster) {
+            mRecordAdapter.addData(sampleMaster);
+
           }
         });
   }
