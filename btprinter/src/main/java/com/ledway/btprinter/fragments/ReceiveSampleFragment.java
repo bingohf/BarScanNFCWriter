@@ -87,7 +87,7 @@ public class ReceiveSampleFragment extends PagerFragment{
     dataList.clear();
     sampleList.clear();
     simpleAdapter.notifyDataSetChanged();
-    remoteDB.executeQuery("select a.json, b.CardPic "
+    remoteDB.executeQuery("select a.json "
         + " from PRODUCTAPPGET a left join CUSTOMER b on b.custno = a.custno  "
         +" where a.shareToDeviceId like ? and a.json <>''", MApp.getApplication().getSystemInfo().getDeviceId() +"%")
         .subscribeOn(Schedulers.io())
@@ -150,6 +150,7 @@ public class ReceiveSampleFragment extends PagerFragment{
           @Override public void onError(Throwable e) {
             Log.e("error", e.getMessage(), e);
             e.printStackTrace();
+            swipeRefreshLayout.setRefreshing(false);
             Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
           }
 

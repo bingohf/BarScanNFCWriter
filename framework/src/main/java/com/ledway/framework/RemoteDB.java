@@ -1,13 +1,13 @@
 package com.ledway.framework;
 
 import java.io.InputStream;
+import java.sql.Array;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Time;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,6 +38,11 @@ public class RemoteDB {
           initStatement();
           PreparedStatement preparedStatement = connection.prepareStatement(sql);
           for(int i =0;i < args.length ;++i){
+            if (args[i] instanceof SqlArray){
+              SqlArray sqlArray = (SqlArray) args[i];
+              Array array = connection.createArrayOf(sqlArray.type, sqlArray.value);
+              preparedStatement.setArray(i + 1, array);
+            }else
             if (args[i] instanceof String){
               preparedStatement.setString(i + 1, (String)args[i]);
             } else if (args[i] instanceof Integer){
