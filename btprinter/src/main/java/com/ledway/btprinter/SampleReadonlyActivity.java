@@ -55,11 +55,6 @@ public class SampleReadonlyActivity extends AppCompatActivity {
       mDataAdapter.addData(photoData);
     }
 
-    if(!TextUtils.isEmpty(mSampleMaster.shareToDeviceId)){
-      TextData textData = new TextData(DataAdapter.DATA_TYPE_SHARE_TO);
-      textData.setText(mSampleMaster.shareToDeviceId);
-      mDataAdapter.addData(textData);
-    }
     Iterator<SampleProdLink> iterator = mSampleMaster.prodIterator();
     while (iterator.hasNext()) {
       SampleProdLink prod = iterator.next();

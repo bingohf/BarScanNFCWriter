@@ -4,11 +4,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.Toast;
 import com.activeandroid.util.Log;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -19,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.SampleReadonlyActivity;
+import com.ledway.btprinter.adapters.ReceiveSampleAdapter;
 import com.ledway.btprinter.adapters.RecordAdapter;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.framework.RemoteDB;
@@ -28,6 +31,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -38,7 +43,9 @@ import rx.schedulers.Schedulers;
  * Created by togb on 2016/9/4.
  */
 public class ReceiveSampleFragment extends PagerFragment{
-  private RecordAdapter mRecordAdapter;
+  private SimpleAdapter simpleAdapter;
+  private ArrayList<HashMap<String,String>> dataList = new ArrayList<>();
+  private ArrayList<SampleMaster> sampleList = new ArrayList<>();
   private RemoteDB remoteDB = RemoteDB.getDefault();
   private SwipeRefreshLayout swipeRefreshLayout;
 
@@ -58,12 +65,12 @@ public class ReceiveSampleFragment extends PagerFragment{
     ListView listView = (ListView) view.findViewById(R.id.list_view);
     swipeRefreshLayout =
         (SwipeRefreshLayout) view.findViewById(R.id.swiperefresh);
-    mRecordAdapter = new RecordAdapter(getActivity());
-    listView.setAdapter(mRecordAdapter);
+    simpleAdapter = new ReceiveSampleAdapter(getActivity(),dataList, R.layout.list_item_record, new String[]{"text"}, new int[]{R.id.text1});
+    listView.setAdapter(simpleAdapter);
     loadData();
     listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        SampleMaster sampleMaster = mRecordAdapter.getItem(position);
+        SampleMaster sampleMaster = sampleList.get(position);
         MApp.getApplication().getSession().put("current_data", sampleMaster);
         startActivity(new Intent(getActivity(), SampleReadonlyActivity.class));
       }
@@ -77,7 +84,9 @@ public class ReceiveSampleFragment extends PagerFragment{
 
   private void loadData() {
     swipeRefreshLayout.setRefreshing(true);
-    mRecordAdapter.clear();
+    dataList.clear();
+    sampleList.clear();
+    simpleAdapter.notifyDataSetChanged();
     remoteDB.executeQuery("select a.json, b.CardPic "
         + " from PRODUCTAPPGET a left join CUSTOMER b on b.custno = a.custno  "
         +" where a.shareToDeviceId like ? and a.json <>''", MApp.getApplication().getSystemInfo().getDeviceId() +"%")
@@ -134,7 +143,7 @@ public class ReceiveSampleFragment extends PagerFragment{
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new Subscriber<SampleMaster>() {
           @Override public void onCompleted() {
-            mRecordAdapter.notifyDataSetChanged();
+            simpleAdapter.notifyDataSetChanged();
             swipeRefreshLayout.setRefreshing(false);
           }
 
@@ -145,7 +154,15 @@ public class ReceiveSampleFragment extends PagerFragment{
           }
 
           @Override public void onNext(SampleMaster sampleMaster) {
-            mRecordAdapter.addData(sampleMaster);
+            HashMap<String, String> hashMap = new HashMap<String, String>();
+            String text = sampleMaster.create_date.toLocaleString();
+            if (!TextUtils.isEmpty(sampleMaster.dataFrom)){
+              text +="  " + sampleMaster.dataFrom;
+            }
+            text += (TextUtils.isEmpty(sampleMaster.getDesc())?"": "\r\n" +sampleMaster.getDesc());
+            hashMap.put("text",text);
+            dataList.add(hashMap);
+            sampleList.add(sampleMaster);
 
           }
         });

@@ -60,7 +60,7 @@ public class MyIDFragment extends PagerFragment {
       if(ss.length >1){
         px += " " + ss[1].trim();
       }
-      getQrCode(MApp.getApplication().getSystemInfo().getDeviceId() +"\t" + px, 300)
+      getQrCode(MApp.getApplication().getSystemInfo().getDeviceId() +"|" + px, 300)
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe(

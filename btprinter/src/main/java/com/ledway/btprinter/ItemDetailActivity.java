@@ -112,6 +112,9 @@ public class ItemDetailActivity extends AppCompatActivity {
     if (TextUtils.isEmpty(mSampleMaster.guid)) {
       mSampleMaster. guid = MApp.getApplication().getSystemInfo().getDeviceId() + "_" + System.currentTimeMillis();
     }
+    if (TextUtils.isEmpty(mSampleMaster.dataFrom)){
+      mSampleMaster.dataFrom = MApp.getApplication().getSystemInfo().getBusinessCard();
+    }
     mSampleMaster.reset();
     mSampleMaster.queryDetail();
     setContentView(R.layout.activity_item_detail);
