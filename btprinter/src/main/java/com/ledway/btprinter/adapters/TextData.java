@@ -31,6 +31,10 @@ public class TextData extends BaseData{
         s = MApp.getApplication().getString(R.string.share_to_title) +s;
         break;
       }
+      case DataAdapter.DATA_TYPE_DATA_FROM:{
+        s = MApp.getApplication().getString(R.string.data_from) +s;
+        break;
+      }
       case DataAdapter.DATA_TYPE_BARCODE:{
        // s = MApp.getApplication().getString(R.string.prod)  + s;
         break;

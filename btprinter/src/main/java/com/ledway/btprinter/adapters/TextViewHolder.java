@@ -34,6 +34,10 @@ public class TextViewHolder extends BaseViewHolder {
         break;
       }
 
+      case DataAdapter.DATA_TYPE_DATA_FROM:{
+        label = MApp.getApplication().getString(R.string.data_from);
+        break;
+      }
 
     }
     mTxtLabel.setText(label);

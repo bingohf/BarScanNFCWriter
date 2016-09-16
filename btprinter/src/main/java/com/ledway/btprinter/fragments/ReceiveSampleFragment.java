@@ -157,7 +157,7 @@ public class ReceiveSampleFragment extends PagerFragment{
             HashMap<String, String> hashMap = new HashMap<String, String>();
             String text = sampleMaster.create_date.toLocaleString();
             if (!TextUtils.isEmpty(sampleMaster.dataFrom)){
-              text +="  " + sampleMaster.dataFrom;
+              text +="  " + sampleMaster.dataFrom.trim().replaceAll("\\r|\\n", " ");
             }
             text += (TextUtils.isEmpty(sampleMaster.getDesc())?"": "\r\n" +sampleMaster.getDesc());
             hashMap.put("text",text);

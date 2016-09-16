@@ -37,7 +37,11 @@ public class SampleReadonlyActivity extends AppCompatActivity {
     mListViewProd.setLayoutManager(linearLayoutManager);
     mListViewProd.setAdapter(mDataAdapter);
 
-
+    if (!TextUtils.isEmpty(mSampleMaster.dataFrom)) {
+      TextData textData = new TextData(DataAdapter.DATA_TYPE_DATA_FROM);
+      textData.setText(mSampleMaster.dataFrom);
+      mDataAdapter.addData(textData);
+    }
     if (!TextUtils.isEmpty(mSampleMaster.getDesc())) {
       TextData textData = new TextData(DataAdapter.DATA_TYPE_MEMO);
       textData.setText(mSampleMaster.getDesc());
