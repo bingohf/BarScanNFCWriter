@@ -5,12 +5,15 @@ android {
   compileSdkVersion 23
   buildToolsVersion "23.0.3"
 
+  packagingOptions {
+    pickFirst  'META-INF/LICENSE'
+  }
   defaultConfig {
     applicationId "com.ledway.btprinter"
     minSdkVersion 17
     targetSdkVersion 17
-    versionCode 39
-    versionName "3.9"
+    versionCode 40
+    versionName "4.0"
   }
   signingConfigs{
     relase_signing_config{
@@ -23,6 +26,7 @@ android {
   lintOptions {
     abortOnError false
   }
+
   buildTypes {
     debug{
       versionNameSuffix ".dev"

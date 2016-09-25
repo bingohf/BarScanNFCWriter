@@ -66,7 +66,7 @@ public class BusinessCardFragment extends PagerFragment {
             }
           }
         });
-    String text = sp.getString("qrcode","");
+    String text = sp.getString("qrcode",getString(R.string.default_my_business_card));
     if (TextUtils.isEmpty(text)){
       text = getString(R.string.default_my_business_card);
     }

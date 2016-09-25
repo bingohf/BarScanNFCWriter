@@ -395,11 +395,15 @@ public class ItemDetailActivity extends AppCompatActivity {
         }
         case RESULT_CAMERA_SHARE_TO: {
           String qrcode = data.getStringExtra("barcode");
-          mSampleMaster.setShareToDeviceId(qrcode);
-          TextData textData = new TextData(DataAdapter.DATA_TYPE_SHARE_TO);
-          textData.setText(qrcode);
-          mDataAdapter.removeByType(DataAdapter.DATA_TYPE_SHARE_TO);
-          mDataAdapter.addData(textData);
+          String[] ss = qrcode.split("\\r|\\n");
+          if (ss.length > 0) {
+            qrcode = ss[0] + " | " + MApp.getApplication().getSystemInfo().getBusinessCard();
+            mSampleMaster.setShareToDeviceId(qrcode);
+            TextData textData = new TextData(DataAdapter.DATA_TYPE_SHARE_TO);
+            textData.setText(qrcode);
+            mDataAdapter.removeByType(DataAdapter.DATA_TYPE_SHARE_TO);
+            mDataAdapter.addData(textData);
+          }
           break;
         }
         case RESULT_CAMERA_BAR_CODE: {

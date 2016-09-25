@@ -52,7 +52,7 @@ public class MyIDFragment extends PagerFragment {
     if(isVisibleToUser){
       SharedPreferences sp = getActivity().getSharedPreferences("qrcode", Context.MODE_PRIVATE);
       String qrcode = sp.getString("qrcode","");
-      getQrCode(MApp.getApplication().getSystemInfo().getDeviceId() +"|" + qrcode, 300)
+      getQrCode(MApp.getApplication().getSystemInfo().getDeviceId() +"\r\n" + qrcode, 300)
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe(

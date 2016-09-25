@@ -65,7 +65,7 @@ public class ReceiveSampleFragment extends PagerFragment{
     ListView listView = (ListView) view.findViewById(R.id.list_view);
     swipeRefreshLayout =
         (SwipeRefreshLayout) view.findViewById(R.id.swiperefresh);
-    simpleAdapter = new ReceiveSampleAdapter(getActivity(),dataList, R.layout.list_item_record, new String[]{"text"}, new int[]{R.id.text1});
+    simpleAdapter = new ReceiveSampleAdapter(getActivity(),dataList, R.layout.list_item_record, new String[]{"text", "text2"}, new int[]{R.id.text1, R.id.text2});
     listView.setAdapter(simpleAdapter);
     loadData();
     listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -157,11 +157,12 @@ public class ReceiveSampleFragment extends PagerFragment{
           @Override public void onNext(SampleMaster sampleMaster) {
             HashMap<String, String> hashMap = new HashMap<String, String>();
             String text = sampleMaster.create_date.toLocaleString();
-            if (!TextUtils.isEmpty(sampleMaster.dataFrom)){
-              text +="  " + sampleMaster.dataFrom.trim().replaceAll("\\r|\\n", " ");
-            }
             text += (TextUtils.isEmpty(sampleMaster.getDesc())?"": "\r\n" +sampleMaster.getDesc());
             hashMap.put("text",text);
+
+            if (!TextUtils.isEmpty(sampleMaster.dataFrom)){
+              hashMap.put("text2",sampleMaster.dataFrom.trim().replaceAll("\\r|\\n", " "));
+            }
             dataList.add(hashMap);
             sampleList.add(sampleMaster);
 

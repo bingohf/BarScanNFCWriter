@@ -5,6 +5,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.provider.Settings;
 import com.ledway.btprinter.MApp;
+import com.ledway.btprinter.R;
 
 /**
  * Created by togb on 2016/6/5.
@@ -31,7 +32,7 @@ public class SystemInfo {
   public String getBusinessCard() {
     String string = MApp.getApplication()
         .getSharedPreferences("qrcode", Context.MODE_PRIVATE)
-        .getString("qrcode", "");
+        .getString("qrcode", MApp.getApplication().getString(R.string.default_my_business_card));
     return string;
 /*    String[] ss = stirng.split("\\r|\\n");
     StringBuilder sb = new StringBuilder();

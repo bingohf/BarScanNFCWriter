@@ -23,6 +23,7 @@ android {
     lintOptions {
         abortOnError false
     }
+
     buildTypes {
         debug{
             versionNameSuffix ".dev"
@@ -49,6 +50,7 @@ android {
 
         }
     }
+
 }
 
 dependencies {
