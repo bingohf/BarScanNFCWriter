@@ -82,19 +82,23 @@ public class PhotoData extends BaseData {
   }
 
   public Bitmap getFileBitmap(int targetW, int targetH){
-    BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-    bmOptions.inJustDecodeBounds = true;
-    BitmapFactory.decodeFile(bitmapPath, bmOptions);
-    int photoW = bmOptions.outWidth;
-    int photoH = bmOptions.outHeight;
-    int scaleFactor = Math.max(photoW / targetW, photoH / targetH);
-    scaleFactor = Math.max(scaleFactor, 1);
-    // Decode the image file into a Bitmap sized to fill the View
-    bmOptions.inJustDecodeBounds = false;
-    bmOptions.inSampleSize = scaleFactor;
-    bmOptions.inPurgeable = true;
-    bitmap = BitmapFactory.decodeFile(bitmapPath, bmOptions);
-    return bitmap;
+    if(new File(bitmapPath).exists()) {
+
+      BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+      bmOptions.inJustDecodeBounds = true;
+      BitmapFactory.decodeFile(bitmapPath, bmOptions);
+      int photoW = bmOptions.outWidth;
+      int photoH = bmOptions.outHeight;
+      int scaleFactor = Math.max(photoW / targetW, photoH / targetH);
+      scaleFactor = Math.max(scaleFactor, 1);
+      // Decode the image file into a Bitmap sized to fill the View
+      bmOptions.inJustDecodeBounds = false;
+      bmOptions.inSampleSize = scaleFactor;
+      bmOptions.inPurgeable = true;
+      bitmap = BitmapFactory.decodeFile(bitmapPath, bmOptions);
+      return bitmap;
+    }
+    return null;
 
   }
   private byte[] StartBmpToPrintCode(Bitmap bitmap) {

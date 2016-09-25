@@ -31,14 +31,16 @@ public class PhotoViewHolder extends BaseViewHolder{
       if (file.exists() && file.length() > 0) {
         int targetW = MApp.getApplication().point.x - 200;
         int targetH = Math.max(imageView.getHeight(),MApp.getApplication().point.y/3);
-
-
         Bitmap bitmap = photoData.getFileBitmap(targetW, targetH);
-        imageView.setImageBitmap(bitmap);
-        imageView.setImagePath(photoData.getBitmapPath());
-        ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
-        layoutParams.width = bitmap.getWidth();
-        layoutParams.height = bitmap.getHeight();
+        if (bitmap != null) {
+          imageView.setImageBitmap(bitmap);
+          imageView.setImagePath(photoData.getBitmapPath());
+          ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
+          layoutParams.width = bitmap.getWidth();
+          layoutParams.height = bitmap.getHeight();
+        }else{
+          imageView.setImageBitmap(null);
+        }
 
       } else {
         imageView.setImageBitmap(null);

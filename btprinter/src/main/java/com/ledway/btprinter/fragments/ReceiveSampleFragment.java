@@ -87,9 +87,9 @@ public class ReceiveSampleFragment extends PagerFragment{
     dataList.clear();
     sampleList.clear();
     simpleAdapter.notifyDataSetChanged();
-    remoteDB.executeQuery("select a.json "
+    remoteDB.executeQuery("select a.json, b.CardPic "
         + " from PRODUCTAPPGET a left join CUSTOMER b on b.custno = a.custno  "
-        +" where a.shareToDeviceId like ? and a.json <>''", MApp.getApplication().getSystemInfo().getDeviceId() +"%")
+        +" where a.shareToDeviceId like ? and a.json <>'' order by a.CREATEDATE desc", MApp.getApplication().getSystemInfo().getDeviceId() +"%")
         .subscribeOn(Schedulers.io())
 
         .flatMap(new Func1<ResultSet, Observable<SampleMaster>>() {

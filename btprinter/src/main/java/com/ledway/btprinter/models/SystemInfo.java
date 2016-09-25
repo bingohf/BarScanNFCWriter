@@ -29,10 +29,11 @@ public class SystemInfo {
   }
 
   public String getBusinessCard() {
-    String stirng = MApp.getApplication()
+    String string = MApp.getApplication()
         .getSharedPreferences("qrcode", Context.MODE_PRIVATE)
         .getString("qrcode", "");
-    String[] ss = stirng.split("\\r|\\n");
+    return string;
+/*    String[] ss = stirng.split("\\r|\\n");
     StringBuilder sb = new StringBuilder();
     for(int i =0;i < ss.length && i < 2; ++i){
       if(i > 0){
@@ -40,7 +41,7 @@ public class SystemInfo {
       }
       sb.append(ss[i]);
     }
-    return  sb.toString();
+    return  sb.toString();*/
 
   }
 }
