@@ -20,12 +20,14 @@ import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+import com.ledway.btprinter.adapters.BaseData;
 import com.ledway.btprinter.adapters.DataAdapter;
 import com.ledway.btprinter.adapters.PhotoData;
 import com.ledway.btprinter.adapters.RecordAdapter;
@@ -95,6 +97,7 @@ public class ItemDetailActivity extends AppCompatActivity {
 
           @Override public void onNext(SampleProdLink sampleProdLink) {
             TextData textData = new TextData(DataAdapter.DATA_TYPE_BARCODE);
+            textData.value = sampleProdLink.prod_id;
             textData.setText(sampleProdLink.ext
                 + ": "
                 + sampleProdLink.prod_id
@@ -158,6 +161,7 @@ public class ItemDetailActivity extends AppCompatActivity {
       SampleProdLink prod = iterator.next();
       TextData textData = new TextData(DataAdapter.DATA_TYPE_BARCODE);
       textData.setText(prod.ext + ": " + prod.prod_id + "  " + prod.spec_desc);
+      textData.value = prod.prod_id;
       mDataAdapter.addData(textData);
     }
   }
@@ -169,8 +173,23 @@ public class ItemDetailActivity extends AppCompatActivity {
     linearLayoutManager.setStackFromEnd(true);
     mListViewProd.setLayoutManager(linearLayoutManager);
     mListViewProd.setAdapter(mDataAdapter);
+
+    final GestureDetector gestureDetector = new GestureDetector(this,new GestureDetector.SimpleOnGestureListener(){
+
+      @Override public boolean onSingleTapUp(MotionEvent e) {
+        return true;
+      }
+    });
     mListViewProd.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
       @Override public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+        View childView = rv.findChildViewUnder(e.getX(), e.getY());
+        int position = rv.getChildAdapterPosition(childView);
+        BaseData baseData = mDataAdapter.getItem(position);
+        if(gestureDetector.onTouchEvent(e) && baseData.getType() == DataAdapter.DATA_TYPE_BARCODE){
+          String prodno = (String) baseData.value;
+          startActivity(new Intent(ItemDetailActivity.this, TodoProdDetailActivity.class).putExtra("prod_no",prodno));
+          return true;
+        }
         return false;
       }
 
@@ -395,15 +414,13 @@ public class ItemDetailActivity extends AppCompatActivity {
         }
         case RESULT_CAMERA_SHARE_TO: {
           String qrcode = data.getStringExtra("barcode");
-          String[] ss = qrcode.split("\\r|\\n");
-          if (ss.length > 0) {
-            qrcode = ss[0] + " | " + MApp.getApplication().getSystemInfo().getBusinessCard();
-            mSampleMaster.setShareToDeviceId(qrcode);
-            TextData textData = new TextData(DataAdapter.DATA_TYPE_SHARE_TO);
-            textData.setText(qrcode);
-            mDataAdapter.removeByType(DataAdapter.DATA_TYPE_SHARE_TO);
-            mDataAdapter.addData(textData);
-          }
+          qrcode = qrcode. replaceAll("\\r|\\n", " ");
+          qrcode = qrcode.replaceFirst(" ", " | ");
+          mSampleMaster.setShareToDeviceId(qrcode);
+          TextData textData = new TextData(DataAdapter.DATA_TYPE_SHARE_TO);
+          textData.setText(qrcode);
+          mDataAdapter.removeByType(DataAdapter.DATA_TYPE_SHARE_TO);
+          mDataAdapter.addData(textData);
           break;
         }
         case RESULT_CAMERA_BAR_CODE: {

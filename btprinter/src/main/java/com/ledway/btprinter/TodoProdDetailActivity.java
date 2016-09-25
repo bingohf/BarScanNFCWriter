@@ -20,6 +20,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.activeandroid.query.Select;
 import com.ledway.btprinter.models.TodoProd;
 import com.ledway.btprinter.utils.IOUtil;
 import com.ledway.btprinter.views.MImageView;
@@ -90,7 +91,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     mImageView = (MImageView) findViewById(R.id.image);
     mTxtHint = (TextView) findViewById(R.id.txt_hint);
     mEdtSpec = (EditText) findViewById(R.id.txt_spec);
-    mTodoProd = (TodoProd) MApp.getApplication().getSession().getValue("current_todo_prod");
+    loadTodoProd();
     mTodoProd.queryAllField();
     getSupportActionBar().setTitle(mTodoProd.prodNo);
     mEdtSpec.setText(mTodoProd.spec_desc);
@@ -122,6 +123,23 @@ public class TodoProdDetailActivity extends AppCompatActivity {
 
 /*    Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
     startActivityForResult(takePicture, REQUEST_TAKE_IMAGE);//zero can be replaced with any action code*/
+  }
+
+  private void loadTodoProd() {
+    String prodno = getIntent().getStringExtra("prod_no");
+    if(TextUtils.isEmpty(prodno)) {
+      mTodoProd = (TodoProd) MApp.getApplication().getSession().getValue("current_todo_prod");
+    }else {
+      mTodoProd = loadTodoProd(prodno);
+    }
+  }
+
+  private TodoProd loadTodoProd(String prodno) {
+    List<TodoProd> todoProds = new Select().from(TodoProd.class).where("prodno =?", prodno).execute();
+    if (todoProds.size() > 0){
+      return todoProds.get(0);
+    }
+    return null;
   }
 
   @Override protected void onActivityResult(final int requestCode, int resultCode, Intent data) {

@@ -10,6 +10,7 @@ import java.io.OutputStream;
  */
 public class BaseData {
   protected int type;
+  public Object value;
   public BaseData(int type){
     this.type = type;
   }
