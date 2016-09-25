@@ -56,6 +56,7 @@
     <activity android:name=".BusinessCardActivity"
         android:label="@string/title_my_business_card"
         />
+    <activity android:name=".RemoteProdActivity"/>
     <activity
         android:theme="@style/AppOverlayTheme"
         android:name="com.ledway.framework.FullScannerActivity"/>

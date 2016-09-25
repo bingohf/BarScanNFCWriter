@@ -255,7 +255,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
   }
 
   private String getProdNoFileName(){
-    return mTodoProd.prodNo.replace("[\\*\\/\\\\\\?]","_");
+    return mTodoProd.prodNo.replaceAll("[\\*\\/\\\\\\?]","_");
   }
 
 }

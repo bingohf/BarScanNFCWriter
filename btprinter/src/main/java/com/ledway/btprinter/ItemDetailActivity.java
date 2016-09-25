@@ -184,11 +184,16 @@ public class ItemDetailActivity extends AppCompatActivity {
       @Override public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
         View childView = rv.findChildViewUnder(e.getX(), e.getY());
         int position = rv.getChildAdapterPosition(childView);
-        BaseData baseData = mDataAdapter.getItem(position);
-        if(gestureDetector.onTouchEvent(e) && baseData.getType() == DataAdapter.DATA_TYPE_BARCODE){
-          String prodno = (String) baseData.value;
-          startActivity(new Intent(ItemDetailActivity.this, TodoProdDetailActivity.class).putExtra("prod_no",prodno));
-          return true;
+        if (position > 0 && position < mDataAdapter.getItemCount()) {
+          BaseData baseData = mDataAdapter.getItem(position);
+          if (gestureDetector.onTouchEvent(e)
+              && baseData.getType() == DataAdapter.DATA_TYPE_BARCODE) {
+            String prodno = (String) baseData.value;
+            startActivity(
+                new Intent(ItemDetailActivity.this, TodoProdDetailActivity.class).putExtra("prod_no",
+                    prodno));
+            return true;
+          }
         }
         return false;
       }

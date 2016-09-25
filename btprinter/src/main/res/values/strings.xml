@@ -52,4 +52,5 @@
   <string name="data_from">發送方:</string>
   <string name="my_sample">我的取樣單</string>
   <string name="title_receive_sample">接收的取樣單</string>
+  <string name="no_image">没有图片</string>
 </resources>
