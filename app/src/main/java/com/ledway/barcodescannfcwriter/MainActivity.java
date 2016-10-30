@@ -470,7 +470,8 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, R.string.auth_fail_card, Toast.LENGTH_LONG).show();
                     } else {
                         gnfc.write(barcode);
-                        if (barcode.equals(gnfc.read())) {
+                        String readText = gnfc.read();
+                        if (barcode.equals(readText)) {
                             Record r = new Record();
                             r.readings = barcode;
                             r.rfidSeries = readMifareId(intents);
