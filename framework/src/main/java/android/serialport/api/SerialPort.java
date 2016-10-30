@@ -228,7 +228,7 @@ public class SerialPort {
 	private native void close();
 
 	static {
-//		System.loadLibrary("serial_port");
+		System.loadLibrary("serial_port");
 	}
 
 	private static String byteToString(byte[] b, int size) {
