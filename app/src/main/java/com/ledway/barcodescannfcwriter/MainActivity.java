@@ -395,15 +395,16 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-    private String bytesToHexString(byte[] src) {
+    private  String bytesToHexStringDesc(byte[] src) {
         StringBuilder stringBuilder = new StringBuilder("");
         if (src == null || src.length <= 0) {
             return null;
         }
         char[] buffer = new char[2];
         for (int i = 0; i < src.length; i++) {
-            buffer[0] = Character.forDigit((src[i] >>> 4) & 0x0F, 16);
-            buffer[1] = Character.forDigit(src[i] & 0x0F, 16);
+            int j = src.length -1 - i;
+            buffer[0] = Character.forDigit((src[j] >>> 4) & 0x0F, 16);
+            buffer[1] = Character.forDigit(src[j] & 0x0F, 16);
 
             stringBuilder.append(buffer);
 
@@ -413,13 +414,10 @@ public class MainActivity extends AppCompatActivity {
 
     private String readMifareId(Intent intent){
         byte[] myNFCID = intent.getByteArrayExtra(NfcAdapter.EXTRA_ID);
-        int before = (int) Long.parseLong(bytesToHexString(myNFCID), 16);
-        int r24 = before >> 24 & 0x000000FF;
-        int r8 = before >> 8 & 0x0000FF00;
-        int l8 = before << 8 & 0x00FF0000;
-        int l24 = before << 24 & 0xFF000000;
-
-        long mifareId = Long.parseLong(Integer.toHexString((r24 | r8 | l8 | l24)), 16);
+        String hexStr = bytesToHexStringDesc(myNFCID);
+        int v2 = (int) (Long.parseLong(hexStr, 16) & 0xffffffff);
+        String hexStr2 = Integer.toHexString(v2);
+        long mifareId =  Long.parseLong(hexStr2, 16);
         return mifareId +"";
     }
 
