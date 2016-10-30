@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    >
+
+
+  <android.support.v7.widget.RecyclerView
+      android:id="@+id/list_data"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="1"
+      android:clickable="true"
+      android:scrollbars="vertical"
+      >
+  </android.support.v7.widget.RecyclerView>
+
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+      <Button
+          android:id="@+id/btn_take_photo_1"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="@string/take_photo_1"
+          android:textAllCaps="false"
+          />
+      <View
+          android:layout_width="8dp"
+          android:layout_height="1dp"
+          />
+
+      <Button
+          android:id="@+id/btn_shareto"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="@string/share_to"
+          android:textAllCaps="false"
+          />
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+      <Button
+          android:id="@+id/btn_take_photo_2"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="@string/take_photo_2"
+          android:textAllCaps="false"
+          />
+
+      <View
+          android:layout_width="8dp"
+          android:layout_height="1dp"
+          />
+      <Button
+          android:id="@+id/btn_input_barcode"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="@string/input_barcode"
+          android:textAllCaps="false"
+          />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+
+
+      <Button
+          android:id="@+id/btn_qr_code"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="@string/read_qr_code"
+          android:textAllCaps="false"
+          />
+      <View
+          android:layout_width="8dp"
+          android:layout_height="1dp"
+          />
+      <Button
+          android:id="@+id/btn_scan_barcode"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="@string/scan_barcode"
+          android:textAllCaps="false"
+          />
+    </LinearLayout>
+  </LinearLayout>
+
+</LinearLayout>

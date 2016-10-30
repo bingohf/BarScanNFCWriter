@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <EditTextPreference
+        android:title="@string/setting.line.title"
+        android:key="Line"
+        android:summary="Please provide your line"
+        android:shouldDisableView="false"></EditTextPreference>
+    <EditTextPreference android:title="@string/setting.reader.title"
+        android:key="Reader"
+        android:summary="Please provide your Reader"
+        android:shouldDisableView="false">
+        ></EditTextPreference>
+    <EditTextPreference android:title="@string/setting.server.title"
+        android:key="Server"
+        android:summary="Please provide cloud server"
+        android:shouldDisableView="false">
+        ></EditTextPreference>
+
+    <Preference
+        android:key="app_version"
+        android:shouldDisableView="false"
+        android:title="@string/app_version"
+        />
+    </PreferenceScreen>

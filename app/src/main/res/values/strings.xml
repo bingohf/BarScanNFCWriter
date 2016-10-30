@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Bundle Tracking</string>
+    <string name="ledway_license">This software is licensed to equipments under MAC code being registered to the Supplier before installation. Please contact Ledway to ensure your MAC code is active. Please call us at<a href="tel:+886-2-22799889">+886-2-22799889</a> or check out our web at<a href="http://www.ledway.com.tw"> www.ledway.com.tw</a></string>
+    <string name="wait_a_moment">Wait a moment</string>
+    <string name="license">License</string>
+    <string name="authorization">授權中</string>
 
 </resources>

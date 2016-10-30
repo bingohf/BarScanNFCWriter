@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.ledway.btprinter">
+
+  <uses-feature android:name="android.hardware.camera"
+      android:required="true" />
+  <uses-permission android:name="android.permission.BLUETOOTH"/>
+  <uses-permission android:name="android.permission.CALL_PHONE"/>
+  <uses-permission android:name="android.permission.NFC"/>
+  <uses-permission android:name="android.permission.INJECT_EVENT">
+  </uses-permission>
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED">
+  </uses-permission>
+
+  <uses-permission android:name="android.permission.VIBRATE"/>
+  <uses-permission android:name="android.permission.INTERNET"/>
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+  <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+  <uses-permission android:name="android.permission.CAMERA" />
+  <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
+
+  <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
+  <application
+      android:name=".MApp"
+      android:allowBackup="true"
+      android:icon="@drawable/ic_launcher"
+      android:label="@string/app_name"
+      android:supportsRtl="true"
+      android:theme="@style/AppTheme"
+
+      >
+    <activity android:name=".MainActivity"
+        android:theme="@style/AppTheme.NoActionBar"
+        android:screenOrientation="portrait">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+
+        <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
+    </activity>
+    <activity android:name=".AppPreferences"/>
+    <activity android:name=".ItemDetailActivity"
+        android:screenOrientation="portrait"
+        />
+    <activity android:name=".PrintPreviewActivity"/>
+    <activity android:name=".ProdListActivity"
+        android:screenOrientation="portrait"
+        android:label="@string/update_prod"
+        />
+    <activity android:name=".TodoProdDetailActivity"    android:screenOrientation="portrait"/>
+    <activity android:name=".AgreementActivity"
+        android:label="@string/title_agreement"
+        />
+    <activity android:name=".BusinessCardActivity"
+        android:label="@string/title_my_business_card"
+        />
+    <activity android:name=".RemoteProdActivity"/>
+    <activity
+        android:theme="@style/AppOverlayTheme"
+        android:name="com.ledway.framework.FullScannerActivity"/>
+
+    <activity android:name=".SampleReadonlyActivity"/>
+
+    <provider
+        android:name="android.support.v4.content.FileProvider"
+        android:authorities="com.ledway.btprinter.fileprovider"
+        android:exported="false"
+        android:grantUriPermissions="true">
+      <meta-data
+          android:name="android.support.FILE_PROVIDER_PATHS"
+          android:resource="@xml/file_paths"></meta-data>
+    </provider>
+
+<!--    &lt;!&ndash; 按键广播 &ndash;&gt;
+    <receiver
+        android:name="com.zkc.Receiver.RemoteControlReceiver"
+        android:permission="com.zkc.keycode" >
+      &lt;!&ndash;            <intent-filter android:priority="1000" />&ndash;&gt;
+      <intent-filter>
+        <action android:name="com.zkc.keycode" />
+      </intent-filter>
+    </receiver>-->
+    <!-- 广播接收 -->
+<!--    <receiver android:name="com.zkc.Receiver.StartReceiver" >
+      &lt;!&ndash;            <intent-filter android:priority="996" />&ndash;&gt;
+      <intent-filter>
+        <action android:name="android.intent.action.BOOT_COMPLETED" />
+
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+    </receiver>-->
+    <!-- 扫描服务 -->
+<!--    <service android:name="com.zkc.Service.CaptureService" >
+      <intent-filter>
+        <action android:name="com.zkc.Service.CaptureService" />
+      </intent-filter>
+    </service>-->
+    <meta-data
+        android:name="AA_DB_NAME"
+        android:value="cust.db"/>
+    <meta-data
+        android:name="AA_DB_VERSION"
+        android:value="1"/>
+    <meta-data
+        android:name="AA_MODELS"
+        android:value="com.ledway.btprinter.models.SampleMaster,com.ledway.btprinter.models.Prod,com.ledway.btprinter.models.TodoProd,com.ledway.btprinter.models.SampleProdLink"/>
+  </application>
+
+</manifest>

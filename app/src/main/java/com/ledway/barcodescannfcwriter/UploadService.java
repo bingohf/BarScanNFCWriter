@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.ledway.barcodescannfcwriter.models.Record;
 
+import com.ledway.framework.RemoteDB;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -19,11 +20,13 @@ import rx.Notification;
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Action1;
+import rx.functions.Func1;
 
 /**
  * Created by togb on 2016/4/23.
  */
 public class UploadService {
+    private RemoteDB remoteDB;
     private Context context;
     private Settings settings;
     private Statement statement;
@@ -32,49 +35,25 @@ public class UploadService {
     public UploadService(Context context){
         this.context = context;
         settings = MApp.getInstance().getSettings();
+        reset();
     }
 
     public Observable<Record> uploadRecord(final Record record){
-        return Observable.create(new Observable.OnSubscribe<Record>() {
-            @Override
-            public void call(Subscriber<? super Record> subscriber) {
-                if (!isOnline()){
-                    subscriber.onError(new Exception("Network is not available"));
-                    if(statement != null) {
-                        try {
-                            statement.close();
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-                        statement = null;
-                    }
-                }else {
-                    try {
-                        prepareStatement();
-                        String sql = "insert into dbo.RFID1(line,reader,readings,wK_date,rfid_series) values('" + record.line
-                                +"','" + record.reader
-                                + "','" + record.readings
-                                +"','" + dateFormat.format(record.wk_date)
-                                 +"','" + record.rfidSeries
-                            +"')";
-                        statement.execute(sql);
-                        record.uploaded_datetime = new Date();
-                       // Thread.sleep(3000);
-                        record.save();
-                        subscriber.onNext(record);
-                        subscriber.onCompleted();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        subscriber.onError(e);
-                    }
+        String sql = "insert into dbo.RFID1(line,reader,readings,wK_date,rfid_series) values(?,?,?,?,?)";
+
+        return remoteDB.execute(sql, record.line, record.reader, record.readings, record.wk_date, record.rfidSeries)
+            .map(new Func1<Boolean, Record>() {
+                @Override public Record call(Boolean aBoolean) {
+                    record.uploaded_datetime = new Date();
+                    record.save();
+                    return record;
                 }
-            }
-        }).doOnError(new Action1<Throwable>() {
-            @Override
-            public void call(Throwable throwable) {
-                statement = null;
-            }
-        }).retry(2);
+            }).doOnError(new Action1<Throwable>() {
+                @Override public void call(Throwable throwable) {
+                    reset();
+                }
+            }).retry(2);
+
     }
 
     private synchronized void prepareStatement() throws Exception {
@@ -104,6 +83,11 @@ public class UploadService {
     }
 
     public void reset() {
-        statement = null;
+        if (remoteDB != null){
+            remoteDB.reset();
+        }
+        String connectionString = "jdbc:jtds:sqlserver://%s;DatabaseName=WINUPRFID;charset=UTF8";
+        connectionString = String.format(connectionString, settings.getServer());
+        remoteDB = new RemoteDB(connectionString);
     }
 }

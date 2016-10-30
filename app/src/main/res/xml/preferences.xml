@@ -40,4 +40,10 @@
         android:shouldDisableView="false"
         android:title="@string/company"
         android:summary="@string/company.tel"/>
+
+    <Preference
+        android:key="app_version"
+        android:shouldDisableView="false"
+        android:title="@string/app_version"
+        />
     </PreferenceScreen>
