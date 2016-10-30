@@ -5,6 +5,7 @@ import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.Tag;
 import android.nfc.tech.Ndef;
+import android.text.TextUtils;
 import android.util.Log;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -17,21 +18,27 @@ import java.util.Arrays;
 public class GNdef extends GNfc {
   private final static String TAG = GNfc.class.getSimpleName();
   private final Ndef ndef;
-
+  private String cachedText = null;
   public GNdef(Tag tag) {
     super(tag);
     this. ndef = Ndef.get(tag);
   }
 
   @Override public String read() throws IOException {
+    if (!TextUtils.isEmpty(cachedText)){
+      return cachedText;
+    }
     NdefMessage ndefMessage = ndef.getCachedNdefMessage();
-    NdefRecord[] records = ndefMessage.getRecords();
-    for (NdefRecord ndefRecord : records) {
-      if (ndefRecord.getTnf() == NdefRecord.TNF_WELL_KNOWN && Arrays.equals(ndefRecord.getType(), NdefRecord.RTD_TEXT)) {
-        try {
-          return readText(ndefRecord);
-        } catch (UnsupportedEncodingException e) {
-          Log.e(TAG, "Unsupported Encoding", e);
+    if (ndefMessage != null) {
+      NdefRecord[] records = ndefMessage.getRecords();
+      for (NdefRecord ndefRecord : records) {
+        if (ndefRecord.getTnf() == NdefRecord.TNF_WELL_KNOWN && Arrays.equals(ndefRecord.getType(),
+            NdefRecord.RTD_TEXT)) {
+          try {
+            return readText(ndefRecord);
+          } catch (UnsupportedEncodingException e) {
+            Log.e(TAG, "Unsupported Encoding", e);
+          }
         }
       }
     }
@@ -67,6 +74,7 @@ public class GNdef extends GNfc {
     NdefMessage message = new NdefMessage(records);
     try {
       ndef.writeNdefMessage(message);
+      cachedText = text;
     } catch (FormatException e) {
       e.printStackTrace();
       Log.e("error", e.getMessage(), e);
