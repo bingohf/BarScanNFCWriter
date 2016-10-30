@@ -15,7 +15,7 @@
   <string name="prod">布種:</string>
   <string name="qr_card">名片信息:</string>
   <string name="save_record">保存記錄</string>
-  <string name="bind_bt_printer">邦定打印機</string>
+  <string name="bind_bt_printer">綁定印表機</string>
   <string name="hint_enable_bluetooth">請開啟藍牙</string>
   <string name="card1">名片正面</string>
   <string name="card2">名片背面</string>

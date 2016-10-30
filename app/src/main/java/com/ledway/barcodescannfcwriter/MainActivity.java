@@ -10,8 +10,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
-import android.nfc.tech.MifareClassic;
-import android.nfc.tech.NfcA;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
@@ -33,6 +31,9 @@ import android.widget.Toast;
 import com.activeandroid.Model;
 import com.activeandroid.query.Select;
 import com.ledway.barcodescannfcwriter.models.Record;
+import com.ledway.barcodescannfcwriter.nfc.GMifareNfc;
+import com.ledway.barcodescannfcwriter.nfc.GNfc;
+import com.ledway.barcodescannfcwriter.nfc.GNfcLoader;
 import com.zkc.Receiver.StartReceiver;
 import com.zkc.Service.CaptureService;
 import com.zkc.beep.ServiceBeepManager;
@@ -49,6 +50,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
+import org.w3c.dom.Text;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
@@ -63,8 +65,6 @@ import rx.subscriptions.Subscriptions;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
-    private byte keyA[] = { (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
-            (byte) 0xff, (byte) 0xff};
 
     private NfcAdapter nfcAdapter;
     private PendingIntent pendingIntent;
@@ -204,9 +204,7 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter ndef = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
         ndef.addCategory("*/*");
         mFilters = new IntentFilter[] { ndef };// 过滤器
-        mTechLists = new String[][] {
-                new String[] { MifareClassic.class.getName() },
-                new String[] { NfcA.class.getName() } };// 允许扫描的标签类型
+        mTechLists = GNfcLoader.TechList;
 
         findViewById(R.id.btn_scan).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -376,25 +374,18 @@ public class MainActivity extends AppCompatActivity {
             if (settings.getDeviceType().equals("ReadNFC")){
                 Tag tagFromIntent = intents
                         .getParcelableExtra(NfcAdapter.EXTRA_TAG);
-                MifareClassic mfc = MifareClassic
-                        .get(tagFromIntent);
+                GNfc gnfc = GNfcLoader.load(tagFromIntent);
 
                 try {
-                    mfc.connect();
-                    boolean auth = mfc.authenticateSectorWithKeyA(
-                            1,
-                            keyA);
+                    gnfc.connect();
                     String mifareID = readMifareId(intent);
-                    if (auth) {
-                        byte[] bytes = mfc.readBlock(4);
-                        String barcode = new String(bytes).trim();
-                        if(!TextUtils.isEmpty(barcode)) {
+                    String barcode = gnfc.read();
+                    if (!TextUtils.isEmpty(barcode)) {
                             mEdtBarCode.setText(barcode);
                             Record record = new Record();
                             record.readings = barcode;
                             record.rfidSeries = mifareID;
                             insertRecordLog(record);
-                        }
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -471,33 +462,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void call(Object o) {
                 inWrite = false;
-                MifareClassic mfc = MifareClassic
-                        .get(tagFromIntent);
+                GNfc gnfc=  GNfcLoader.load(tagFromIntent);
                 boolean auth = false;
                 try {
-                    mfc.connect();
-                    auth = mfc.authenticateSectorWithKeyA(
-                            1,
-                            keyA);
-                    if (!auth) {
+                    gnfc.connect();
+                    if ((gnfc.getProperty() & GMifareNfc.PROPERTY_READABLE) != GMifareNfc.PROPERTY_READABLE) {
                         Toast.makeText(MainActivity.this, R.string.auth_fail_card, Toast.LENGTH_LONG).show();
                     } else {
-                        byte[] d = mEdtBarCode.getText().toString().trim().getBytes();
-                        byte[] f = new byte[16];
-                        for (int j = 0; j < d.length; j++) {
-                            f[j] = d[j];
-                        }
-                        if (d.length < 16) {
-                            int j = 16 - d.length;
-                            int k = d.length;
-                            for (int j2 = 0; j2 < j; j2++) {
-                                f[k + j2] = (byte) 0x00;
-                            }
-                        }
-                        mfc.writeBlock(4, f);
-                        mfc.sectorToBlock(4);
-                        byte[] bytes = mfc.readBlock(4);
-                        if (barcode.equals(new String(bytes).trim())) {
+                        gnfc.write(barcode);
+                        if (barcode.equals(gnfc.read())) {
                             Record r = new Record();
                             r.readings = barcode;
                             r.rfidSeries = readMifareId(intents);
@@ -512,7 +485,7 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 } finally {
                     try {
-                        mfc.close();
+                        gnfc.close();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

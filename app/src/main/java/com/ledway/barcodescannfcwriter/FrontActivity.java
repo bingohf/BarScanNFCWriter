@@ -32,7 +32,7 @@ public class FrontActivity extends AppCompatActivity {
     TextView tv = (TextView) findViewById(R.id.txt_license);
     tv.setMovementMethod(LinkMovementMethod.getInstance());
     mSp = getSharedPreferences("license", Context.MODE_PRIVATE);
-    if (mSp.getBoolean("authority", false) == true && mSp.getLong("ExpiredDate",0L) > new Date().getTime()){
+    if (BuildConfig.DEBUG||mSp.getBoolean("authority", false) == true && mSp.getLong("ExpiredDate",0L) > new Date().getTime()){
       finish();
       startActivity(new Intent(this, MainActivity.class));
     }else{
