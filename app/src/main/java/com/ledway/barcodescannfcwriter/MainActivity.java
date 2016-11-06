@@ -86,9 +86,9 @@ public class MainActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             autoScanTimeStamp = System.currentTimeMillis();
             String text = intent.getExtras().getString("code");
-            if (text.length() < 10){
+/*            if (text.length() < 10){
                 Toast.makeText(MainActivity.this, R.string.invalid_barcode, Toast.LENGTH_LONG).show();
-            }
+            }*/
             Log.i(TAG, "MyBroadcastReceiver code:" + text);
             Pattern pattern = Pattern.compile("[^0-9a-zA-Z_ ]");
             if(!pattern.matcher(text).matches()) {
