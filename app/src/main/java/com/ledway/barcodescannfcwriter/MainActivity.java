@@ -90,16 +90,13 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, R.string.invalid_barcode, Toast.LENGTH_LONG).show();
             }*/
             Log.i(TAG, "MyBroadcastReceiver code:" + text);
-            Pattern pattern = Pattern.compile("[^0-9a-zA-Z_ ]");
-            if(!pattern.matcher(text).matches()) {
-                mEdtBarCode.setText(text);
+            mEdtBarCode.setText(text);
+            if(validBarCode(text)) {
                 if (settings.getDeviceType().equals("ReadNFC")){
                     Record record = new Record();
                     record.readings = text;
                     insertRecordLog(record);
                 }
-            }else{
-                vibrator.vibrate(1000);
             }
             mScanTimer.onNext("Receiver");
             Observable.just(true).delay(1,TimeUnit.SECONDS).subscribe(new Action1<Boolean>() {
@@ -117,6 +114,15 @@ public class MainActivity extends AppCompatActivity {
     @Override protected void onPause() {
         super.onPause();
         autoScanTimeStamp = 0;
+    }
+    private boolean validBarCode(String barcode)  {
+        Pattern pattern = Pattern.compile("^[0-9a-zA-Z]*$");
+        if (!pattern.matcher(barcode).matches()) {
+            Toast.makeText(this, R.string.invalid_barcode, Toast.LENGTH_LONG).show();
+            vibrator.vibrate(1000);
+            return false;
+        }
+        return true;
     }
 
     private BroadcastReceiver systemBroadcastReceiver = new BroadcastReceiver() {
@@ -381,11 +387,13 @@ public class MainActivity extends AppCompatActivity {
                     String mifareID = readMifareId(intent);
                     String barcode = gnfc.read();
                     if (!TextUtils.isEmpty(barcode)) {
-                            mEdtBarCode.setText(barcode);
-                            Record record = new Record();
-                            record.readings = barcode;
-                            record.rfidSeries = mifareID;
-                            insertRecordLog(record);
+                            if(validBarCode(barcode)) {
+                                mEdtBarCode.setText(barcode);
+                                Record record = new Record();
+                                record.readings = barcode;
+                                record.rfidSeries = mifareID;
+                                insertRecordLog(record);
+                            }
                     }
                 } catch (IOException e) {
                     e.printStackTrace();

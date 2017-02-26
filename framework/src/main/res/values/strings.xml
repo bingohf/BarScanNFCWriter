@@ -32,7 +32,7 @@
   <string name="setting.autoupload.title">自動上傳(Auto Upload)</string>
   <string name="setting.type.title">Type</string>
   <string name="empty"/>
-  <string name="invalid_barcode">條碼不全(Invalid Code)</string>
+  <string name="invalid_barcode">條碼不全(Barcode Error)</string>
   <string name="app_version">App Version</string>
 
 

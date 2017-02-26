@@ -75,13 +75,8 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(MainActivity.this, R.string.invalid_barcode, Toast.LENGTH_LONG).show();
       }
       Log.i(TAG, "MyBroadcastReceiver code:" + text);
-      Pattern pattern = Pattern.compile("[^0-9a-zA-Z_ ]");
-      if (!pattern.matcher(text).matches()) {
-        mEdtBarCode.setText(text);
-        doQuery(text);
-      } else {
-        vibrator.vibrate(1000);
-      }
+      mEdtBarCode.setText(text);
+      doQuery(text);
       mScanTimer.onNext("Receiver");
       Observable.just(true).delay(1,TimeUnit.SECONDS).subscribe(new Action1<Boolean>() {
         @Override public void call(Boolean aBoolean) {
@@ -199,13 +194,28 @@ public class MainActivity extends AppCompatActivity {
     exitActivity();
   }
 
+
+  private boolean validBarCode(String barcode)  {
+    Pattern pattern = Pattern.compile("^[0-9a-zA-Z]*$");
+    if (!pattern.matcher(barcode).matches()) {
+      Toast.makeText(this, R.string.invalid_barcode, Toast.LENGTH_LONG).show();
+      vibrator.vibrate(1000);
+      return false;
+    }
+    return true;
+  }
+
+
   private void doQuery(String barcode) {
-    mTxtResponse.setText("");
     View view = this.getCurrentFocus();
     if (view != null) {
       InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
       imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
+    if(!validBarCode(barcode)){
+      return;
+    }
+    mTxtResponse.setText("");
     mPrgLoading.setVisibility(View.VISIBLE);
     MyProjectApi.getInstance()
         .getBarCodeDesc(barcode)
