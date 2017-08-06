@@ -2,8 +2,21 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
   <item
+      android:id="@+id/action_data_list"
+      android:orderInCategory="100"
+      android:title="@string/action_data_list"
+      app:showAsAction="ifRoom"/>
+
+  <item
+      android:id="@+id/action_sample_view"
+      android:orderInCategory="100"
+      android:title="@string/action_sample_track"
+      app:showAsAction="ifRoom"/>
+  <item
       android:id="@+id/action_print"
       android:orderInCategory="100"
       android:title="@string/action_print"
       app:showAsAction="ifRoom"/>
+
+
 </menu>

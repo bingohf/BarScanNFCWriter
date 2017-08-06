@@ -29,6 +29,7 @@
   <string name="setting.reader.title">Reader(##) (96發料, 97車縫, 98整燙, 99繳庫)</string>
   <string name="setting.line.title">Line(####)</string>
   <string name="setting.server.title">Server</string>
+  <string name="setting.data_list.title">Data List Url</string>
   <string name="setting.autoupload.title">自動上傳(Auto Upload)</string>
   <string name="setting.type.title">Type</string>
   <string name="empty"/>

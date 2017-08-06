@@ -1,12 +1,15 @@
 package com.ledway.btprinter;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -33,9 +36,7 @@ import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -68,68 +69,6 @@ public class PrintPreviewActivity extends AppCompatActivity {
     setListView();
   }
 
-  @Override public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.bt_print_preview_menu, menu);
-    return true;
-  }
-
-  @Override public boolean onOptionsItemSelected(MenuItem item) {
-    switch (item.getItemId()) {
-      case R.id.action_print: {
-        doPrint();
-        break;
-      }
-      case android.R.id.home:{
-        finish();
-      }
-    }
-    return true;
-  }
-
-  private void doPrint() {
-
-    final BTPrinter btPrinter = BTPrinter.getBtPrinter();
-    if (TextUtils.isEmpty(btPrinter.getMacAddress())) {
-      BindBTPrintDialogFragment bindBTPrintDialogFragment = new BindBTPrintDialogFragment();
-      bindBTPrintDialogFragment.show(getSupportFragmentManager(), "dialog");
-      return;
-    }
-
-    final ProgressDialog progressDialog =
-        ProgressDialog.show(this, getString(R.string.action_print),
-            getString(R.string.wait_a_moment));
-    Observable.from(mDataAdapter)
-        .filter(new Func1<BaseData, Boolean>() {
-          @Override public Boolean call(BaseData baseData) {
-            return baseData.getType() != DataAdapter.DATA_TYPE_PHOTO_1
-                && baseData.getType() != DataAdapter.DATA_TYPE_PHOTO_2;
-          }
-        })
-        .flatMap(new Func1<BaseData, Observable<Boolean>>() {
-          @Override public Observable<Boolean> call(BaseData baseData) {
-            return btPrinter.print(baseData);
-          }
-        })
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Subscriber<Boolean>() {
-          @Override public void onCompleted() {
-            btPrinter.println("\n").subscribe();
-            progressDialog.dismiss();
-          }
-
-          @Override public void onError(Throwable e) {
-            Log.e("error", e.getMessage(), e);
-            progressDialog.dismiss();
-            Toast.makeText(PrintPreviewActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-          }
-
-          @Override public void onNext(Boolean aBoolean) {
-
-          }
-        });
-  }
-
   private void setListView() {
     mDataAdapter = new DataAdapter(this);
     LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -138,7 +77,7 @@ public class PrintPreviewActivity extends AppCompatActivity {
     mListView.setAdapter(mDataAdapter);
 
     PhotoData logoData = new PhotoData(DataAdapter.DATA_TYPE_LOGO);
-    logoData.setBitmapPath(    getLogoBitMap());
+    logoData.setBitmapPath(getLogoBitMap());
 
     mDataAdapter.addData(logoData);
     if (!TextUtils.isEmpty(mSampleMaster.getDesc())) {
@@ -200,24 +139,6 @@ public class PrintPreviewActivity extends AppCompatActivity {
     }
   }
 
-  private Bitmap createQRBitMap(String text) throws WriterException {
-    QRCodeWriter writer = new QRCodeWriter();
-    Map<EncodeHintType, Object> hints = new EnumMap<EncodeHintType, Object>(EncodeHintType.class);
-    hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
-    hints.put(EncodeHintType.MARGIN, 0); /* default = 4 */
-
-    BitMatrix bitMatrix = writer.encode(text, BarcodeFormat.QR_CODE, 160, 160, hints);
-    int width = bitMatrix.getWidth();
-    int height = bitMatrix.getHeight();
-    Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-    for (int x = 0; x < width; x++) {
-      for (int y = 0; y < height; y++) {
-        bmp.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
-      }
-    }
-    return bmp;
-  }
-
   private String getLogoBitMap() {
     final File cacheFile = new File(getCacheDir() + "logo.png");
     OkHttpClient client = new OkHttpClient();
@@ -264,4 +185,95 @@ public class PrintPreviewActivity extends AppCompatActivity {
     return cacheFile.getAbsolutePath();
   }
 
+  private Bitmap createQRBitMap(String text) throws WriterException {
+    QRCodeWriter writer = new QRCodeWriter();
+    Map<EncodeHintType, Object> hints = new EnumMap<EncodeHintType, Object>(EncodeHintType.class);
+    hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
+    hints.put(EncodeHintType.MARGIN, 0); /* default = 4 */
+
+    BitMatrix bitMatrix = writer.encode(text, BarcodeFormat.QR_CODE, 160, 160, hints);
+    int width = bitMatrix.getWidth();
+    int height = bitMatrix.getHeight();
+    Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+    for (int x = 0; x < width; x++) {
+      for (int y = 0; y < height; y++) {
+        bmp.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
+      }
+    }
+    return bmp;
+  }
+
+  @Override public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.bt_print_preview_menu, menu);
+    return true;
+  }
+
+  @Override public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+      case R.id.action_print: {
+        doPrint();
+        break;
+      }
+      case R.id.action_sample_view: {
+        startActivity(new Intent(this, WebViewActivity.class).putExtra("url",
+            mSampleMaster.qrcode));
+        break;
+      }
+      case R.id.action_data_list: {
+
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        startActivity(new Intent(this, WebViewActivity.class).putExtra("url",
+            sp.getString("cloudDataListUrl", "http://www.ledway.com.tw")));
+        break;
+      }
+      case android.R.id.home: {
+        finish();
+      }
+    }
+    return true;
+  }
+
+  private void doPrint() {
+
+    final BTPrinter btPrinter = BTPrinter.getBtPrinter();
+    if (TextUtils.isEmpty(btPrinter.getMacAddress())) {
+      BindBTPrintDialogFragment bindBTPrintDialogFragment = new BindBTPrintDialogFragment();
+      bindBTPrintDialogFragment.show(getSupportFragmentManager(), "dialog");
+      return;
+    }
+
+    final ProgressDialog progressDialog =
+        ProgressDialog.show(this, getString(R.string.action_print),
+            getString(R.string.wait_a_moment));
+    Observable.from(mDataAdapter)
+        .filter(new Func1<BaseData, Boolean>() {
+          @Override public Boolean call(BaseData baseData) {
+            return baseData.getType() != DataAdapter.DATA_TYPE_PHOTO_1
+                && baseData.getType() != DataAdapter.DATA_TYPE_PHOTO_2;
+          }
+        })
+        .flatMap(new Func1<BaseData, Observable<Boolean>>() {
+          @Override public Observable<Boolean> call(BaseData baseData) {
+            return btPrinter.print(baseData);
+          }
+        })
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Subscriber<Boolean>() {
+          @Override public void onCompleted() {
+            btPrinter.println("\n").subscribe();
+            progressDialog.dismiss();
+          }
+
+          @Override public void onError(Throwable e) {
+            Log.e("error", e.getMessage(), e);
+            progressDialog.dismiss();
+            Toast.makeText(PrintPreviewActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+          }
+
+          @Override public void onNext(Boolean aBoolean) {
+
+          }
+        });
+  }
 }

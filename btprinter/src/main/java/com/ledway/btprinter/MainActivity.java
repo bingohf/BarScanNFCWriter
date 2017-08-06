@@ -1,7 +1,6 @@
 package com.ledway.btprinter;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -16,35 +15,23 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.Toast;
-import com.activeandroid.query.Select;
 import com.example.android.common.view.SlidingTabLayout;
 import com.ledway.btprinter.adapters.MyProfileViewPagerAdapter;
 import com.ledway.btprinter.adapters.RecordAdapter;
 import com.ledway.btprinter.fragments.BindBTPrintDialogFragment;
-import com.ledway.btprinter.fragments.BusinessCardFragment;
 import com.ledway.btprinter.fragments.MainFragment;
-import com.ledway.btprinter.fragments.MyIDFragment;
 import com.ledway.btprinter.fragments.NewVersionDialogFragment;
 import com.ledway.btprinter.fragments.PagerFragment;
 import com.ledway.btprinter.fragments.ReceiveSampleFragment;
-import com.ledway.btprinter.fragments.ShareAppFragment;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.network.ApkVersionResponse;
 import com.ledway.btprinter.network.MyProjectApi;
-import com.ledway.framework.RemoteDB;
 import com.zkc.Service.CaptureService;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 import rx.subscriptions.CompositeSubscription;
@@ -94,20 +81,49 @@ public class MainActivity extends AppCompatActivity {
     });
     */
 
-
     checkAgreement();
 
     checkVersion();
 
     ViewPager mViewPager = (ViewPager) findViewById(R.id.viewpager);
-    mViewPager.setAdapter(new MyProfileViewPagerAdapter(getSupportFragmentManager(), new PagerFragment[]{new MainFragment(), new ReceiveSampleFragment()}));
+    mViewPager.setAdapter(new MyProfileViewPagerAdapter(getSupportFragmentManager(),
+        new PagerFragment[] { new MainFragment(), new ReceiveSampleFragment() }));
     SlidingTabLayout mSlidingTabLayout = (SlidingTabLayout) findViewById(R.id.sliding_tabs);
     mSlidingTabLayout.setViewPager(mViewPager);
   }
 
-  @Override public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-    mSubscriptions.clear();
-    super.onSaveInstanceState(outState, outPersistentState);
+  @Override protected void onDestroy() {
+    super.onDestroy();
+    RecordAdapter.setSingletonInstance(null);
+  }
+
+  private void reset() {
+  }
+
+  private void checkSetting() {
+    SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+    String line = sp.getString("Line", "01");
+    String reader = sp.getString("Reader", "01");
+    String server = sp.getString("Server", "vip.ledway.com.tw");
+    sp.edit()
+        .putString("Line", line)
+        .putString("Reader", reader)
+        .putString("Server", server)
+        .putString("cloudDataListUrl", "http://www.ledway.com.tw")
+        .apply();
+    if (TextUtils.isEmpty(line) || TextUtils.isEmpty(reader) || TextUtils.isEmpty(server)) {
+      mSettingSubject.onNext(false);
+    } else {
+      mSettingSubject.onNext(true);
+    }
+  }
+
+  private void checkAgreement() {
+    SharedPreferences sp = getSharedPreferences("agreement", Context.MODE_PRIVATE);
+    if (!sp.getBoolean("agree", false)) {
+      startActivityForResult(new Intent(this, AgreementActivity.class),
+          AppConstants.REQUEST_AGREEMENT);
+    }
   }
 
   private void checkVersion() {
@@ -128,14 +144,16 @@ public class MainActivity extends AppCompatActivity {
           @Override public void onNext(ApkVersionResponse apkVersionResponse) {
             if (apkVersionResponse.curVersion > BuildConfig.VERSION_CODE) {
               SharedPreferences sp = getSharedPreferences("upgrade", Context.MODE_PRIVATE);
-              String currDate  = new SimpleDateFormat("yyyyMMdd").format(new Date());
-              if (apkVersionResponse.minVersion > BuildConfig.VERSION_CODE || !sp.getBoolean(currDate, false) ) {
+              String currDate = new SimpleDateFormat("yyyyMMdd").format(new Date());
+              if (apkVersionResponse.minVersion > BuildConfig.VERSION_CODE || !sp.getBoolean(
+                  currDate, false)) {
                 NewVersionDialogFragment newVersionDialogFragment = new NewVersionDialogFragment();
                 Bundle args = new Bundle();
                 args.putString("url", "http://www.ledway.com.tw/uploads/sales_edge.apk");
-                args.putString("apkName", "sales_edge_" + apkVersionResponse.curVersion  +".apk");
+                args.putString("apkName", "sales_edge_" + apkVersionResponse.curVersion + ".apk");
                 args.putString("desc", apkVersionResponse.desc);
-                args.putBoolean("cancelable", apkVersionResponse.minVersion > BuildConfig.VERSION_CODE);
+                args.putBoolean("cancelable",
+                    apkVersionResponse.minVersion > BuildConfig.VERSION_CODE);
                 newVersionDialogFragment.setArguments(args);
                 newVersionDialogFragment.setCancelable(false);
 
@@ -146,36 +164,46 @@ public class MainActivity extends AppCompatActivity {
         }));
   }
 
-  private void checkAgreement() {
-    SharedPreferences sp = getSharedPreferences("agreement", Context.MODE_PRIVATE);
-    if (!sp.getBoolean("agree", false)) {
-      startActivityForResult(new Intent(this, AgreementActivity.class),AppConstants. REQUEST_AGREEMENT);
+  @Override public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+    mSubscriptions.clear();
+    super.onSaveInstanceState(outState, outPersistentState);
+  }
+
+  @Override public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.main_menu, menu);
+    return super.onCreateOptionsMenu(menu);
+  }
+
+  @Override public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+      case R.id.action_bind_bt_printer: {
+        showSetDialog();
+        break;
+      }
+      case R.id.action_up_prod: {
+        startActivity(new Intent(this, ProdListActivity.class));
+        break;
+      }
+      case R.id.action_my_business_card: {
+        startActivity(new Intent(this, BusinessCardActivity.class));
+        break;
+      }
+      case R.id.action_setting: {
+        Intent intent = new Intent(this, AppPreferences.class);
+        startActivityForResult(intent, AppConstants.REQUEST_TYPE_SETTING);
+        break;
+      }
     }
+    return false;
   }
 
-
-  @Override protected void onDestroy() {
-    super.onDestroy();
-    RecordAdapter.setSingletonInstance(null);
-  }
-
-  private void reset() {
-  }
-
-  private void checkSetting() {
-    SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-    String line = sp.getString("Line", "01");
-    String reader = sp.getString("Reader", "01");
-    String server = sp.getString("Server", "vip.ledway.com.tw");
-    if (TextUtils.isEmpty(line) || TextUtils.isEmpty(reader) || TextUtils.isEmpty(server)) {
-      mSettingSubject.onNext(false);
-    } else {
-      mSettingSubject.onNext(true);
-    }
+  private void showSetDialog() {
+    BindBTPrintDialogFragment bindBTPrintDialogFragment = new BindBTPrintDialogFragment();
+    bindBTPrintDialogFragment.show(getSupportFragmentManager(), "dialog");
   }
 
   @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    super.onActivityResult(requestCode,resultCode, data);
+    super.onActivityResult(requestCode, resultCode, data);
     SampleMaster currentData =
         (SampleMaster) MApp.getApplication().getSession().getValue("current_data");
     switch (requestCode) {
@@ -194,34 +222,4 @@ public class MainActivity extends AppCompatActivity {
       }
     }
   }
-
-  @Override public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.main_menu, menu);
-    return  super.onCreateOptionsMenu(menu);
-  }
-
-  @Override public boolean onOptionsItemSelected(MenuItem item) {
-    switch (item.getItemId()) {
-      case R.id.action_bind_bt_printer: {
-        showSetDialog();
-        break;
-      }
-      case R.id.action_up_prod: {
-        startActivity(new Intent(this, ProdListActivity.class));
-        break;
-      }
-      case R.id.action_my_business_card: {
-        startActivity(new Intent(this, BusinessCardActivity.class));
-        break;
-      }
-    }
-    return false;
-  }
-
-  private void showSetDialog() {
-    BindBTPrintDialogFragment bindBTPrintDialogFragment = new BindBTPrintDialogFragment();
-    bindBTPrintDialogFragment.show(getSupportFragmentManager(), "dialog");
-  }
-
-
 }

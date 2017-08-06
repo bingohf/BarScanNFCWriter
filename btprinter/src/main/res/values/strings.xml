@@ -53,4 +53,6 @@
   <string name="my_sample">我的取樣單</string>
   <string name="title_receive_sample">接收的取樣單</string>
   <string name="no_image">没有图片</string>
+  <string name="action_data_list">Data List</string>
+  <string name="action_sample_track">样品追踪</string>
 </resources>
