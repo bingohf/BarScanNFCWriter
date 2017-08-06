@@ -7,23 +7,32 @@
       android:id="@+id/action_my_business_card"
       android:orderInCategory="100"
       android:title="@string/action_my_business_card"
+      android:icon="@drawable/ic_account_card_details"
       app:showAsAction="ifRoom" />
 
-
+  <item
+      android:icon="@drawable/ic_cloud"
+      android:id="@+id/action_data_list"
+      android:orderInCategory="100"
+      android:title="@string/action_data_list"
+      app:showAsAction="ifRoom"/>
   <item
       android:id="@+id/action_up_prod"
       android:orderInCategory="100"
       android:title="@string/action_update_prod"
+      android:icon="@drawable/ic_format_list_bulleted"
       app:showAsAction="ifRoom" />
   <item
     android:id="@+id/action_bind_bt_printer"
     android:orderInCategory="100"
     android:title="@string/action_bind_bt_printer"
+      android:icon="@drawable/ic_bluetooth"
     app:showAsAction="ifRoom" />
 
   <item
       android:id="@+id/action_setting"
       android:orderInCategory="100"
       android:title="@string/action_settings"
+      android:icon="@drawable/ic_settings"
       app:showAsAction="ifRoom" />
 </menu>

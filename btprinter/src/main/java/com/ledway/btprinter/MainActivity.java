@@ -105,11 +105,12 @@ public class MainActivity extends AppCompatActivity {
     String line = sp.getString("Line", "01");
     String reader = sp.getString("Reader", "01");
     String server = sp.getString("Server", "vip.ledway.com.tw");
+    String cloudDataListUrl = sp.getString("cloudDataListUrl", "http://www.ledway.com.tw");
     sp.edit()
         .putString("Line", line)
         .putString("Reader", reader)
         .putString("Server", server)
-        .putString("cloudDataListUrl", "http://www.ledway.com.tw")
+        .putString("cloudDataListUrl", cloudDataListUrl)
         .apply();
     if (TextUtils.isEmpty(line) || TextUtils.isEmpty(reader) || TextUtils.isEmpty(server)) {
       mSettingSubject.onNext(false);
@@ -191,6 +192,12 @@ public class MainActivity extends AppCompatActivity {
       case R.id.action_setting: {
         Intent intent = new Intent(this, AppPreferences.class);
         startActivityForResult(intent, AppConstants.REQUEST_TYPE_SETTING);
+        break;
+      }
+      case R.id.action_data_list: {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        startActivity(new Intent(this, WebViewActivity.class).putExtra("url",
+            sp.getString("cloudDataListUrl", "http://www.ledway.com.tw")));
         break;
       }
     }

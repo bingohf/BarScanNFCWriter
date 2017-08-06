@@ -29,7 +29,10 @@ public class WebViewActivity extends AppCompatActivity {
     }else{
       url = getIntent().getStringExtra("url");
     }
+    mVebView.getSettings().setUseWideViewPort( true);
+    mVebView.getSettings().setBuiltInZoomControls(true);
     mVebView.loadUrl(url);
+
     mVebView.setWebChromeClient(new WebChromeClient(){
       @Override public void onProgressChanged(WebView view, int newProgress) {
         super.onProgressChanged(view, newProgress);
@@ -39,7 +42,7 @@ public class WebViewActivity extends AppCompatActivity {
     });
     mVebView.setWebViewClient(new WebViewClient(){
       @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        view.loadUrl(url);
+       // view.loadUrl(url);
         return false;
       }
 
