@@ -24,7 +24,9 @@ import com.ledway.btprinter.SampleReadonlyActivity;
 import com.ledway.btprinter.adapters.ReceiveSampleAdapter;
 import com.ledway.btprinter.adapters.RecordAdapter;
 import com.ledway.btprinter.models.SampleMaster;
-import com.ledway.framework.RemoteDB;
+import com.ledway.btprinter.network.MyProjectApi;
+import com.ledway.btprinter.network.model.ProductAppGetReturn;
+import com.ledway.btprinter.network.model.RestDataSetResponse;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -46,7 +48,6 @@ public class ReceiveSampleFragment extends PagerFragment{
   private SimpleAdapter simpleAdapter;
   private ArrayList<HashMap<String,String>> dataList = new ArrayList<>();
   private ArrayList<SampleMaster> sampleList = new ArrayList<>();
-  private RemoteDB remoteDB = RemoteDB.getDefault();
   private SwipeRefreshLayout swipeRefreshLayout;
 
   @Override public String getTitle() {
@@ -87,22 +88,24 @@ public class ReceiveSampleFragment extends PagerFragment{
     dataList.clear();
     sampleList.clear();
     simpleAdapter.notifyDataSetChanged();
-    remoteDB.executeQuery("select a.json "
-        + " from PRODUCTAPPGET a left join CUSTOMER b on b.custno = a.custno  "
-        +" where a.shareToDeviceId like ? and a.json <>'' order by a.UPDATEDATE desc", MApp.getApplication().getSystemInfo().getDeviceId() +"%")
-        .subscribeOn(Schedulers.io())
+    String query = "isnull(json,'') <>'' and shareToDeviceId like '" + MApp.getApplication().getSystemInfo().getDeviceId() +"%'";
+    String orderBy ="order by UPDATEDATE desc";
 
-        .flatMap(new Func1<ResultSet, Observable<SampleMaster>>() {
-          @Override public Observable<SampleMaster> call(final ResultSet resultSet) {
+    Observable<RestDataSetResponse<ProductAppGetReturn>>  obResponse=
+        MyProjectApi.getInstance().getDbService().query("PRODUCTAPPGET", query, orderBy);
+
+    obResponse .subscribeOn(Schedulers.io())
+        .flatMap(new Func1<RestDataSetResponse<ProductAppGetReturn>, Observable<SampleMaster>>() {
+          @Override public Observable<SampleMaster> call(final RestDataSetResponse<ProductAppGetReturn> response) {
             return Observable.create(new Observable.OnSubscribe<SampleMaster>() {
               @Override public void call(Subscriber<? super SampleMaster> subscriber) {
                 ObjectMapper objectMapper = new ObjectMapper();
                 objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
                 objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                ArrayList<ProductAppGetReturn> datasetResponse = response.result.get(0);
                 try {
-                  while(resultSet.next()){
-                    String json = resultSet.getString("json");
-
+                  for(ProductAppGetReturn item : datasetResponse){
+                    String json = item.json;
                     SampleMaster sampleMaster = objectMapper.readValue(json, SampleMaster.class);
 /*                    File photoFile = new File(MApp.getApplication().getPicPath()
                         + "/"
