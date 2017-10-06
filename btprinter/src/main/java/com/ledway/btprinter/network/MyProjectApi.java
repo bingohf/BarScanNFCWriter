@@ -9,6 +9,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
  */
 public class MyProjectApi {
   private static MyProjectApi instance;
+  private final DBService dbService;
   private LedwayService ledwayService;
 
   private MyProjectApi(){
@@ -18,6 +19,15 @@ public class MyProjectApi {
         .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
         .build();
     ledwayService = retrofit.create(LedwayService.class);
+
+
+
+    Retrofit retrofit2 = new Retrofit.Builder()
+        .baseUrl("http://ledwayvip.cloudapp.net/datasnap/rest/TLwDataModule/")
+        .addConverterFactory(JacksonConverterFactory.create())
+        .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+        .build();
+    dbService = retrofit.create(DBService.class);
   }
 
 
@@ -30,5 +40,9 @@ public class MyProjectApi {
 
   public LedwayService getLedwayService(){
     return ledwayService;
+  }
+
+  public DBService getDbService(){
+    return dbService;
   }
 }
