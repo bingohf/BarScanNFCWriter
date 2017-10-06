@@ -31,6 +31,7 @@ public class WebViewActivity extends AppCompatActivity {
     }
     mVebView.getSettings().setUseWideViewPort( true);
     mVebView.getSettings().setBuiltInZoomControls(true);
+    mVebView.getSettings().setJavaScriptEnabled(true);
     mVebView.loadUrl(url);
 
     mVebView.setWebChromeClient(new WebChromeClient(){
