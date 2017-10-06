@@ -1,5 +1,7 @@
 package com.ledway.btprinter.network;
 
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
@@ -13,10 +15,15 @@ public class MyProjectApi {
   private LedwayService ledwayService;
 
   private MyProjectApi(){
+    OkHttpClient.Builder builder = new OkHttpClient.Builder();
+    builder.addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY));
+    OkHttpClient client = builder.build();
+
     Retrofit retrofit = new Retrofit.Builder()
         .baseUrl("http://www.ledway.com.tw/uploads/")
         .addConverterFactory(JacksonConverterFactory.create())
         .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+        .client(client)
         .build();
     ledwayService = retrofit.create(LedwayService.class);
 
@@ -26,8 +33,9 @@ public class MyProjectApi {
         .baseUrl("http://ledwayvip.cloudapp.net/datasnap/rest/TLwDataModule/")
         .addConverterFactory(JacksonConverterFactory.create())
         .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+        .client(client)
         .build();
-    dbService = retrofit.create(DBService.class);
+    dbService = retrofit2.create(DBService.class);
   }
 
 
