@@ -12,7 +12,6 @@ import rx.Observable;
  */
 
 public interface DBService {
-  @GET("dataset/{dataset}")  Observable<RestDataSetResponse<ProductAppGetReturn>> query(
-      @Path("dataset") String dataset, @Query("query") String query,
+  @GET("dataset/PRODUCTAPPGET")  Observable<RestDataSetResponse<ProductAppGetReturn>> getProductAppGet( @Query("getProductAppGet") String query,
       @Query("orderBy") String orderBy);
 }
