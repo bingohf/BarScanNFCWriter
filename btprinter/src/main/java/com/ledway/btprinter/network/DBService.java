@@ -8,9 +8,11 @@ import com.ledway.btprinter.network.model.SpReturn;
 import com.ledway.btprinter.network.model.Sp_UpSampleDetail_Request;
 import com.ledway.btprinter.network.model.Sp_UpSampleDetail_Return;
 import com.ledway.btprinter.network.model.Sp_UpSample_v3_Request;
+import com.ledway.btprinter.network.model.TotalUserReturn;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 import rx.Observable;
 
@@ -31,4 +33,6 @@ public interface DBService {
 
   @POST("Sp/sp_UpSampleDetail") Observable<RestSpResponse<Sp_UpSampleDetail_Return>> sp_UpSampleDetail(@Body
       Sp_UpSampleDetail_Request request);
+
+  @GET("sql/{sql}") Observable<RestDataSetResponse<TotalUserReturn>> queryTotalUser(@Path("sql") String sql);
 }
