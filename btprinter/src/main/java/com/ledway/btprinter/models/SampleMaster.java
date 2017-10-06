@@ -2,6 +2,7 @@ package com.ledway.btprinter.models;
 
 import android.database.Cursor;
 import android.text.TextUtils;
+import android.util.Base64;
 import com.activeandroid.Cache;
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
@@ -14,8 +15,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
+import com.ledway.btprinter.network.MyProjectApi;
+import com.ledway.btprinter.network.model.RestSpResponse;
+import com.ledway.btprinter.network.model.SpReturn;
+import com.ledway.btprinter.network.model.Sp_UpSampleDetail_Request;
+import com.ledway.btprinter.network.model.Sp_UpSampleDetail_Return;
+import com.ledway.btprinter.network.model.Sp_UpSample_v3_Request;
 import com.ledway.btprinter.utils.IOUtil;
-import com.ledway.framework.RemoteDB;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -244,9 +250,6 @@ import rx.functions.Func1;
     if (!isLoadedAll){
       queryDetail();
     }
-    String connectionString =
-        "jdbc:jtds:sqlserver://vip.ledway.com.tw:1433;DatabaseName=iSamplePub;charset=UTF8";
-    final RemoteDB remoteDB = new RemoteDB(connectionString);
     allSave();
     byte[] imageBuffer = new byte[]{};
     try {
@@ -256,44 +259,66 @@ import rx.functions.Func1;
     } catch (IOException e) {
       e.printStackTrace();
     }
-    Observable<SampleMaster> observableMaster =
-        remoteDB.executeProcedure("{call sp_UpSample_v3(?,?,?,?,?,?,?,?,?,?)}",
-            new int[] { Types.INTEGER, Types.VARCHAR }, 1, 1, guid, mac_address, desc,shareToDeviceId,toJson(), imageBuffer)
-            .flatMap(new Func1<ArrayList<Object>, Observable<SampleMaster>>() {
-              @Override public Observable<SampleMaster> call(ArrayList<Object> objects) {
-                int returnCode = (Integer) objects.get(0);
-                String returnMessage = (String) objects.get(1);
-                if (returnCode == 1) {
-                  qrcode = "http://vip.ledway.com.tw/i/s.aspx?series=" + guid;
-                  save();
-                  return Observable.just(SampleMaster.this);
-                } else {
-                  return Observable.error(new Exception(returnMessage));
-                }
-              }
-            });
+    final Sp_UpSample_v3_Request request =new Sp_UpSample_v3_Request();
+    request.line = 1;
+    request.reader = 1;
+    request.series = guid;
+    request.empno = mac_address;
+    request.custMemo = desc;
+    request.shareToDeviceId = shareToDeviceId;
+    request.json = toJson();
+    request.custCardPic = Base64.encodeToString(imageBuffer, Base64.DEFAULT);
+    Observable<SampleMaster> obMaster = MyProjectApi.getInstance()
+        .getDbService()
+        .sp_UpSample_v3(request)
+        .flatMap(new Func1<RestSpResponse<SpReturn>, Observable<SampleMaster>>() {
+          @Override
+          public Observable<SampleMaster> call(RestSpResponse<SpReturn> spReturnRestSpResponse) {
+            SpReturn spReturn = spReturnRestSpResponse.result.get(0);
+            int returnCode = spReturn.errCode;
+            String returnMessage = spReturn.errData;
+            if (returnCode == 1) {
+              qrcode = "http://vip.ledway.com.tw/i/s.aspx?series=" + guid;
+              save();
+              return Observable.just(SampleMaster.this);
+            } else {
+              return Observable.error(new Exception(returnMessage));
+            }
+          }
+        });
+
+
 
     Observable<SampleMaster> observableDetail =
         Observable.from(sampleProdLinks).flatMap(new Func1<SampleProdLink, Observable<SampleMaster>>() {
           @Override public Observable<SampleMaster> call(final SampleProdLink sampleProdLink) {
-            return remoteDB.executeProcedure("{call sp_UpSampleDetail(?,?,?,?,?,?,?,?,?,?)}",
-                new int[] { Types.INTEGER, Types.VARCHAR, Types.VARCHAR }, 1, 1, mac_address, guid,
-                sampleProdLink.prod_id, sampleProdLink.ext, 1)
-                .flatMap(new Func1<ArrayList<Object>, Observable<SampleMaster>>() {
-                  @Override public Observable<SampleMaster> call(ArrayList<Object> objects) {
-                    int returnCode = (Integer) objects.get(0);
-                    String returnMessage = (String) objects.get(1);
-                    String outProdNo = (String) objects.get(2);
-                    if (returnCode == 1) {
-                      return Observable.just(SampleMaster.this);
-                    }else{
-                      return Observable.error(new Exception(returnMessage));
-                    }
-                  }
-                });
+
+            Sp_UpSampleDetail_Request detailRequest = new Sp_UpSampleDetail_Request();
+            detailRequest.line = 1;
+            detailRequest.reader = 1;
+            detailRequest.empno = mac_address;
+            detailRequest.series = guid;
+            detailRequest.prodno =sampleProdLink.prod_id;
+            detailRequest.itemExt = String.valueOf(sampleProdLink.ext);
+            detailRequest.pcsnum=1 ;
+                return MyProjectApi.getInstance().getDbService().sp_UpSampleDetail(detailRequest)
+                    .flatMap(new Func1<RestSpResponse<Sp_UpSampleDetail_Return>, Observable<SampleMaster>>() {
+                      @Override public Observable<SampleMaster> call(
+                          RestSpResponse<Sp_UpSampleDetail_Return> response) {
+                        int returnCode = response.result.get(0).errCode;
+                        String returnMessage = response.result.get(0).errData;
+                        String outProdNo = response.result.get(0).outProdno;
+                        if (returnCode == 1) {
+                          return Observable.just(SampleMaster.this);
+                        }else{
+                          return Observable.error(new Exception(returnMessage));
+                        }
+                      }
+                    });
+
           }
         });
-    return observableMaster.concatWith(observableDetail).doOnCompleted(new Action0() {
+    return obMaster.concatWith(observableDetail).doOnCompleted(new Action0() {
       @Override public void call() {
         isDirty = false;
         save();
