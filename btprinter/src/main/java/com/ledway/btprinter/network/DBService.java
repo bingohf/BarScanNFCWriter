@@ -35,4 +35,7 @@ public interface DBService {
       Sp_UpSampleDetail_Request request);
 
   @GET("sql/{sql}") Observable<RestDataSetResponse<TotalUserReturn>> queryTotalUser(@Path("sql") String sql);
+
+
+
 }
