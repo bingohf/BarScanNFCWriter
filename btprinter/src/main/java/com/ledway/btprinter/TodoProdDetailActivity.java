@@ -22,6 +22,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.activeandroid.query.Select;
 import com.ledway.btprinter.models.TodoProd;
+import com.ledway.btprinter.network.model.RestSpResponse;
+import com.ledway.btprinter.network.model.SpReturn;
 import com.ledway.btprinter.utils.IOUtil;
 import com.ledway.btprinter.views.MImageView;
 import java.io.ByteArrayOutputStream;
@@ -197,9 +199,9 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     mTodoProd.spec_desc = mEdtSpec.getText().toString();
     mTodoProd.save();
     final ProgressDialog progressDialog = ProgressDialog.show(this, getString(R.string.upload), getString(R.string.wait_a_moment), true);
-    mTodoProd.remoteSave().subscribeOn(Schedulers.io())
+    mTodoProd.remoteSave2().subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Subscriber<ArrayList<Object>>() {
+        .subscribe(new Subscriber<RestSpResponse<SpReturn>>() {
           @Override public void onCompleted() {
             progressDialog.dismiss();
           }
@@ -210,9 +212,9 @@ public class TodoProdDetailActivity extends AppCompatActivity {
             e.printStackTrace();
           }
 
-          @Override public void onNext(ArrayList<Object> objects) {
-            int returnCode = (Integer) objects.get(0);
-            String returnMessage = (String) objects.get(1);
+          @Override public void onNext(RestSpResponse<SpReturn> spReturnRestSpResponse) {
+            int returnCode = spReturnRestSpResponse.result.get(0).errCode;
+            String returnMessage =  spReturnRestSpResponse.result.get(0).errData;
             if (!TextUtils.isEmpty(returnMessage)){
               Toast.makeText(TodoProdDetailActivity.this, returnMessage, Toast.LENGTH_LONG).show();
             }
@@ -221,7 +223,6 @@ public class TodoProdDetailActivity extends AppCompatActivity {
               mTodoProd.save();
             }
             invalidateOptionsMenu();
-
           }
         });
   }
