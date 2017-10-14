@@ -70,17 +70,6 @@ public class MainActivity extends AppCompatActivity {
     });
     checkSetting();
 
-    /*
-    findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View v) {
-        SampleMaster sampleMaster = new SampleMaster();
-        MApp.getApplication().getSession().put("current_data", sampleMaster);
-        startActivityForResult(new Intent(MainActivity.this, ItemDetailActivity.class),
-            AppConstants.REQUEST_TYPE_ADD_RECORD);
-      }
-    });
-    */
-
     checkAgreement();
 
     checkVersion();
