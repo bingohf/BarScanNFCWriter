@@ -24,7 +24,7 @@ public class WebViewActivity extends AppCompatActivity {
     mVebView= (WebView) findViewById(R.id.webView);
     mVebView.getSettings().setUseWideViewPort( true);
     mVebView.getSettings().setBuiltInZoomControls(true);
-    mVebView.getSettings().setJavaScriptEnabled(true)
+    mVebView.getSettings().setJavaScriptEnabled(true);
     progressBar.setMax(100);
     String url;
     if(savedInstanceState != null){
