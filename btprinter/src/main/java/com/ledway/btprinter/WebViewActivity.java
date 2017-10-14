@@ -25,14 +25,15 @@ public class WebViewActivity extends AppCompatActivity {
     progressBar.setMax(100);
     String url;
     if(savedInstanceState != null){
-      url =savedInstanceState.getString("url");
+      mVebView.restoreState(savedInstanceState);
     }else{
       url = getIntent().getStringExtra("url");
+      mVebView.loadUrl(url);
     }
     mVebView.getSettings().setUseWideViewPort( true);
     mVebView.getSettings().setBuiltInZoomControls(true);
     mVebView.getSettings().setJavaScriptEnabled(true);
-    mVebView.loadUrl(url);
+
 
     mVebView.setWebChromeClient(new WebChromeClient(){
       @Override public void onProgressChanged(WebView view, int newProgress) {
@@ -52,6 +53,11 @@ public class WebViewActivity extends AppCompatActivity {
         progressBar.setVisibility(View.GONE);
       }
     });
+  }
+
+  @Override protected void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+    mVebView.saveState(outState);
   }
 
   @Override public boolean onKeyDown(int keyCode, KeyEvent event) {
