@@ -22,6 +22,9 @@ public class WebViewActivity extends AppCompatActivity {
     setContentView(R.layout.activity_webview);
     final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
     mVebView= (WebView) findViewById(R.id.webView);
+    mVebView.getSettings().setUseWideViewPort( true);
+    mVebView.getSettings().setBuiltInZoomControls(true);
+    mVebView.getSettings().setJavaScriptEnabled(true)
     progressBar.setMax(100);
     String url;
     if(savedInstanceState != null){
@@ -30,9 +33,7 @@ public class WebViewActivity extends AppCompatActivity {
       url = getIntent().getStringExtra("url");
       mVebView.loadUrl(url);
     }
-    mVebView.getSettings().setUseWideViewPort( true);
-    mVebView.getSettings().setBuiltInZoomControls(true);
-    mVebView.getSettings().setJavaScriptEnabled(true);
+;
 
 
     mVebView.setWebChromeClient(new WebChromeClient(){
