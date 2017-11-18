@@ -1,5 +1,6 @@
 package com.ledway.btprinter.biz.main;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,13 +13,27 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import com.ledway.btprinter.AgreementActivity;
 import com.ledway.btprinter.AppConstants;
 import com.ledway.btprinter.AppPreferences;
+import com.ledway.btprinter.BuildConfig;
 import com.ledway.btprinter.R;
+import com.ledway.btprinter.fragments.NewVersionDialogFragment;
+import com.ledway.btprinter.network.ApkVersionResponse;
+import com.ledway.btprinter.network.MyProjectApi;
 import com.zkc.Service.CaptureService;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashSet;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 
 public class MainActivity2 extends AppCompatActivity {
   @BindView(R.id.viewPager) ViewPager mViewPager;
@@ -26,6 +41,7 @@ public class MainActivity2 extends AppCompatActivity {
   Class<Fragment>[] fragmentCls = new Class[] {
       SampleListFragment.class, ReceiveSampleListFragment.class, ProductListFragment.class
   };
+  private CompositeSubscription mSubscriptions = new CompositeSubscription();
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -34,7 +50,9 @@ public class MainActivity2 extends AppCompatActivity {
     Intent newIntent = new Intent(this, CaptureService.class);
     newIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
     startService(newIntent);
+    checkAgreement();
     doCheckSetting();
+    checkVersion();
   }
 
   private void doCheckSetting() {
@@ -120,5 +138,57 @@ public class MainActivity2 extends AppCompatActivity {
       return false;
     }
     return true;
+  }
+
+
+  private void checkVersion() {
+    mSubscriptions.add(MyProjectApi.getInstance()
+        .getLedwayService()
+        .get_apk_version()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Subscriber<ApkVersionResponse>() {
+          @Override public void onCompleted() {
+
+          }
+
+          @Override public void onError(Throwable e) {
+            Log.e("get_version", e.getMessage(), e);
+          }
+
+          @Override public void onNext(ApkVersionResponse apkVersionResponse) {
+            if (apkVersionResponse.curVersion > BuildConfig.VERSION_CODE) {
+              SharedPreferences sp = getSharedPreferences("upgrade", Context.MODE_PRIVATE);
+              String currDate = new SimpleDateFormat("yyyyMMdd").format(new Date());
+              if (apkVersionResponse.minVersion > BuildConfig.VERSION_CODE || !sp.getBoolean(
+                  currDate, false)) {
+                NewVersionDialogFragment newVersionDialogFragment = new NewVersionDialogFragment();
+                Bundle args = new Bundle();
+                args.putString("url", "http://www.ledway.com.tw/uploads/sales_edge.apk");
+                args.putString("apkName", "sales_edge_" + apkVersionResponse.curVersion + ".apk");
+                args.putString("desc", apkVersionResponse.desc);
+                args.putBoolean("cancelable",
+                    apkVersionResponse.minVersion > BuildConfig.VERSION_CODE);
+                newVersionDialogFragment.setArguments(args);
+                newVersionDialogFragment.setCancelable(false);
+
+                newVersionDialogFragment.show(getSupportFragmentManager(), "dialog");
+              }
+            }
+          }
+        }));
+  }
+
+  @Override protected void onDestroy() {
+    super.onDestroy();
+    mSubscriptions.clear();
+  }
+
+  private void checkAgreement() {
+    SharedPreferences sp = getSharedPreferences("agreement", Context.MODE_PRIVATE);
+    if (!sp.getBoolean("agree", false)) {
+      startActivityForResult(new Intent(this, AgreementActivity.class),
+          AppConstants.REQUEST_AGREEMENT);
+    }
   }
 }
