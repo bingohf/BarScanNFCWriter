@@ -55,4 +55,5 @@
   <string name="no_image">No Photo</string>
   <string name="action_data_list">Sample room</string>
   <string name="action_sample_track">Tracking</string>
+  <string name="product">Product</string>
 </resources>
