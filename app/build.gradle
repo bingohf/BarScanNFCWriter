@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 def shortName ="barscan"
 android {
     compileSdkVersion 23
-    buildToolsVersion '25.0.0'
+    buildToolsVersion '26.0.2'
 
     defaultConfig {
         applicationId "com.ledway.barcodescannfcwriter"
@@ -37,7 +37,7 @@ android {
     }
 
 
-    applicationVariants.all { variant ->
+  /*  applicationVariants.all { variant ->
         variant.outputs.each { output ->
             def outputFile = output.outputFile;
             if (outputFile != null && outputFile.name.endsWith(".apk")){
@@ -49,7 +49,7 @@ android {
 
 
         }
-    }
+    }*/
 
 }
 
