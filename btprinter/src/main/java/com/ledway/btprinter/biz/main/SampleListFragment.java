@@ -1,5 +1,7 @@
 package com.ledway.btprinter.biz.main;
 
+import android.app.ProgressDialog;
+import android.arch.lifecycle.MutableLiveData;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,16 +18,23 @@ import android.view.ViewGroup;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import com.activeandroid.query.Select;
 import com.ledway.btprinter.R;
+import com.ledway.btprinter.models.Resource;
+import com.ledway.btprinter.models.SampleMaster;
+import io.reactivex.Single;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
+import java.util.List;
 
 public class SampleListFragment extends Fragment {
   @BindView(R.id.listview) RecyclerView mListView;
+  private MutableLiveData<Resource<List<SampleMaster>>> mResourceSampleList =
+      new MutableLiveData<>();
   private Unbinder mViewBinder;
-
-  @Override public void onCreate(@Nullable Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setHasOptionsMenu(true);
-  }
+  private CompositeDisposable mDisposables = new CompositeDisposable();
+  private SampleListAdapter mSampleListAdapter;
+  private ProgressDialog mProgressDialog;
 
   @Nullable @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -40,14 +49,29 @@ public class SampleListFragment extends Fragment {
         new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
     mListView.setLayoutManager(layoutManager);
     mListView.setAdapter(new SampleListAdapter(view.getContext()));
-    DividerItemDecoration
-        dividerItemDecoration = new DividerItemDecoration(getActivity(),layoutManager.getOrientation());
+    DividerItemDecoration dividerItemDecoration =
+        new DividerItemDecoration(getActivity(), layoutManager.getOrientation());
     mListView.addItemDecoration(dividerItemDecoration);
+    mSampleListAdapter = new SampleListAdapter(getActivity());
+    initView();
+  }
+
+  @Override public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+    super.onActivityCreated(savedInstanceState);
+    setHasOptionsMenu(true);
+    setReenterTransition(true);
+    loadRecordData();
   }
 
   @Override public void onDestroyView() {
     super.onDestroyView();
     mViewBinder.unbind();
+    stopLoading();
+  }
+
+  @Override public void onDestroy() {
+    super.onDestroy();
+    mDisposables.clear();
   }
 
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -55,11 +79,56 @@ public class SampleListFragment extends Fragment {
   }
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
-    switch (item.getItemId()){
-      case R.id.action_add:{
+    switch (item.getItemId()) {
+      case R.id.action_add: {
         break;
       }
     }
     return super.onOptionsItemSelected(item);
+  }
+
+  private void loadRecordData() {
+    mDisposables.add(Single.defer(() -> {
+      List<SampleMaster> data =
+          new Select().from(SampleMaster.class).orderBy(" create_date desc ").execute();
+      return Single.just(data);
+    })
+        .doOnSubscribe(disposable -> mResourceSampleList.postValue(Resource.loading(null)))
+        .subscribeOn(Schedulers.io())
+        .subscribe(sampleMasters -> mResourceSampleList.postValue(Resource.success(sampleMasters)),
+            throwable -> mResourceSampleList.postValue(
+                Resource.error(throwable.getMessage(), null))));
+  }
+
+  private void initView() {
+    mResourceSampleList.observe(this, listResource -> {
+      switch (listResource.status) {
+        case LOADING: {
+          showLoading();
+          break;
+        }
+        case SUCCESS: {
+          stopLoading();
+          break;
+        }
+        case ERROR: {
+          stopLoading();
+          break;
+        }
+      }
+    });
+  }
+
+  private void showLoading() {
+    stopLoading();
+    mProgressDialog = ProgressDialog.show(getActivity(), getString(R.string.upload),
+        getString(R.string.wait_a_moment), false);
+  }
+
+  private void stopLoading() {
+    if (mProgressDialog != null) {
+      mProgressDialog.dismiss();
+      mProgressDialog = null;
+    }
   }
 }

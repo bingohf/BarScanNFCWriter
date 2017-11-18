@@ -1,1 +1,1 @@
-include  ':framework', ':zbar', ':btprinter', ":app","bundlechecking"
+include  ':framework', ':btprinter'

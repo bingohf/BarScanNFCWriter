@@ -82,6 +82,9 @@ public class MainActivity2 extends AppCompatActivity {
       case REQUEST_AGREEMENT:{
         if(resultCode != Activity.RESULT_OK){
           finish();
+        }else {
+          SharedPreferences sp = getSharedPreferences("agreement", Context.MODE_PRIVATE);
+          sp.edit().putBoolean("agree", true).apply();
         }
         break;
       }
