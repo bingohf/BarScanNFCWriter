@@ -34,10 +34,8 @@ import rx.subscriptions.CompositeSubscription;
  * Created by togb on 2016/9/4.
  */
 public class MainFragment extends PagerFragment {
-
-  private PublishSubject<Boolean> mSettingSubject = PublishSubject.create();
+  private CompositeSubscription subscriptions = new CompositeSubscription();
   private RecordAdapter mRecordAdapter;
-  private CompositeSubscription mSubscriptions = new CompositeSubscription();
 
   public MainFragment() {
     setHasOptionsMenu(true);
@@ -119,6 +117,11 @@ public class MainFragment extends PagerFragment {
 
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
     inflater.inflate(R.menu.main_fragment_menu, menu);
+  }
+
+  @Override public void onDestroyView() {
+    super.onDestroyView();
+    subscriptions.clear();
   }
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
