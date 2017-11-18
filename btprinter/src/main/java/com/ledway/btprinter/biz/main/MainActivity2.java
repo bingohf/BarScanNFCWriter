@@ -1,5 +1,6 @@
 package com.ledway.btprinter.biz.main;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -34,6 +35,8 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
+
+import static com.ledway.btprinter.AppConstants.REQUEST_AGREEMENT;
 
 public class MainActivity2 extends AppCompatActivity {
   @BindView(R.id.viewPager) ViewPager mViewPager;
@@ -74,6 +77,12 @@ public class MainActivity2 extends AppCompatActivity {
     switch (requestCode){
       case  AppConstants.REQUEST_TYPE_SETTING:{
         doCheckSetting();
+        break;
+      }
+      case REQUEST_AGREEMENT:{
+        if(resultCode != Activity.RESULT_OK){
+          finish();
+        }
         break;
       }
     }
@@ -188,7 +197,7 @@ public class MainActivity2 extends AppCompatActivity {
     SharedPreferences sp = getSharedPreferences("agreement", Context.MODE_PRIVATE);
     if (!sp.getBoolean("agree", false)) {
       startActivityForResult(new Intent(this, AgreementActivity.class),
-          AppConstants.REQUEST_AGREEMENT);
+          REQUEST_AGREEMENT);
     }
   }
 }
