@@ -14,18 +14,26 @@ import com.ledway.btprinter.R;
 public class MainActivity2 extends AppCompatActivity {
    @BindView(R.id.viewPager) ViewPager mViewPager;
    @BindView(R.id.bottomNavigation) BottomNavigationView mBottomNav;
-    Fragment[] fragments = new Fragment[]{new SampleListFragment(), new ProductListFragment()};
+    Class< Fragment>[] fragmentCls = new Class[]{SampleListFragment.class,ReceiveSampleListFragment.class, ProductListFragment.class};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main2);
         ButterKnife.bind(this);
         mViewPager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
             @Override public Fragment getItem(int position) {
-                return fragments[position];
+              try {
+                return fragmentCls[position].newInstance();
+              } catch (InstantiationException e) {
+                e.printStackTrace();
+              } catch (IllegalAccessException e) {
+                e.printStackTrace();
+              }
+              return null;
             }
 
             @Override public int getCount() {
-                return fragments.length;
+                return fragmentCls.length;
             }
         });
       mBottomNav.setOnNavigationItemSelectedListener(item -> {
