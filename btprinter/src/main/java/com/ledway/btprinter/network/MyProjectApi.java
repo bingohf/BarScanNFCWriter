@@ -1,5 +1,6 @@
 package com.ledway.btprinter.network;
 
+import java.util.concurrent.TimeUnit;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
@@ -16,6 +17,7 @@ public class MyProjectApi {
 
   private MyProjectApi(){
     OkHttpClient.Builder builder = new OkHttpClient.Builder();
+    builder.writeTimeout(60, TimeUnit.SECONDS).readTimeout(60, TimeUnit.SECONDS);
     builder.addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY));
     OkHttpClient client = builder.build();
 
@@ -30,7 +32,7 @@ public class MyProjectApi {
 
 
     Retrofit retrofit2 = new Retrofit.Builder()
-        .baseUrl("http://ledwayvip.cloudapp.net/datasnap/rest/TLwDataModule/")
+        .baseUrl("http://ledwayvip.cloudapp.net:8080/datasnap/rest/TLwDataModule/")
         .addConverterFactory(JacksonConverterFactory.create())
         .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
         .client(client)
