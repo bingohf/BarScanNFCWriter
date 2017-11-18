@@ -71,31 +71,6 @@
           android:name="android.support.FILE_PROVIDER_PATHS"
           android:resource="@xml/file_paths"></meta-data>
     </provider>
-
-<!--    &lt;!&ndash; 按键广播 &ndash;&gt;
-    <receiver
-        android:name="com.zkc.Receiver.RemoteControlReceiver"
-        android:permission="com.zkc.keycode" >
-      &lt;!&ndash;            <intent-filter android:priority="1000" />&ndash;&gt;
-      <intent-filter>
-        <action android:name="com.zkc.keycode" />
-      </intent-filter>
-    </receiver>-->
-    <!-- 广播接收 -->
-<!--    <receiver android:name="com.zkc.Receiver.StartReceiver" >
-      &lt;!&ndash;            <intent-filter android:priority="996" />&ndash;&gt;
-      <intent-filter>
-        <action android:name="android.intent.action.BOOT_COMPLETED" />
-
-        <category android:name="android.intent.category.LAUNCHER" />
-      </intent-filter>
-    </receiver>-->
-    <!-- 扫描服务 -->
-<!--    <service android:name="com.zkc.Service.CaptureService" >
-      <intent-filter>
-        <action android:name="com.zkc.Service.CaptureService" />
-      </intent-filter>
-    </service>-->
     <meta-data
         android:name="AA_DB_NAME"
         android:value="cust.db"/>
