@@ -36,6 +36,10 @@ public class SampleListFragment extends Fragment {
   private SampleListAdapter mSampleListAdapter;
   private ProgressDialog mProgressDialog;
 
+  public SampleListFragment(){
+    setRetainInstance(true);
+  }
+
   @Nullable @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
@@ -52,14 +56,13 @@ public class SampleListFragment extends Fragment {
     DividerItemDecoration dividerItemDecoration =
         new DividerItemDecoration(getActivity(), layoutManager.getOrientation());
     mListView.addItemDecoration(dividerItemDecoration);
-    mSampleListAdapter = new SampleListAdapter(getActivity());
     initView();
   }
 
   @Override public void onActivityCreated(@Nullable Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
     setHasOptionsMenu(true);
-    setReenterTransition(true);
+    //setReenterTransition(true);
     loadRecordData();
   }
 

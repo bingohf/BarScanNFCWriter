@@ -2,7 +2,6 @@ package com.ledway.btprinter.biz.main;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -29,9 +28,7 @@ import com.ledway.btprinter.network.MyProjectApi;
 import com.zkc.Service.CaptureService;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashSet;
 import rx.Subscriber;
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -41,8 +38,8 @@ import static com.ledway.btprinter.AppConstants.REQUEST_AGREEMENT;
 public class MainActivity2 extends AppCompatActivity {
   @BindView(R.id.viewPager) ViewPager mViewPager;
   @BindView(R.id.bottomNavigation) BottomNavigationView mBottomNav;
-  Class<Fragment>[] fragmentCls = new Class[] {
-      SampleListFragment.class, ReceiveSampleListFragment.class, ProductListFragment.class
+  Fragment[] fragments = new Fragment[] {
+      new SampleListFragment(), new SampleListFragment(), new SampleListFragment()
   };
   private CompositeSubscription mSubscriptions = new CompositeSubscription();
 
@@ -59,7 +56,7 @@ public class MainActivity2 extends AppCompatActivity {
   }
 
   private void doCheckSetting() {
-    if(!checkSetting()){
+    if (!checkSetting()) {
       AlertDialog.Builder builder = new AlertDialog.Builder(this);
       builder.setTitle(R.string.invalid_setting)
           .setMessage(R.string.goto_setting)
@@ -70,68 +67,6 @@ public class MainActivity2 extends AppCompatActivity {
           .setCancelable(false);
       builder.create().show();
     }
-  }
-
-  @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    super.onActivityResult(requestCode, resultCode, data);
-    switch (requestCode){
-      case  AppConstants.REQUEST_TYPE_SETTING:{
-        doCheckSetting();
-        break;
-      }
-      case REQUEST_AGREEMENT:{
-        if(resultCode != Activity.RESULT_OK){
-          finish();
-        }else {
-          SharedPreferences sp = getSharedPreferences("agreement", Context.MODE_PRIVATE);
-          sp.edit().putBoolean("agree", true).apply();
-        }
-        break;
-      }
-    }
-  }
-
-  private void initView() {
-    ButterKnife.bind(this);
-    mViewPager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
-      @Override public Fragment getItem(int position) {
-        try {
-          return fragmentCls[position].newInstance();
-        } catch (InstantiationException e) {
-          e.printStackTrace();
-        } catch (IllegalAccessException e) {
-          e.printStackTrace();
-        }
-        return null;
-      }
-
-      @Override public int getCount() {
-        return fragmentCls.length;
-      }
-    });
-    mBottomNav.setOnNavigationItemSelectedListener(item -> {
-      mViewPager.setCurrentItem(item.getOrder());
-      return true;
-    });
-    mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-      @Override
-      public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-      }
-
-      @Override public void onPageSelected(int position) {
-        mBottomNav.setSelectedItemId(mBottomNav.getMenu().getItem(position).getItemId());
-      }
-
-      @Override public void onPageScrollStateChanged(int state) {
-
-      }
-    });
-  }
-
-  @Override public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.menu_main, menu);
-    return true;
   }
 
   private boolean checkSetting() {
@@ -152,6 +87,37 @@ public class MainActivity2 extends AppCompatActivity {
     return true;
   }
 
+  private void initView() {
+    ButterKnife.bind(this);
+    mViewPager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
+      @Override public Fragment getItem(int position) {
+        return fragments[position];
+      }
+
+      @Override public int getCount() {
+        return fragments.length;
+      }
+    });
+    mBottomNav.setOnNavigationItemSelectedListener(item -> {
+      mViewPager.setCurrentItem(item.getOrder(),false);
+      return true;
+    });
+    mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+      @Override
+      public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+      }
+
+      @Override public void onPageSelected(int position) {
+        mBottomNav.setSelectedItemId(mBottomNav.getMenu().getItem(position).getItemId());
+        invalidateOptionsMenu();
+      }
+
+      @Override public void onPageScrollStateChanged(int state) {
+
+      }
+    });
+  }
 
   private void checkVersion() {
     mSubscriptions.add(MyProjectApi.getInstance()
@@ -199,8 +165,31 @@ public class MainActivity2 extends AppCompatActivity {
   private void checkAgreement() {
     SharedPreferences sp = getSharedPreferences("agreement", Context.MODE_PRIVATE);
     if (!sp.getBoolean("agree", false)) {
-      startActivityForResult(new Intent(this, AgreementActivity.class),
-          REQUEST_AGREEMENT);
+      startActivityForResult(new Intent(this, AgreementActivity.class), REQUEST_AGREEMENT);
     }
+  }
+
+  @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    switch (requestCode) {
+      case AppConstants.REQUEST_TYPE_SETTING: {
+        doCheckSetting();
+        break;
+      }
+      case REQUEST_AGREEMENT: {
+        if (resultCode != Activity.RESULT_OK) {
+          finish();
+        } else {
+          SharedPreferences sp = getSharedPreferences("agreement", Context.MODE_PRIVATE);
+          sp.edit().putBoolean("agree", true).apply();
+        }
+        break;
+      }
+    }
+  }
+
+  @Override public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.menu_main, menu);
+    return true;
   }
 }
