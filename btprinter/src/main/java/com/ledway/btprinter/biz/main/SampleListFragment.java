@@ -2,6 +2,7 @@ package com.ledway.btprinter.biz.main;
 
 import android.app.ProgressDialog;
 import android.arch.lifecycle.MutableLiveData;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -19,6 +20,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.activeandroid.query.Select;
+import com.ledway.btprinter.AppConstants;
+import com.ledway.btprinter.ItemDetailActivity;
+import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.models.Resource;
 import com.ledway.btprinter.models.SampleMaster;
@@ -52,7 +56,8 @@ public class SampleListFragment extends Fragment {
     LinearLayoutManager layoutManager =
         new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
     mListView.setLayoutManager(layoutManager);
-    mListView.setAdapter(new SampleListAdapter(view.getContext()));
+    mSampleListAdapter = new SampleListAdapter(view.getContext());
+    mListView.setAdapter(mSampleListAdapter);
     DividerItemDecoration dividerItemDecoration =
         new DividerItemDecoration(getActivity(), layoutManager.getOrientation());
     mListView.addItemDecoration(dividerItemDecoration);
@@ -84,6 +89,10 @@ public class SampleListFragment extends Fragment {
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
       case R.id.action_add: {
+        SampleMaster sampleMaster = new SampleMaster();
+        MApp.getApplication().getSession().put("current_data", sampleMaster);
+        startActivityForResult(new Intent(getActivity(), ItemDetailActivity.class),
+            AppConstants.REQUEST_TYPE_ADD_RECORD);
         break;
       }
     }
@@ -112,6 +121,8 @@ public class SampleListFragment extends Fragment {
         }
         case SUCCESS: {
           stopLoading();
+          mSampleListAdapter.setData(listResource.data);
+          mSampleListAdapter.notifyDataSetChanged();
           break;
         }
         case ERROR: {
@@ -134,4 +145,6 @@ public class SampleListFragment extends Fragment {
       mProgressDialog = null;
     }
   }
+
+
 }

@@ -99,7 +99,7 @@ public class MainActivity2 extends AppCompatActivity {
       }
     });
     mBottomNav.setOnNavigationItemSelectedListener(item -> {
-      mViewPager.setCurrentItem(item.getOrder(),false);
+      mViewPager.setCurrentItem(item.getOrder());
       return true;
     });
     mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {

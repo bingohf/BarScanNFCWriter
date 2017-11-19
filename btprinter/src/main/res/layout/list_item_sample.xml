@@ -4,6 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="8dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="?attr/selectableItemBackground"
     >
 
   <ImageView
@@ -23,12 +26,14 @@
       android:layout_gravity="center_vertical"
       >
   <TextView
+      android:id="@+id/txt_title"
       android:text="Title"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:textAppearance="@style/TextAppearance.AppCompat.Medium"
       />
     <TextView
+        android:id="@+id/txt_sub_title"
         android:text="subTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -36,6 +41,7 @@
   </LinearLayout>
 
   <TextView
+      android:id="@+id/txt_timestamp"
       android:text="2017/11/11 12:30"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
