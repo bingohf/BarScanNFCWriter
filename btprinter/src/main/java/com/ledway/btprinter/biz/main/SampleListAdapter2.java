@@ -14,6 +14,7 @@ import com.ledway.btprinter.R;
 import com.ledway.btprinter.models.SampleMaster;
 import com.squareup.picasso.Picasso;
 import io.reactivex.subjects.PublishSubject;
+import java.io.DataInput;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -21,14 +22,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class SampleListAdapter  extends RecyclerView.Adapter<SampleListAdapter.SampleViewHolder>
+public class SampleListAdapter2 extends RecyclerView.Adapter<SampleListAdapter2.SampleViewHolder>
     implements View.OnClickListener {
   private SimpleDateFormat mDateFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm",Locale.getDefault());
-  private List<SampleMaster> mData = new ArrayList<>();
+  private List<ItemData> mData = new ArrayList<>();
   private final LayoutInflater mLayoutInflater;
-  private PublishSubject<SampleMaster> mClickSubject =  PublishSubject.create();
+  private PublishSubject<Object> mClickSubject =  PublishSubject.create();
 
-  public SampleListAdapter(Context context) {
+  public SampleListAdapter2(Context context) {
     mLayoutInflater = LayoutInflater.from(context);
   }
 
@@ -40,17 +41,17 @@ public class SampleListAdapter  extends RecyclerView.Adapter<SampleListAdapter.S
   }
 
   @Override public void onBindViewHolder(SampleViewHolder holder, int position) {
-    SampleMaster dataItem = mData.get(position);
-    if(!TextUtils.isEmpty(dataItem.getImage1())) {
-      File file = new File(dataItem.getImage1());
+    ItemData dataItem = mData.get(position);
+    if(!TextUtils.isEmpty(dataItem.iconPath)) {
+      File file = new File(dataItem.iconPath);
       if (file.exists()) {
         Picasso.with(holder.itemView.getContext()).load(file).fit().into(holder.imgIcon);
       }
     }
-    holder.txtTitle.setText(safeText(dataItem.getDesc()));
+    holder.txtTitle.setText(safeText(dataItem.title));
     holder.txtSubTitle.setText("");
-    holder.txtTimestamp.setText(formatDate(dataItem.update_date));
-    holder.imgSynced.setVisibility(dataItem.isDirty ? View.VISIBLE:View.GONE);
+    holder.txtTimestamp.setText(formatDate(dataItem.timestamp));
+    holder.imgSynced.setVisibility(dataItem.redFlag ? View.VISIBLE:View.GONE);
     holder.itemView.setTag(position);
   }
 
@@ -65,11 +66,11 @@ public class SampleListAdapter  extends RecyclerView.Adapter<SampleListAdapter.S
     }
     return text;
   }
-  public void setData(List<SampleMaster> data){
+  public void setData(List<ItemData> data){
     mData = data;
   }
 
-  public PublishSubject<SampleMaster> getClickObservable(){
+  public PublishSubject<Object> getClickObservable(){
     return mClickSubject;
   }
 
@@ -78,8 +79,8 @@ public class SampleListAdapter  extends RecyclerView.Adapter<SampleListAdapter.S
   }
 
   @Override public void onClick(View view) {
-    SampleMaster item = mData.get((int)view.getTag());
-    mClickSubject.onNext(item);
+    ItemData item = mData.get((int) view.getTag());
+    mClickSubject.onNext(item.hold);
   }
 
   public static class SampleViewHolder extends RecyclerView.ViewHolder{
@@ -93,6 +94,16 @@ public class SampleListAdapter  extends RecyclerView.Adapter<SampleListAdapter.S
       ButterKnife.bind(this, itemView);
     }
   }
+
+  public static class ItemData<T>{
+    public String iconPath;
+    public Date timestamp;
+    public String title;
+    public String subTitle;
+    public boolean redFlag;
+    public T hold;
+  }
+
 
 
 }

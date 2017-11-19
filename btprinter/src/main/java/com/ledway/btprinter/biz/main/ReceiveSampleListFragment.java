@@ -1,29 +1,154 @@
 package com.ledway.btprinter.biz.main;
 
+import android.arch.lifecycle.MutableLiveData;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
+import com.ledway.btprinter.models.Resource;
+import com.ledway.btprinter.models.SampleMaster;
+import com.ledway.btprinter.network.MyProjectApi;
+import com.ledway.btprinter.network.model.ProductAppGetReturn;
+import com.ledway.btprinter.network.model.ProductReturn;
+import com.ledway.btprinter.network.model.RestDataSetResponse;
+import io.reactivex.disposables.CompositeDisposable;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import org.w3c.dom.Text;
+import rx.Observable;
+import rx.Subscriber;
+import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 
 public class ReceiveSampleListFragment extends Fragment {
   @BindView(R.id.listview) RecyclerView mListView;
+  @BindView(R.id.swiperefresh) SwipeRefreshLayout mSwipeRefresh;
+  private CompositeDisposable mDisposables = new CompositeDisposable();
+  private CompositeSubscription mSubscriptions = new CompositeSubscription();
   private Unbinder mViewBinder;
+  private SampleListAdapter2 mSampleListAdapter;
+  private MutableLiveData<Resource<List<SampleListAdapter2.ItemData>>> dataResource =
+      new MutableLiveData<>();
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
+    mSampleListAdapter = new SampleListAdapter2(getContext());
+    loadData();
+  }
+
+  private void loadData() {
+    dataResource.postValue(Resource.loading(null));
+    String query = "isnull(json,'') <>'' and shareToDeviceId like '" + MApp.getApplication()
+        .getSystemInfo()
+        .getDeviceId() + "%'";
+    query = "isnull(json,'') <>'' and shareToDeviceId like '" + "10c106001dbeed9" + "%'";
+    String orderBy = "order by UPDATEDATE desc";
+    Observable<RestDataSetResponse<ProductAppGetReturn>> obResponse =
+        MyProjectApi.getInstance().getDbService().getProductAppGet(query, orderBy);
+    mSubscriptions.add(obResponse.subscribeOn(Schedulers.io()).flatMap(response -> {
+      ObjectMapper objectMapper = new ObjectMapper();
+      objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      ArrayList<ProductAppGetReturn> datasetResponse = response.result.get(0);
+      ArrayList<SampleMaster> ret = new ArrayList<>();
+      for (ProductAppGetReturn item : datasetResponse) {
+        String json = item.json;
+        try {
+          SampleMaster sampleMaster = objectMapper.readValue(json, SampleMaster.class);
+          ret.add(sampleMaster);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+      return Observable.from(ret);
+    }).flatMap(sampleMaster -> {
+      SampleListAdapter2.ItemData itemData = new SampleListAdapter2.ItemData();
+      itemData.timestamp = sampleMaster.update_date;
+      String title = sampleMaster.shareToDeviceId;
+      int index = title.indexOf('|');
+      if (index > 0) {
+        title = title.substring(index + 1);
+      }
+      itemData.title = title;
+      return Observable.from(sampleMaster.sampleProdLinks)
+          .flatMap(sampleProdLink -> loadProductImage(sampleProdLink.prod_id))
+          .toList()
+          .map(files -> {
+            if(!files.isEmpty()) {
+              itemData.iconPath = files.get(0).getAbsolutePath();
+            }
+            return itemData;
+          });
+    }).toList().subscribe(new Subscriber<List<SampleListAdapter2.ItemData>>() {
+      @Override public void onCompleted() {
+
+      }
+
+      @Override public void onError(Throwable e) {
+        dataResource.postValue(Resource.error(e.getMessage(), null));
+      }
+
+      @Override public void onNext(List<SampleListAdapter2.ItemData> itemData) {
+        dataResource.postValue(Resource.success(itemData));
+      }
+    }));
+  }
+
+  private Observable<File> loadProductImage(String prodno) {
+    File imgFile = new File(MApp.getApplication().getPicPath() + "/product/" + prodno + ".png");
+    if (!imgFile.getParentFile().exists()) {
+      imgFile.getParentFile().mkdir();
+    }
+    String query = "prodno='" + prodno +"'";
+    return MyProjectApi.getInstance()
+        .getDbService()
+        .getProduct(query, "")
+        .subscribeOn(Schedulers.io())
+        .flatMap(response -> {
+          ArrayList<ProductReturn> list = response.result.get(0);
+          for (ProductReturn productReturn : list) {
+            if(!TextUtils.isEmpty(productReturn.graphic)) {
+              byte[] data = Base64.decode(productReturn.graphic, Base64.DEFAULT);
+              try (OutputStream stream = new FileOutputStream(imgFile)) {
+                stream.write(data);
+                return Observable.just(imgFile);
+              } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                return Observable.error(e);
+              } catch (IOException e) {
+                e.printStackTrace();
+                return Observable.error(e);
+              }
+            }
+          }
+          return Observable.empty();
+        });
   }
 
   @Nullable @Override
@@ -38,10 +163,33 @@ public class ReceiveSampleListFragment extends Fragment {
     LinearLayoutManager layoutManager =
         new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
     mListView.setLayoutManager(layoutManager);
-    mListView.setAdapter(new SampleListAdapter(view.getContext()));
-    DividerItemDecoration
-        dividerItemDecoration = new DividerItemDecoration(getActivity(),layoutManager.getOrientation());
+    mListView.setAdapter(mSampleListAdapter);
+    DividerItemDecoration dividerItemDecoration =
+        new DividerItemDecoration(getActivity(), layoutManager.getOrientation());
     mListView.addItemDecoration(dividerItemDecoration);
+    mSwipeRefresh.setOnRefreshListener(this::loadData);
+    initView();
+  }
+
+  private void initView() {
+    dataResource.observe(this, resource -> {
+      switch (resource.status) {
+        case LOADING: {
+          mSwipeRefresh.setRefreshing(true);
+          break;
+        }
+        case ERROR: {
+          mSwipeRefresh.setRefreshing(false);
+          Toast.makeText(getContext(), resource.message, Toast.LENGTH_LONG).show();
+          break;
+        }
+        case SUCCESS: {
+          mSwipeRefresh.setRefreshing(false);
+          mSampleListAdapter.setData(resource.data);
+          mSampleListAdapter.notifyDataSetChanged();
+        }
+      }
+    });
   }
 
   @Override public void onDestroyView() {
@@ -49,7 +197,13 @@ public class ReceiveSampleListFragment extends Fragment {
     mViewBinder.unbind();
   }
 
+  @Override public void onDestroy() {
+    super.onDestroy();
+    mDisposables.clear();
+    mSubscriptions.clear();
+  }
+
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-    inflater.inflate(R.menu.menu_sample_list, menu);
+    //inflater.inflate(R.menu.menu_sample_list, menu);
   }
 }
