@@ -62,7 +62,7 @@ public class ProductListFragment extends Fragment {
         }
         break;
       }
-      case REQUEST_TODO_PRODUCT:{
+      case REQUEST_TODO_PRODUCT: {
         loadData();
         break;
       }
@@ -77,31 +77,6 @@ public class ProductListFragment extends Fragment {
             new Intent(getActivity(), TodoProdDetailActivity.class).putExtra("prod_no",
                 (String) prodno), REQUEST_TODO_PRODUCT)));
     loadData();
-  }
-
-  private void loadData() {
-    Observable.defer(() -> Observable.from(new Select().from(TodoProd.class).orderBy("update_time desc").execute())).map(o -> {
-      TodoProd todoProd = (TodoProd) o;
-      SampleListAdapter2.ItemData itemData = new SampleListAdapter2.ItemData();
-      itemData.timestamp = todoProd.create_time;
-      itemData.subTitle = todoProd.spec_desc;
-      itemData.title = todoProd.prodNo;
-      itemData.hold = todoProd.prodNo;
-      itemData.iconPath = todoProd.image1;
-      return itemData;
-    }).toList().subscribe(new Subscriber<List<SampleListAdapter2.ItemData>>() {
-      @Override public void onCompleted() {
-
-      }
-
-      @Override public void onError(Throwable e) {
-        dataResource.postValue(Resource.error(e.getMessage(), null));
-      }
-
-      @Override public void onNext(List<SampleListAdapter2.ItemData> itemData) {
-        dataResource.postValue(Resource.success(itemData));
-      }
-    });
   }
 
   @Nullable @Override
@@ -153,7 +128,6 @@ public class ProductListFragment extends Fragment {
   @Override public void onDestroyView() {
     super.onDestroyView();
     mViewBinder.unbind();
-
   }
 
   @Override public void onDestroy() {
@@ -179,5 +153,33 @@ public class ProductListFragment extends Fragment {
   private void scanBarCode() {
     startActivityForResult(new Intent(getActivity(), FullScannerActivity.class),
         RESULT_CAMERA_QR_CODE);
+  }
+
+  private void loadData() {
+    Observable.defer(() -> Observable.from(
+        new Select().from(TodoProd.class).orderBy("update_time desc").execute())).map(o -> {
+      TodoProd todoProd = (TodoProd) o;
+      SampleListAdapter2.ItemData itemData = new SampleListAdapter2.ItemData();
+      itemData.timestamp = todoProd.create_time;
+      itemData.subTitle = todoProd.spec_desc;
+      itemData.title = todoProd.prodNo;
+      itemData.hold = todoProd.prodNo;
+      itemData.iconPath = todoProd.image1;
+      itemData.redFlag = todoProd.uploaded_time == null
+          || todoProd.update_time.getTime() > todoProd.uploaded_time.getTime();
+      return itemData;
+    }).toList().subscribe(new Subscriber<List<SampleListAdapter2.ItemData>>() {
+      @Override public void onCompleted() {
+
+      }
+
+      @Override public void onError(Throwable e) {
+        dataResource.postValue(Resource.error(e.getMessage(), null));
+      }
+
+      @Override public void onNext(List<SampleListAdapter2.ItemData> itemData) {
+        dataResource.postValue(Resource.success(itemData));
+      }
+    });
   }
 }

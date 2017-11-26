@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 
-def shortName ="sales_edge"
+def shortName = "sales_edge"
 android {
   compileSdkVersion 27
   buildToolsVersion '26.0.2'
@@ -13,8 +13,8 @@ android {
     applicationId "com.ledway.btprinter"
     minSdkVersion 17
     targetSdkVersion 21
-    versionCode 45
-    versionName "4.5"
+    versionCode 46
+    versionName "4.6"
   }
   signingConfigs{
     relase_signing_config{
@@ -53,6 +53,13 @@ android {
 
     }
   }*/
+
+  android.applicationVariants.all { variant ->
+    variant.outputs.all {
+      outputFileName = "${shortName}-v${variant.versionName}.apk"
+    }
+  }
+
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
     targetCompatibility JavaVersion.VERSION_1_8

@@ -27,6 +27,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+import com.activeandroid.Model;
+import com.activeandroid.query.Select;
 import com.ledway.btprinter.adapters.BaseData;
 import com.ledway.btprinter.adapters.DataAdapter;
 import com.ledway.btprinter.adapters.PhotoData;
@@ -109,13 +111,25 @@ public class ItemDetailActivity extends AppCompatActivity {
         });
   }
 
+  private void loadSampleMaster(String guid){
+    mSampleMaster = new SampleMaster();
+    mSampleMaster.guid =
+        MApp.getApplication().getSystemInfo().getDeviceId() + "_" + System.currentTimeMillis();
+    if(guid != null){
+      List<Model> list = new Select().from(SampleMaster.class).where("guid =?", guid).execute();
+      if(!list.isEmpty()){
+        mSampleMaster= (SampleMaster) list.get(0);
+      }
+    }
+
+
+  }
+
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    String guid = getIntent().getStringExtra("guid");
+    loadSampleMaster(guid);
     mSampleMaster = (SampleMaster) MApp.getApplication().getSession().getValue("current_data");
-    if (TextUtils.isEmpty(mSampleMaster.guid)) {
-      mSampleMaster.guid =
-          MApp.getApplication().getSystemInfo().getDeviceId() + "_" + System.currentTimeMillis();
-    }
     if (TextUtils.isEmpty(mSampleMaster.dataFrom)) {
       mSampleMaster.dataFrom = MApp.getApplication().getSystemInfo().getBusinessCard();
     }
