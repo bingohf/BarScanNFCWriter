@@ -26,7 +26,8 @@ import rx.Subscriber;
   @Column(name = "image1") public String image1;
   @Column(name = "image2") public String image2;
   @Column(name = "uploaded_time") public Date uploaded_time;
-  @Column(name = "created_time") public Date created_time;
+  @Column(name = "update_time") public Date update_time;
+  @Column(name = "create_time") public Date create_time;
   @Column(name = "spec_desc") public String spec_desc;
 
   public int todayCount;
@@ -46,7 +47,7 @@ import rx.Subscriber;
         } else {
           TodoProd todoProd = new TodoProd();
           todoProd.prodNo = prodNo;
-          todoProd.created_time = new Date();
+          todoProd.create_time = new Date();
           todoProd.save();
           subscriber.onNext(todoProd);
           subscriber.onCompleted();
@@ -105,7 +106,7 @@ import rx.Subscriber;
       TodoProd temp = record.get(0);
       image1 = temp.image1;
       image2 = temp.image2;
-      created_time = temp.created_time;
+      create_time = temp.create_time;
       uploaded_time = temp.uploaded_time;
       spec_desc = temp.spec_desc;
     }

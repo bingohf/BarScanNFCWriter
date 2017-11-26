@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -17,22 +16,22 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnTextChanged;
 import com.activeandroid.query.Select;
 import com.ledway.btprinter.models.TodoProd;
 import com.ledway.btprinter.network.model.RestSpResponse;
 import com.ledway.btprinter.network.model.SpReturn;
 import com.ledway.btprinter.utils.IOUtil;
 import com.ledway.btprinter.views.MImageView;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import rx.Subscriber;
@@ -45,12 +44,11 @@ import rx.schedulers.Schedulers;
 public class TodoProdDetailActivity extends AppCompatActivity {
   private static final int REQUEST_TAKE_IMAGE = 1;
 
-  private MImageView mImageView;
-  private TextView mTxtHint;
   private TodoProd mTodoProd ;
-  private EditText mEdtSpec;
   private String mCurrentPhotoPath;
-
+  @BindView(R.id.image) MImageView mImageView;
+  @BindView(R.id.txt_hint) TextView mTxtHint;
+  @BindView(R.id.txt_spec) EditText mEdtSpec;
   @Override public boolean onCreateOptionsMenu(Menu menu) {
     getMenuInflater().inflate(R.menu.todo_prod_menu, menu);
     return true;
@@ -72,11 +70,9 @@ public class TodoProdDetailActivity extends AppCompatActivity {
 
 
   @Override public void onBackPressed() {
-    if (!mEdtSpec.getText().toString().equals(mTodoProd.spec_desc)){
-      mTodoProd.uploaded_time = null;
+    if(mTodoProd.update_time.getTime() != mTodoProd.create_time.getTime()) {
+      mTodoProd.save();
     }
-    mTodoProd.spec_desc = mEdtSpec.getText().toString();
-    mTodoProd.save();
     super.onBackPressed();
   }
 
@@ -90,9 +86,8 @@ public class TodoProdDetailActivity extends AppCompatActivity {
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_todo_prod_detail);
-    mImageView = (MImageView) findViewById(R.id.image);
-    mTxtHint = (TextView) findViewById(R.id.txt_hint);
-    mEdtSpec = (EditText) findViewById(R.id.txt_spec);
+    ButterKnife.bind(this);
+
     loadTodoProd();
     //mTodoProd.queryAllField();
     getSupportActionBar().setTitle(mTodoProd.prodNo);
@@ -117,8 +112,6 @@ public class TodoProdDetailActivity extends AppCompatActivity {
       @Override public void onFocusChange(View v, boolean hasFocus) {
         if (!hasFocus){
           mTodoProd.spec_desc = mEdtSpec.getText().toString();
-          mTodoProd.uploaded_time = null;
-          mTodoProd.save();
         }
       }
     });
@@ -126,6 +119,12 @@ public class TodoProdDetailActivity extends AppCompatActivity {
 /*    Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
     startActivityForResult(takePicture, REQUEST_TAKE_IMAGE);//zero can be replaced with any action code*/
   }
+
+  @OnTextChanged(R.id.txt_spec) void onTextSpecChange(){
+    mTodoProd.spec_desc = mEdtSpec.getText().toString();
+    mTodoProd.update_time = new Date();
+  }
+
 
   private void loadTodoProd() {
     String prodno = getIntent().getStringExtra("prod_no");
@@ -142,8 +141,8 @@ public class TodoProdDetailActivity extends AppCompatActivity {
       return todoProds.get(0);
     }
     TodoProd todoProd = new TodoProd();
-    todoProd.created_time = new Date();
-    todoProd.uploaded_time = new Date();
+    todoProd.create_time = new Date();
+    todoProd.update_time = todoProd.create_time;
     todoProd.prodNo = prodno;
     return todoProd;
   }
@@ -183,7 +182,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
             mTxtHint.setVisibility(View.GONE);
             mImageView.setImageBitmap(bitmap);
             mImageView.setImagePath(f.getAbsolutePath());
-            mTodoProd.uploaded_time = null;
+            mTodoProd.update_time = new Date();
             mTodoProd.save();
           }
        //   upload();

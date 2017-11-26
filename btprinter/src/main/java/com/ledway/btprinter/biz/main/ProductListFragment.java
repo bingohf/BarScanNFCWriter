@@ -35,6 +35,7 @@ import rx.Subscriber;
 
 public class ProductListFragment extends Fragment {
   private static final int RESULT_CAMERA_QR_CODE = 1;
+  private static final int REQUEST_TODO_PRODUCT = 2;
   @BindView(R.id.listview) RecyclerView mListView;
   @BindView(R.id.swiperefresh) SwipeRefreshLayout mSwipeRefresh;
   @BindView(R.id.statefulLayout) StatefulLayout mStatefulLayout;
@@ -57,8 +58,12 @@ public class ProductListFragment extends Fragment {
           String qrcode = data.getStringExtra("barcode");
           startActivityForResult(
               new Intent(getActivity(), TodoProdDetailActivity.class).putExtra("prod_no", qrcode),
-              1);
+              REQUEST_TODO_PRODUCT);
         }
+        break;
+      }
+      case REQUEST_TODO_PRODUCT:{
+        loadData();
         break;
       }
     }
@@ -70,15 +75,15 @@ public class ProductListFragment extends Fragment {
     mDisposables.add(mSampleListAdapter.getClickObservable()
         .subscribe(prodno -> startActivityForResult(
             new Intent(getActivity(), TodoProdDetailActivity.class).putExtra("prod_no",
-                (String) prodno), 1)));
+                (String) prodno), REQUEST_TODO_PRODUCT)));
     loadData();
   }
 
   private void loadData() {
-    Observable.defer(() -> Observable.from(new Select().from(TodoProd.class).execute())).map(o -> {
+    Observable.defer(() -> Observable.from(new Select().from(TodoProd.class).orderBy("update_time desc").execute())).map(o -> {
       TodoProd todoProd = (TodoProd) o;
       SampleListAdapter2.ItemData itemData = new SampleListAdapter2.ItemData();
-      itemData.timestamp = todoProd.created_time;
+      itemData.timestamp = todoProd.create_time;
       itemData.subTitle = todoProd.spec_desc;
       itemData.title = todoProd.prodNo;
       itemData.hold = todoProd.prodNo;
@@ -165,7 +170,6 @@ public class ProductListFragment extends Fragment {
     switch (item.getItemId()) {
       case R.id.action_add: {
         scanBarCode();
-
         break;
       }
     }
