@@ -49,7 +49,7 @@ public class SampleListAdapter2 extends RecyclerView.Adapter<SampleListAdapter2.
       }
     }
     holder.txtTitle.setText(safeText(dataItem.title));
-    holder.txtSubTitle.setText("");
+    holder.txtSubTitle.setText(safeText(dataItem.subTitle));
     holder.txtTimestamp.setText(formatDate(dataItem.timestamp));
     holder.imgSynced.setVisibility(dataItem.redFlag ? View.VISIBLE:View.GONE);
     holder.itemView.setTag(position);

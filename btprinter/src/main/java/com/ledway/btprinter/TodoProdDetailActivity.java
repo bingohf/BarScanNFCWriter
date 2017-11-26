@@ -141,7 +141,11 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     if (todoProds.size() > 0){
       return todoProds.get(0);
     }
-    return null;
+    TodoProd todoProd = new TodoProd();
+    todoProd.created_time = new Date();
+    todoProd.uploaded_time = new Date();
+    todoProd.prodNo = prodno;
+    return todoProd;
   }
 
   @Override protected void onActivityResult(final int requestCode, int resultCode, Intent data) {

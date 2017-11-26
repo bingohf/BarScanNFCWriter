@@ -28,6 +28,7 @@ import com.ledway.btprinter.TodoProdDetailActivity;
 import com.ledway.btprinter.models.Resource;
 import com.ledway.btprinter.models.TodoProd;
 import com.ledway.framework.FullScannerActivity;
+import io.reactivex.disposables.CompositeDisposable;
 import java.util.List;
 import rx.Observable;
 import rx.Subscriber;
@@ -38,6 +39,7 @@ public class ProductListFragment extends Fragment {
   @BindView(R.id.swiperefresh) SwipeRefreshLayout mSwipeRefresh;
   @BindView(R.id.statefulLayout) StatefulLayout mStatefulLayout;
   private Unbinder mViewBinder;
+  private CompositeDisposable mDisposables = new CompositeDisposable();
   private SampleListAdapter2 mSampleListAdapter;
   private MutableLiveData<Resource<List<SampleListAdapter2.ItemData>>> dataResource =
       new MutableLiveData<>();
@@ -65,6 +67,10 @@ public class ProductListFragment extends Fragment {
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     mSampleListAdapter = new SampleListAdapter2(getContext());
+    mDisposables.add(mSampleListAdapter.getClickObservable()
+        .subscribe(prodno -> startActivityForResult(
+            new Intent(getActivity(), TodoProdDetailActivity.class).putExtra("prod_no",
+                (String) prodno), 1)));
     loadData();
   }
 
@@ -72,10 +78,9 @@ public class ProductListFragment extends Fragment {
     Observable.defer(() -> Observable.from(new Select().from(TodoProd.class).execute())).map(o -> {
       TodoProd todoProd = (TodoProd) o;
       SampleListAdapter2.ItemData itemData = new SampleListAdapter2.ItemData();
-      itemData.title = todoProd.spec_desc;
       itemData.timestamp = todoProd.created_time;
-      itemData.subTitle = todoProd.prodNo;
-      itemData.title = todoProd.spec_desc;
+      itemData.subTitle = todoProd.spec_desc;
+      itemData.title = todoProd.prodNo;
       itemData.hold = todoProd.prodNo;
       itemData.iconPath = todoProd.image1;
       return itemData;
@@ -143,6 +148,12 @@ public class ProductListFragment extends Fragment {
   @Override public void onDestroyView() {
     super.onDestroyView();
     mViewBinder.unbind();
+
+  }
+
+  @Override public void onDestroy() {
+    super.onDestroy();
+    mDisposables.clear();
   }
 
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
