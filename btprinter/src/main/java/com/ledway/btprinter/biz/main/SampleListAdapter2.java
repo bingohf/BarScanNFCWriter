@@ -56,6 +56,7 @@ public class SampleListAdapter2 extends RecyclerView.Adapter<SampleListAdapter2.
   }
 
   private String formatDate(Date date){
+    if(date == null) return "";
     return mDateFormatter.format(date);
   }
 

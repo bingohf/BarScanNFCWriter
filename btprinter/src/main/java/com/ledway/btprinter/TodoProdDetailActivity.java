@@ -94,7 +94,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     mTxtHint = (TextView) findViewById(R.id.txt_hint);
     mEdtSpec = (EditText) findViewById(R.id.txt_spec);
     loadTodoProd();
-    mTodoProd.queryAllField();
+    //mTodoProd.queryAllField();
     getSupportActionBar().setTitle(mTodoProd.prodNo);
     mEdtSpec.setText(mTodoProd.spec_desc);
     if (TextUtils.isEmpty(mTodoProd.image1)){
