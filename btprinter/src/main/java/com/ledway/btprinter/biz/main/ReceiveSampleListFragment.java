@@ -20,11 +20,16 @@ import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import com.activeandroid.Model;
+import com.activeandroid.query.Delete;
+import com.activeandroid.query.Select;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gturedi.views.StatefulLayout;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
+import com.ledway.btprinter.models.ReceivedSample;
 import com.ledway.btprinter.models.Resource;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.network.MyProjectApi;
@@ -39,15 +44,17 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import org.w3c.dom.Text;
 import rx.Observable;
 import rx.Subscriber;
+import rx.functions.Func0;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
 public class ReceiveSampleListFragment extends Fragment {
   @BindView(R.id.listview) RecyclerView mListView;
   @BindView(R.id.swiperefresh) SwipeRefreshLayout mSwipeRefresh;
+  @BindView(R.id.statefulLayout) StatefulLayout mStatefulLayout;
   private CompositeDisposable mDisposables = new CompositeDisposable();
   private CompositeSubscription mSubscriptions = new CompositeSubscription();
   private Unbinder mViewBinder;
@@ -59,15 +66,49 @@ public class ReceiveSampleListFragment extends Fragment {
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
     mSampleListAdapter = new SampleListAdapter2(getContext());
-    loadData();
+    loadFromCache();
   }
 
-  private void loadData() {
+  private void loadFromCache(){
+    Observable.defer(() -> Observable.from(new Select().from(ReceivedSample.class).execute()))
+        .map( cacheItem -> {
+          ReceivedSample dbItem = (ReceivedSample) cacheItem;
+          SampleListAdapter2.ItemData viewItem = new SampleListAdapter2.ItemData<>();
+          viewItem.title = dbItem.title;
+          viewItem.iconPath = dbItem.iconPath;
+          viewItem.timestamp= dbItem.datetime;
+          viewItem.hold = dbItem.holdId;
+          viewItem.title = dbItem.title;
+          return viewItem;
+        }).toList().subscribe(new Subscriber<List<SampleListAdapter2.ItemData>>() {
+      @Override public void onCompleted() {
+
+      }
+
+      @Override public void onError(Throwable e) {
+        dataResource.postValue(Resource.error(e.getMessage(), null));
+      }
+
+      @Override public void onNext(List<SampleListAdapter2.ItemData> itemData) {
+        if(itemData.size() ==0){
+          loadFromRemoteData();
+        }else {
+          dataResource.postValue(Resource.success(itemData));
+        }
+      }
+    });
+
+  }
+
+  private void loadFromRemoteData() {
     dataResource.postValue(Resource.loading(null));
     String query = "isnull(json,'') <>'' and shareToDeviceId like '" + MApp.getApplication()
         .getSystemInfo()
         .getDeviceId() + "%'";
-    query = "isnull(json,'') <>'' and shareToDeviceId like '" + "10c106001dbeed9" + "%'";
+
+    new Delete().from(ReceivedSample.class).execute();
+
+    query = "isnull(json,'') <>'' and shareToDeviceId like '" + "becb8da230e0a7cb" + "%'";
     String orderBy = "order by UPDATEDATE desc";
     Observable<RestDataSetResponse<ProductAppGetReturn>> obResponse =
         MyProjectApi.getInstance().getDbService().getProductAppGet(query, orderBy);
@@ -95,14 +136,20 @@ public class ReceiveSampleListFragment extends Fragment {
       if (index > 0) {
         title = title.substring(index + 1);
       }
-      itemData.title = title;
+      itemData.title = title.trim();
       return Observable.from(sampleMaster.sampleProdLinks)
           .flatMap(sampleProdLink -> loadProductImage(sampleProdLink.prod_id))
           .toList()
           .map(files -> {
-            if(!files.isEmpty()) {
+            if (!files.isEmpty()) {
               itemData.iconPath = files.get(0).getAbsolutePath();
             }
+            ReceivedSample cached = new ReceivedSample();
+            cached.iconPath = itemData.iconPath;
+            cached.title = itemData.title;
+            cached.datetime = itemData.timestamp;
+            cached.holdId = sampleMaster.guid;
+            cached.save();
             return itemData;
           });
     }).toList().subscribe(new Subscriber<List<SampleListAdapter2.ItemData>>() {
@@ -125,7 +172,7 @@ public class ReceiveSampleListFragment extends Fragment {
     if (!imgFile.getParentFile().exists()) {
       imgFile.getParentFile().mkdir();
     }
-    String query = "prodno='" + prodno +"'";
+    String query = "prodno='" + prodno + "'";
     return MyProjectApi.getInstance()
         .getDbService()
         .getProduct(query, "")
@@ -133,7 +180,7 @@ public class ReceiveSampleListFragment extends Fragment {
         .flatMap(response -> {
           ArrayList<ProductReturn> list = response.result.get(0);
           for (ProductReturn productReturn : list) {
-            if(!TextUtils.isEmpty(productReturn.graphic)) {
+            if (!TextUtils.isEmpty(productReturn.graphic)) {
               byte[] data = Base64.decode(productReturn.graphic, Base64.DEFAULT);
               try (OutputStream stream = new FileOutputStream(imgFile)) {
                 stream.write(data);
@@ -167,7 +214,7 @@ public class ReceiveSampleListFragment extends Fragment {
     DividerItemDecoration dividerItemDecoration =
         new DividerItemDecoration(getActivity(), layoutManager.getOrientation());
     mListView.addItemDecoration(dividerItemDecoration);
-    mSwipeRefresh.setOnRefreshListener(this::loadData);
+    mSwipeRefresh.setOnRefreshListener(this::loadFromRemoteData);
     initView();
   }
 
@@ -187,6 +234,11 @@ public class ReceiveSampleListFragment extends Fragment {
           mSwipeRefresh.setRefreshing(false);
           mSampleListAdapter.setData(resource.data);
           mSampleListAdapter.notifyDataSetChanged();
+          if(resource.data.isEmpty()){
+            mStatefulLayout.showEmpty();
+          }else {
+            mStatefulLayout.showContent();
+          }
         }
       }
     });

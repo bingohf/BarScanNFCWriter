@@ -242,7 +242,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
       }
       if (photoFile != null) {
         Uri photoURI =
-            FileProvider.getUriForFile(TodoProdDetailActivity.this, "com.ledway.btprinter.fileprovider", photoFile);
+            FileProvider.getUriForFile(TodoProdDetailActivity.this, BuildConfig.APPLICATION_ID+".fileprovider", photoFile);
         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
         List<ResolveInfo> resolvedIntentActivities = getPackageManager().queryIntentActivities(takePictureIntent, PackageManager.MATCH_DEFAULT_ONLY);
         for (ResolveInfo resolvedIntentInfo : resolvedIntentActivities) {

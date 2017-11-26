@@ -306,7 +306,7 @@ public class ItemDetailActivity extends AppCompatActivity {
       }
       if (photoFile != null && photoFile.exists()) {
         Uri photoURI =
-            FileProvider.getUriForFile(ItemDetailActivity.this, "com.ledway.btprinter.fileprovider",
+            FileProvider.getUriForFile(ItemDetailActivity.this, BuildConfig.APPLICATION_ID+ ".fileprovider",
                 photoFile);
         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
 

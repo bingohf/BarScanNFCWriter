@@ -1,5 +1,5 @@
 <resources>
-  <string name="app_name">MyShowRoom</string>
+  <string name="app_name">Show Room</string>
   <string name="barcode">Barcode</string>
   <string name="scan_barcode">6 Scan Barcode</string>
   <string name="cust_contact">Customer</string>

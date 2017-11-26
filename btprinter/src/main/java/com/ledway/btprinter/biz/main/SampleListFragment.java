@@ -22,6 +22,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.activeandroid.query.Select;
+import com.gturedi.views.StatefulLayout;
 import com.ledway.btprinter.AppConstants;
 import com.ledway.btprinter.ItemDetailActivity;
 import com.ledway.btprinter.MApp;
@@ -37,6 +38,7 @@ import java.util.List;
 public class SampleListFragment extends Fragment {
   @BindView(R.id.listview) RecyclerView mListView;
   @BindView(R.id.swiperefresh) SwipeRefreshLayout mSwipeRefresh;
+  @BindView(R.id.statefulLayout) StatefulLayout mStatefulLayout;
   private MutableLiveData<Resource<List<SampleListAdapter2.ItemData>>> mResourceSampleList =
       new MutableLiveData<>();
   private Unbinder mViewBinder;
@@ -128,6 +130,11 @@ public class SampleListFragment extends Fragment {
           mSwipeRefresh.setRefreshing(false);
           mSampleListAdapter.setData(listResource.data);
           mSampleListAdapter.notifyDataSetChanged();
+          if(listResource.data.isEmpty()){
+            mStatefulLayout.showEmpty();
+          }else {
+            mStatefulLayout.showContent();
+          }
           break;
         }
         case ERROR: {

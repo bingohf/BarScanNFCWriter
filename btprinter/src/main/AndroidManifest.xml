@@ -79,7 +79,7 @@
         android:value="1"/>
     <meta-data
         android:name="AA_MODELS"
-        android:value="com.ledway.btprinter.models.SampleMaster,com.ledway.btprinter.models.Prod,com.ledway.btprinter.models.TodoProd,com.ledway.btprinter.models.SampleProdLink"/>
+        android:value="com.ledway.btprinter.models.SampleMaster,com.ledway.btprinter.models.Prod,com.ledway.btprinter.models.TodoProd,com.ledway.btprinter.models.SampleProdLink,com.ledway.btprinter.models.ReceivedSample"/>
 
 
     <meta-data
