@@ -78,53 +78,6 @@ public class ItemDetailActivity extends AppCompatActivity {
     }
   };
 
-  private void appendBarCode(String text) {
-    if (text.length() > 30) {
-      text = text.substring(0, 30);
-    }
-    final ProgressDialog progressDialog =
-        ProgressDialog.show(this, getString(R.string.loading), getString(R.string.wait_a_moment));
-    mSampleMaster.addProd(text)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Subscriber<SampleProdLink>() {
-          @Override public void onCompleted() {
-            progressDialog.dismiss();
-          }
-
-          @Override public void onError(Throwable e) {
-            progressDialog.dismiss();
-            Toast.makeText(ItemDetailActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-          }
-
-          @Override public void onNext(SampleProdLink sampleProdLink) {
-            TextData textData = new TextData(DataAdapter.DATA_TYPE_BARCODE);
-            textData.value = sampleProdLink.prod_id;
-            textData.setText(sampleProdLink.ext
-                + ": "
-                + sampleProdLink.prod_id
-                + "  "
-                + sampleProdLink.spec_desc);
-            mDataAdapter.addData(textData);
-            mListViewProd.scrollToPosition(mDataAdapter.getItemCount() - 1);
-          }
-        });
-  }
-
-  private void loadSampleMaster(String guid){
-    mSampleMaster = new SampleMaster();
-    mSampleMaster.guid =
-        MApp.getApplication().getSystemInfo().getDeviceId() + "_" + System.currentTimeMillis();
-    if(guid != null){
-      List<Model> list = new Select().from(SampleMaster.class).where("guid =?", guid).execute();
-      if(!list.isEmpty()){
-        mSampleMaster= (SampleMaster) list.get(0);
-      }
-    }
-
-
-  }
-
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     String guid = getIntent().getStringExtra("guid");
@@ -145,6 +98,18 @@ public class ItemDetailActivity extends AppCompatActivity {
     setEvent();
 
     setView();
+  }
+
+  private void loadSampleMaster(String guid) {
+    mSampleMaster = new SampleMaster();
+    mSampleMaster.guid =
+        MApp.getApplication().getSystemInfo().getDeviceId() + "_" + System.currentTimeMillis();
+    if (guid != null) {
+      List<Model> list = new Select().from(SampleMaster.class).where("guid =?", guid).execute();
+      if (!list.isEmpty()) {
+        mSampleMaster = (SampleMaster) list.get(0);
+      }
+    }
   }
 
   private void setView() {
@@ -188,12 +153,13 @@ public class ItemDetailActivity extends AppCompatActivity {
     mListViewProd.setLayoutManager(linearLayoutManager);
     mListViewProd.setAdapter(mDataAdapter);
 
-    final GestureDetector gestureDetector = new GestureDetector(this,new GestureDetector.SimpleOnGestureListener(){
+    final GestureDetector gestureDetector =
+        new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
 
-      @Override public boolean onSingleTapUp(MotionEvent e) {
-        return true;
-      }
-    });
+          @Override public boolean onSingleTapUp(MotionEvent e) {
+            return true;
+          }
+        });
     mListViewProd.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
       @Override public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
         View childView = rv.findChildViewUnder(e.getX(), e.getY());
@@ -204,8 +170,8 @@ public class ItemDetailActivity extends AppCompatActivity {
               && baseData.getType() == DataAdapter.DATA_TYPE_BARCODE) {
             String prodno = (String) baseData.value;
             startActivity(
-                new Intent(ItemDetailActivity.this, TodoProdDetailActivity.class).putExtra("prod_no",
-                    prodno));
+                new Intent(ItemDetailActivity.this, TodoProdDetailActivity.class).putExtra(
+                    "prod_no", prodno));
             return true;
           }
         }
@@ -225,15 +191,6 @@ public class ItemDetailActivity extends AppCompatActivity {
   @Override protected void onDestroy() {
     super.onDestroy();
     unregisterReceiver(scanBroadcastReceiver);
-  }
-
-  @Override public void onBackPressed() {
-    if (mSampleMaster.isChanged()) {
-      mSampleMaster.allSave();
-    } else {
-      setResult(-1);
-    }
-    super.onBackPressed();
   }
 
   private void setEvent() {
@@ -297,6 +254,39 @@ public class ItemDetailActivity extends AppCompatActivity {
     });
   }
 
+  private void appendBarCode(String text) {
+    if (text.length() > 30) {
+      text = text.substring(0, 30);
+    }
+    final ProgressDialog progressDialog =
+        ProgressDialog.show(this, getString(R.string.loading), getString(R.string.wait_a_moment));
+    mSampleMaster.addProd(text)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Subscriber<SampleProdLink>() {
+          @Override public void onCompleted() {
+            progressDialog.dismiss();
+          }
+
+          @Override public void onError(Throwable e) {
+            progressDialog.dismiss();
+            Toast.makeText(ItemDetailActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+          }
+
+          @Override public void onNext(SampleProdLink sampleProdLink) {
+            TextData textData = new TextData(DataAdapter.DATA_TYPE_BARCODE);
+            textData.value = sampleProdLink.prod_id;
+            textData.setText(sampleProdLink.ext
+                + ": "
+                + sampleProdLink.prod_id
+                + "  "
+                + sampleProdLink.spec_desc);
+            mDataAdapter.addData(textData);
+            mListViewProd.scrollToPosition(mDataAdapter.getItemCount() - 1);
+          }
+        });
+  }
+
   private void startTakePhoto(int type) {
 
     Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -319,9 +309,8 @@ public class ItemDetailActivity extends AppCompatActivity {
         e.printStackTrace();
       }
       if (photoFile != null && photoFile.exists()) {
-        Uri photoURI =
-            FileProvider.getUriForFile(ItemDetailActivity.this, BuildConfig.APPLICATION_ID+ ".fileprovider",
-                photoFile);
+        Uri photoURI = FileProvider.getUriForFile(ItemDetailActivity.this,
+            BuildConfig.APPLICATION_ID + ".fileprovider", photoFile);
         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
 
         List<ResolveInfo> resolvedIntentActivities =
@@ -337,6 +326,34 @@ public class ItemDetailActivity extends AppCompatActivity {
         startActivityForResult(takePictureIntent, type);
       }
     }
+  }
+
+  private void uploadRecord() {
+    final ProgressDialog progressDialog = ProgressDialog.show(this, getString(R.string.save_record),
+        getString(R.string.wait_a_moment));
+    mSampleMaster.remoteSave()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Subscriber<SampleMaster>() {
+          @Override public void onCompleted() {
+            progressDialog.dismiss();
+          }
+
+          @Override public void onError(Throwable e) {
+            progressDialog.dismiss();
+            Toast.makeText(ItemDetailActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+          }
+
+          @Override public void onNext(SampleMaster sampleMaster) {
+
+          }
+        });
+  }
+
+  @Override public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.item_detail_menu, menu);
+    return true;
   }
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
@@ -366,10 +383,27 @@ public class ItemDetailActivity extends AppCompatActivity {
     return true;
   }
 
-  private void uploadRecord() {
-    final ProgressDialog progressDialog = ProgressDialog.show(this, getString(R.string.save_record),
-        getString(R.string.wait_a_moment));
-    mSampleMaster.remoteSave()
+  private void uploadAll() {
+    final ProgressDialog progressDialog =
+        ProgressDialog.show(this, getString(R.string.upload), getString(R.string.wait_a_moment),
+            false);
+    Observable.concat(Observable.just(mSampleMaster), Observable.defer(() -> {
+      List<SampleMaster> data = new Select().from(SampleMaster.class)
+          .where("isDirty =?", true)
+          .orderBy(" create_date desc ")
+          .execute();
+      return Observable.from(data);
+    }))
+        .filter(new Func1<SampleMaster, Boolean>() {
+          @Override public Boolean call(SampleMaster sampleMaster) {
+            return !sampleMaster.isUploaded();
+          }
+        })
+        .flatMap(new Func1<SampleMaster, Observable<SampleMaster>>() {
+          @Override public Observable<SampleMaster> call(SampleMaster sampleMaster) {
+            return sampleMaster.remoteSave();
+          }
+        })
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new Subscriber<SampleMaster>() {
@@ -379,19 +413,14 @@ public class ItemDetailActivity extends AppCompatActivity {
 
           @Override public void onError(Throwable e) {
             progressDialog.dismiss();
+            Log.e("upload_all", e.getMessage(), e);
             Toast.makeText(ItemDetailActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-            e.printStackTrace();
           }
 
           @Override public void onNext(SampleMaster sampleMaster) {
 
           }
         });
-  }
-
-  @Override public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.item_detail_menu, menu);
-    return true;
   }
 
   @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -433,7 +462,7 @@ public class ItemDetailActivity extends AppCompatActivity {
         }
         case RESULT_CAMERA_SHARE_TO: {
           String qrcode = data.getStringExtra("barcode");
-          qrcode = qrcode. replaceAll("\\r|\\n", " ");
+          qrcode = qrcode.replaceAll("\\r|\\n", " ");
           qrcode = qrcode.replaceFirst(" ", " | ");
           mSampleMaster.setShareToDeviceId(qrcode);
           TextData textData = new TextData(DataAdapter.DATA_TYPE_SHARE_TO);
@@ -451,40 +480,13 @@ public class ItemDetailActivity extends AppCompatActivity {
     }
   }
 
-  private void uploadAll() {
-    final ProgressDialog progressDialog =
-        ProgressDialog.show(this, getString(R.string.upload), getString(R.string.wait_a_moment),
-            false);
-    Observable.concat(Observable.just(mSampleMaster),
-        Observable.from(RecordAdapter.getSingletonInstance()))
-        .filter(new Func1<SampleMaster, Boolean>() {
-          @Override public Boolean call(SampleMaster sampleMaster) {
-            return !sampleMaster.isUploaded();
-          }
-        })
-        .flatMap(new Func1<SampleMaster, Observable<SampleMaster>>() {
-          @Override public Observable<SampleMaster> call(SampleMaster sampleMaster) {
-            return sampleMaster.remoteSave();
-          }
-        })
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Subscriber<SampleMaster>() {
-          @Override public void onCompleted() {
-            progressDialog.dismiss();
-            RecordAdapter.getSingletonInstance().notifyDataSetChanged();
-          }
-
-          @Override public void onError(Throwable e) {
-            progressDialog.dismiss();
-            Log.e("upload_all", e.getMessage(), e);
-            Toast.makeText(ItemDetailActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-          }
-
-          @Override public void onNext(SampleMaster sampleMaster) {
-
-          }
-        });
+  @Override public void onBackPressed() {
+    if (mSampleMaster.isChanged()) {
+      mSampleMaster.allSave();
+    } else {
+      setResult(-1);
+    }
+    super.onBackPressed();
   }
 }
 
