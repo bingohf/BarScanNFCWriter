@@ -412,7 +412,8 @@ public class ItemDetailActivity extends AppCompatActivity {
           }
 
           @Override public void onError(Throwable e) {
-            progressDialog.dismiss();
+            progressDialog.
+                dismiss();
             Log.e("upload_all", e.getMessage(), e);
             Toast.makeText(ItemDetailActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
           }

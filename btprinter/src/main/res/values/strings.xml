@@ -56,4 +56,7 @@
   <string name="action_data_list">Sample room</string>
   <string name="action_sample_track">Tracking</string>
   <string name="product">Product</string>
+  <string name="business_hint">Click to image Business Card</string>
+  <string name="hint_share_to">Click to Scan ShareToID</string>
+  <string name="my">My</string>
 </resources>

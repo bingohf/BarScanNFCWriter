@@ -22,4 +22,11 @@
       android:orderInCategory="2"
       android:title="@string/product"
       />
+
+  <item
+      android:id="@+id/action_my_account"
+      android:icon="@drawable/ic_account_box_black_24dp"
+      android:orderInCategory="3"
+      android:title="@string/my"
+      />
 </menu>

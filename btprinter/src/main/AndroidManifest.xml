@@ -32,10 +32,10 @@
 
       >
     <activity android:name=".biz.main.MainActivity2"
+        android:windowSoftInputMode="adjustResize"
        >
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
-
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
@@ -52,9 +52,9 @@
     <activity android:name=".AgreementActivity"
         android:label="@string/title_agreement"
         />
-    <activity android:name=".BusinessCardActivity"
+<!--    <activity android:name=".BusinessCardActivity"
         android:label="@string/title_my_business_card"
-        />
+        />-->
     <activity android:name=".RemoteProdActivity"/>
     <activity
         android:theme="@style/AppOverlayTheme"
