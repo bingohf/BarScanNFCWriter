@@ -1,5 +1,5 @@
 <resources>
-  <string name="app_name">Show Room</string>
+  <string name="app_name">Sales Edge</string>
   <string name="barcode">Barcode</string>
   <string name="scan_barcode">6 Scan Barcode</string>
   <string name="cust_contact">Customer</string>
@@ -31,7 +31,7 @@
   YOU MAY UPLOAD ALL YOUR DATA COLLECTED TO CLOUD SERVICE TO ENABLE THE QRCODE TRACKING FOR FREE.</string>
   <string name="title_agreement">Authorize</string>
   <string name="btn_agree">Agree</string>
-  <string name="loading">Loading...</string>
+  <string name="loading">Loading…</string>
   <string name="prod_exists">Duplicated</string>
   <string name="title_my_business_card">My</string>
   <string name="action_my_business_card">My</string>
@@ -50,7 +50,7 @@
   <string name="input_barcode">5 Entry Code</string>
   <string name="share_to_title">Recv.ID:</string>
   <string name="data_from">Sender:</string>
-  <string name="my_sample">Sampling</string>
+  <string name="my_sample">Sales Leads</string>
   <string name="title_receive_sample">Received Sample</string>
   <string name="no_image">No Photo</string>
   <string name="action_data_list">Sample room</string>
