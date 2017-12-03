@@ -20,5 +20,19 @@ public class SampleActivity extends AppCompatActivity {
     mViewPager.setAdapter(new SampleFragmentPagerAdapter(getSupportFragmentManager(),
         this));
     mTabLayout.setupWithViewPager(mViewPager);
+    mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+      @Override
+      public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+      }
+
+      @Override public void onPageSelected(int position) {
+        invalidateOptionsMenu();
+      }
+
+      @Override public void onPageScrollStateChanged(int state) {
+
+      }
+    });
   }
 }

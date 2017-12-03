@@ -31,7 +31,7 @@
       android:theme="@style/AppTheme"
 
       >
-    <activity android:name=".biz.main.MainActivity2"
+    <activity android:name=".biz.sample.SampleActivity"
         android:windowSoftInputMode="adjustResize"
        >
       <intent-filter>
@@ -39,6 +39,10 @@
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
+
+    <activity android:name=".biz.ProductPickerActivity"
+        android:screenOrientation="portrait"/>
+
     <activity android:name=".AppPreferences"/>
     <activity android:name=".ItemDetailActivity"
         android:screenOrientation="portrait"

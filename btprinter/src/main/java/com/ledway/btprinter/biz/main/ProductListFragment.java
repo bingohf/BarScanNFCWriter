@@ -8,6 +8,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -29,6 +31,7 @@ import com.ledway.btprinter.models.Resource;
 import com.ledway.btprinter.models.TodoProd;
 import com.ledway.framework.FullScannerActivity;
 import io.reactivex.disposables.CompositeDisposable;
+import java.util.ArrayList;
 import java.util.List;
 import rx.Observable;
 import rx.Subscriber;
@@ -44,6 +47,8 @@ public class ProductListFragment extends Fragment {
   private SampleListAdapter2 mSampleListAdapter;
   private MutableLiveData<Resource<List<SampleListAdapter2.ItemData>>> dataResource =
       new MutableLiveData<>();
+
+  private boolean inSelectMode = false;
 
   public ProductListFragment() {
     setRetainInstance(true);
@@ -71,12 +76,24 @@ public class ProductListFragment extends Fragment {
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    if (getArguments() != null) {
+      inSelectMode = getArguments().getBoolean("select", false);
+    }
     mSampleListAdapter = new SampleListAdapter2(getContext());
+    mSampleListAdapter.setSelectMode(inSelectMode);
     mDisposables.add(mSampleListAdapter.getClickObservable()
         .subscribe(prodno -> startActivityForResult(
             new Intent(getActivity(), TodoProdDetailActivity.class).putExtra("prod_no",
                 (String) prodno), REQUEST_TODO_PRODUCT)));
+
+    mDisposables.add(mSampleListAdapter.getCheckObservable().subscribe(o -> titleChange()));
     loadData();
+  }
+
+  private void titleChange() {
+    ActionBar actionbar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+    actionbar.setTitle(
+        getString(R.string.formater_selected, mSampleListAdapter.getSelection().length));
   }
 
   @Nullable @Override
@@ -140,10 +157,26 @@ public class ProductListFragment extends Fragment {
     super.onCreateOptionsMenu(menu, inflater);
   }
 
+  @Override public void onPrepareOptionsMenu(Menu menu) {
+    super.onPrepareOptionsMenu(menu);
+    menu.findItem(R.id.action_done).setVisible(inSelectMode);
+    menu.findItem(R.id.app_bar_search).setVisible(false);
+  }
+
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
       case R.id.action_add: {
         scanBarCode();
+        break;
+      }
+      case R.id.action_done: {
+        ArrayList<String> selected = new ArrayList<>();
+        SampleListAdapter2.ItemData[] selectedViewItem = mSampleListAdapter.getSelection();
+        for( SampleListAdapter2.ItemData viewItem:selectedViewItem){
+          selected.add((String) viewItem.hold);
+        }
+        getActivity().setResult(Activity.RESULT_OK, new Intent().putStringArrayListExtra("selected",selected));
+        getActivity().finish();
         break;
       }
     }

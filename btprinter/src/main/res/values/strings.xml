@@ -59,4 +59,6 @@
   <string name="business_hint">Click to image Business Card</string>
   <string name="hint_share_to">Click to Scan ShareToID</string>
   <string name="my">My</string>
+  <string name="customer">Customer</string>
+  <string name="formater_selected">%1$d item(s) selected</string>
 </resources>
