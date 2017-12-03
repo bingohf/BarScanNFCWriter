@@ -121,8 +121,10 @@ public class TodoProdDetailActivity extends AppCompatActivity {
   }
 
   @OnTextChanged(R.id.txt_spec) void onTextSpecChange(){
+    if(!mEdtSpec.getText().toString().equals(mTodoProd.spec_desc)){
+      mTodoProd.update_time = new Date();
+    }
     mTodoProd.spec_desc = mEdtSpec.getText().toString();
-    mTodoProd.update_time = new Date();
   }
 
 
