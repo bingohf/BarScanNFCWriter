@@ -63,6 +63,7 @@ public class SampleListAdapter2 extends RecyclerView.Adapter<SampleListAdapter2.
     holder.txtTimestamp.setText(formatDate(dataItem.timestamp));
     holder.imgSynced.setVisibility(dataItem.redFlag ? View.VISIBLE : View.GONE);
     holder.checkBox.setVisibility(selectMode ? View.VISIBLE : View.GONE);
+    holder.checkBox.setChecked(dataItem.isChecked);
     holder.position = position;
     holder.itemView.setTag(position);
   }

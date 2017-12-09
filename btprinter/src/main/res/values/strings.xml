@@ -1,8 +1,8 @@
-<resources>
+﻿<resources>
   <string name="app_name">Sales Edge</string>
   <string name="barcode">Barcode</string>
   <string name="scan_barcode">6 Scan Barcode</string>
-  <string name="cust_contact">Customer</string>
+  <string name="cust_contact">Contact List</string>
   <string name="read_qr_code">3 Scan QRCode</string>
   <string name="take_photo_1">1 Photo +</string>
   <string name="take_photo_2">2 Photo -</string>
@@ -20,15 +20,15 @@
   <string name="card1">Photo +</string>
   <string name="card2">Photo -</string>
   <string name="pls_input_data">Entry first</string>
-  <string name="action_update_prod">Product</string>
-  <string name="update_prod">Product</string>
+  <string name="action_update_prod">Show Room</string>
+  <string name="update_prod">Show Room</string>
   <string name="hint_prod_image">Click Photo</string>
   <string name="action_re_take_photo">Take Photo</string>
   <string name="action_re_uplaod">Up Load</string>
   <string name="hint_product_spec">Description</string>
   <string name="agreement"><b>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   </b>\n\n
-  YOU MAY UPLOAD ALL YOUR DATA COLLECTED TO CLOUD SERVICE TO ENABLE THE QRCODE TRACKING FOR FREE.</string>
+  YOU MAY UPLOAD ALL YOUR DATA TO LEDWAY CLOUD SERVICE TO ENABLE SAMPLES SHARING.</string>
   <string name="title_agreement">Authorize</string>
   <string name="btn_agree">Agree</string>
   <string name="loading">Loading…</string>
@@ -53,9 +53,9 @@
   <string name="my_sample">Sales Leads</string>
   <string name="title_receive_sample">Received Sample</string>
   <string name="no_image">No Photo</string>
-  <string name="action_data_list">Sample room</string>
+  <string name="action_data_list">Show Room</string>
   <string name="action_sample_track">Tracking</string>
-  <string name="product">Product</string>
+  <string name="product">Show Room</string>
   <string name="business_hint">Click to image Business Card</string>
   <string name="hint_share_to">Click to Scan ShareToID</string>
   <string name="my">My</string>

@@ -27,6 +27,7 @@ import com.ledway.btprinter.AppConstants;
 import com.ledway.btprinter.ItemDetailActivity;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
+import com.ledway.btprinter.biz.sample.SampleActivity;
 import com.ledway.btprinter.models.Resource;
 import com.ledway.btprinter.models.SampleMaster;
 import io.reactivex.Single;
@@ -110,7 +111,7 @@ public class SampleListFragment extends Fragment {
       case R.id.action_add: {
         SampleMaster sampleMaster = new SampleMaster();
         MApp.getApplication().getSession().put("current_data", sampleMaster);
-        startActivityForResult(new Intent(getActivity(), ItemDetailActivity.class),
+        startActivityForResult(new Intent(getActivity(), SampleActivity.class),
             AppConstants.REQUEST_TYPE_ADD_RECORD);
         break;
       }

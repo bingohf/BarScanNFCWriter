@@ -12,14 +12,14 @@ import com.ledway.btprinter.biz.main.ProductListFragment;
  */
 
 public class ProductPickerActivity extends AppCompatActivity {
-  public static final String DATA_PRODUCTS = "data_products";
+
 
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_picker_product);
     ButterKnife.bind(this);
     ProductListFragment fragment = new ProductListFragment();
-    Bundle arguments = new Bundle();
+    Bundle arguments = getIntent().getExtras();
     arguments.putBoolean("select", true);
     fragment.setArguments(arguments);
     getSupportFragmentManager().beginTransaction()

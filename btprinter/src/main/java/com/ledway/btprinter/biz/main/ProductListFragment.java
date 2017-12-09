@@ -37,6 +37,7 @@ import rx.Observable;
 import rx.Subscriber;
 
 public class ProductListFragment extends Fragment {
+  public static final String DATA_PRODUCTS = "data_products";
   private static final int RESULT_CAMERA_QR_CODE = 1;
   private static final int REQUEST_TODO_PRODUCT = 2;
   @BindView(R.id.listview) RecyclerView mListView;
@@ -47,6 +48,7 @@ public class ProductListFragment extends Fragment {
   private SampleListAdapter2 mSampleListAdapter;
   private MutableLiveData<Resource<List<SampleListAdapter2.ItemData>>> dataResource =
       new MutableLiveData<>();
+  private ArrayList<String> mDefaultSelected;
 
   private boolean inSelectMode = false;
 
@@ -78,6 +80,10 @@ public class ProductListFragment extends Fragment {
     super.onCreate(savedInstanceState);
     if (getArguments() != null) {
       inSelectMode = getArguments().getBoolean("select", false);
+      mDefaultSelected = getArguments().getStringArrayList(DATA_PRODUCTS);
+    }
+    if(mDefaultSelected == null){
+      mDefaultSelected = new ArrayList<>();
     }
     mSampleListAdapter = new SampleListAdapter2(getContext());
     mSampleListAdapter.setSelectMode(inSelectMode);
@@ -200,6 +206,8 @@ public class ProductListFragment extends Fragment {
       itemData.iconPath = todoProd.image1;
       itemData.redFlag = todoProd.uploaded_time == null
           || todoProd.update_time.getTime() > todoProd.uploaded_time.getTime();
+
+      itemData.isChecked = mDefaultSelected.contains(todoProd.prodNo);
       return itemData;
     }).toList().subscribe(new Subscriber<List<SampleListAdapter2.ItemData>>() {
       @Override public void onCompleted() {

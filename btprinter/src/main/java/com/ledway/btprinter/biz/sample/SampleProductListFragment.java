@@ -22,13 +22,16 @@ import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import com.activeandroid.Model;
 import com.activeandroid.query.Select;
 import com.gturedi.views.StatefulLayout;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.biz.ProductPickerActivity;
+import com.ledway.btprinter.biz.main.ProductListFragment;
 import com.ledway.btprinter.biz.main.SampleListAdapter2;
 import com.ledway.btprinter.models.Resource;
 import com.ledway.btprinter.models.TodoProd;
+import com.ledway.framework.FullScannerActivity;
 import java.util.ArrayList;
 import java.util.List;
 import rx.Observable;
@@ -36,11 +39,13 @@ import rx.Subscriber;
 
 public class SampleProductListFragment extends Fragment {
   private static final int REQUEST_PICKER = 1;
+  private static final int RESULT_CAMERA_QR_CODE = 2;
   @BindView(R.id.listview) RecyclerView mListView;
   @BindView(R.id.swiperefresh) SwipeRefreshLayout mSwipeRefresh;
   @BindView(R.id.statefulLayout) StatefulLayout mStatefulLayout;
   private Unbinder mViewBinder;
   private SampleListAdapter2 mSampleListAdapter;
+  private List<SampleListAdapter2.ItemData> viewData = new ArrayList<>();
   private MutableLiveData<Resource<List<SampleListAdapter2.ItemData>>> dataResource =
       new MutableLiveData<>();
 
@@ -56,6 +61,30 @@ public class SampleProductListFragment extends Fragment {
         }
         break;
       }
+      case RESULT_CAMERA_QR_CODE: {
+        if (resultCode == Activity.RESULT_OK) {
+          String qrcode = data.getStringExtra("barcode");
+          appendOrNewProduct(qrcode);
+        }
+        break;
+      }
+    }
+  }
+
+  private void appendOrNewProduct(String qrcode) {
+    for (int i =0;i < viewData.size() ; ++i){
+      if(viewData.get(i).hold.equals(qrcode)){
+        Toast.makeText(getContext(),R.string.prod_exists, Toast.LENGTH_LONG).show();
+        return;
+      }
+    }
+    List<Model> list = new Select().from(TodoProd.class).where("prodno = ?", qrcode).execute();
+    if(list.isEmpty()){
+
+    } else {
+      viewData.add(0, toViewItem((TodoProd) list.get(0)));
+      mSampleListAdapter.setData(viewData);
+      mSampleListAdapter.notifyDataSetChanged();
     }
   }
 
@@ -71,15 +100,8 @@ public class SampleProductListFragment extends Fragment {
         .orderBy("update_time desc")
         .execute())).map(o -> {
       TodoProd todoProd = (TodoProd) o;
-      SampleListAdapter2.ItemData itemData = new SampleListAdapter2.ItemData();
-      itemData.timestamp = todoProd.create_time;
-      itemData.subTitle = todoProd.spec_desc;
-      itemData.title = todoProd.prodNo;
-      itemData.hold = todoProd.prodNo;
-      itemData.iconPath = todoProd.image1;
-      itemData.redFlag = todoProd.uploaded_time == null
-          || todoProd.update_time.getTime() > todoProd.uploaded_time.getTime();
-      return itemData;
+
+      return toViewItem(todoProd);
     }).toList().subscribe(new Subscriber<List<SampleListAdapter2.ItemData>>() {
       @Override public void onCompleted() {
 
@@ -94,6 +116,19 @@ public class SampleProductListFragment extends Fragment {
       }
     });
   }
+
+  private SampleListAdapter2.ItemData toViewItem(TodoProd todoProd){
+    SampleListAdapter2.ItemData itemData = new SampleListAdapter2.ItemData();
+   // itemData.timestamp = todoProd.create_time;
+    itemData.subTitle = todoProd.spec_desc;
+    itemData.title = todoProd.prodNo;
+    itemData.hold = todoProd.prodNo;
+    itemData.iconPath = todoProd.image1;
+    itemData.redFlag = todoProd.uploaded_time == null
+        || todoProd.update_time.getTime() > todoProd.uploaded_time.getTime();
+    return itemData;
+  }
+
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -133,6 +168,7 @@ public class SampleProductListFragment extends Fragment {
           break;
         }
         case SUCCESS: {
+          viewData = resource.data;
           mSwipeRefresh.setRefreshing(false);
           mSampleListAdapter.setData(resource.data);
           mSampleListAdapter.notifyDataSetChanged();
@@ -158,8 +194,19 @@ public class SampleProductListFragment extends Fragment {
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
       case R.id.action_add: {
+        ArrayList<String> selected = new ArrayList<>();
+        for(int i =0;i < viewData.size(); ++i){
+          selected.add((String)viewData.get(i).hold);
+        }
+
         startActivityForResult(new Intent(getActivity(), ProductPickerActivity.class).putExtra(
-            ProductPickerActivity.DATA_PRODUCTS, new String[] {}), REQUEST_PICKER);
+            ProductListFragment.DATA_PRODUCTS, selected), REQUEST_PICKER);
+        break;
+      }
+      case R.id.action_scan:{
+
+        startActivityForResult(new Intent(getActivity(), FullScannerActivity.class),
+            RESULT_CAMERA_QR_CODE);
         break;
       }
       default:
