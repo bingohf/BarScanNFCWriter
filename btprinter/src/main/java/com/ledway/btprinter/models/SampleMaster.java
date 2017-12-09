@@ -45,7 +45,7 @@ import rx.functions.Func1;
  */
 
 @Table(name = "sample_master") public class SampleMaster extends Model implements Serializable {
-  public List<SampleProdLink> sampleProdLinks;
+  public List<SampleProdLink> sampleProdLinks = new ArrayList<>();
 
   @Column(name = "guid", unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)
   public String guid;
@@ -118,6 +118,29 @@ import rx.functions.Func1;
     isDirty = true;
     mIsChanged = true;
     this.shareToDeviceId = deviceId;
+  }
+
+  public void fetchLink(){
+    From query =
+        new Select(new String[] { "todo_prod.spec_desc,SampleProdLink.*" }).from(SampleProdLink.class)
+            .join(TodoProd.class)
+            .on("SampleProdLink.prod_id = todo_prod.prodno")
+            .where("SampleProdLink.sample_id=?", guid);
+    Cursor cursor = Cache.openDatabase().rawQuery(query.toSql(),query.getArguments());
+    ArrayList<SampleProdLink> sampleProdLinks = new ArrayList<>();
+    if(cursor.moveToFirst()){
+      do{
+        SampleProdLink sampleProdLink = new SampleProdLink();
+        sampleProdLink.ext = cursor.getInt(cursor.getColumnIndex("ext"));
+        sampleProdLink.create_date = new Date(cursor.getLong(cursor.getColumnIndex("create_date")));
+        sampleProdLink.prod_id = cursor.getString(cursor.getColumnIndex("prod_id"));
+        sampleProdLink.sample_id = cursor.getString(cursor.getColumnIndex("sample_id"));
+        sampleProdLink.link_id = cursor.getString(cursor.getColumnIndex("link_id"));
+        sampleProdLink.spec_desc = cursor.getString(cursor.getColumnIndex("spec_desc"));
+        sampleProdLinks.add(sampleProdLink);
+      }
+      while (cursor.moveToNext());
+    }
   }
 
   public List<SampleProdLink> items() {

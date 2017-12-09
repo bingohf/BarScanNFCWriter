@@ -30,9 +30,12 @@ import com.ledway.btprinter.biz.ProductPickerActivity;
 import com.ledway.btprinter.biz.main.ProductListFragment;
 import com.ledway.btprinter.biz.main.SampleListAdapter2;
 import com.ledway.btprinter.models.Resource;
+import com.ledway.btprinter.models.SampleMaster;
+import com.ledway.btprinter.models.SampleProdLink;
 import com.ledway.btprinter.models.TodoProd;
 import com.ledway.framework.FullScannerActivity;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import rx.Observable;
 import rx.Subscriber;
@@ -48,10 +51,13 @@ public class SampleProductListFragment extends Fragment {
   private List<SampleListAdapter2.ItemData> viewData = new ArrayList<>();
   private MutableLiveData<Resource<List<SampleListAdapter2.ItemData>>> dataResource =
       new MutableLiveData<>();
+  private SampleMaster mSampleMaster;
 
   public SampleProductListFragment() {
     setHasOptionsMenu(true);
   }
+
+
 
   @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
     switch (requestCode) {
@@ -85,7 +91,18 @@ public class SampleProductListFragment extends Fragment {
       viewData.add(0, toViewItem((TodoProd) list.get(0)));
       mSampleListAdapter.setData(viewData);
       mSampleListAdapter.notifyDataSetChanged();
+      add((TodoProd) list.get(0));
     }
+  }
+
+  private void add(TodoProd todoProd){
+    SampleProdLink prodLink = new SampleProdLink();
+    prodLink.prod_id = todoProd.prodNo;
+    prodLink.create_date = new Date();
+    prodLink.ext = mSampleMaster.sampleProdLinks.size();
+    prodLink.link_id = mSampleMaster.guid + "_"+ prodLink.ext;
+    prodLink.spec_desc = todoProd.spec_desc;
+    mSampleMaster.sampleProdLinks.add(prodLink);
   }
 
   private void receiveSelected(ArrayList<String> selected) {
@@ -95,12 +112,17 @@ public class SampleProductListFragment extends Fragment {
       placeholderArray[i] ='?';
       paramArray[i] = selected.get(i);
     }
+    while (mSampleMaster.sampleProdLinks.size()>0){
+      SampleProdLink link = mSampleMaster.sampleProdLinks.get(0);
+      link.delete();
+      mSampleMaster.sampleProdLinks.remove(0);
+    }
     Observable.defer(() -> Observable.from(new Select().from(TodoProd.class)
         .where("prodno in (" + TextUtils.join(",", placeholderArray) + ")", paramArray)
         .orderBy("update_time desc")
         .execute())).map(o -> {
       TodoProd todoProd = (TodoProd) o;
-
+      add(todoProd);
       return toViewItem(todoProd);
     }).toList().subscribe(new Subscriber<List<SampleListAdapter2.ItemData>>() {
       @Override public void onCompleted() {
@@ -131,7 +153,15 @@ public class SampleProductListFragment extends Fragment {
 
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
+    mSampleMaster =
+        getActivity() != null ? ((SampleActivity) getActivity()).mSampleMaster
+            : null;
     super.onCreate(savedInstanceState);
+    ArrayList<String> prodList = new ArrayList<>();
+    for ( SampleProdLink item:mSampleMaster.sampleProdLinks){
+      prodList.add(item.prod_id);
+    }
+    receiveSelected(prodList);
     mSampleListAdapter = new SampleListAdapter2(getContext());
   }
 

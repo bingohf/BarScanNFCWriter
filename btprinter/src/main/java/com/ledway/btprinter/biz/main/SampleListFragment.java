@@ -109,8 +109,6 @@ public class SampleListFragment extends Fragment {
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
       case R.id.action_add: {
-        SampleMaster sampleMaster = new SampleMaster();
-        MApp.getApplication().getSession().put("current_data", sampleMaster);
         startActivityForResult(new Intent(getActivity(), SampleActivity.class),
             AppConstants.REQUEST_TYPE_ADD_RECORD);
         break;
@@ -147,7 +145,7 @@ public class SampleListFragment extends Fragment {
     });
     mViewDisposables.add(mSampleListAdapter.getClickObservable().subscribe(sampleMaster -> {
       MApp.getApplication().getSession().put("current_data", sampleMaster);
-      startActivityForResult(new Intent(getActivity(), ItemDetailActivity.class),
+      startActivityForResult(new Intent(getActivity(), SampleActivity.class).putExtra("guid",((SampleMaster)sampleMaster).guid),
           AppConstants.REQUEST_TYPE_MODIFY_RECORD);
     }));
 

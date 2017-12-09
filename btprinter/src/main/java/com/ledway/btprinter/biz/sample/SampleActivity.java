@@ -55,6 +55,7 @@ public class SampleActivity extends AppCompatActivity {
       List<Model> list = new Select().from(SampleMaster.class).where("guid =?", guid).execute();
       if (!list.isEmpty()) {
         mSampleMaster = (SampleMaster) list.get(0);
+        mSampleMaster.fetchLink();
       }
     }
   }
