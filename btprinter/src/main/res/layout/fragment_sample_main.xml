@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-
+    android:fillViewport="true"
     >
   <LinearLayout
       android:layout_width="match_parent"
@@ -28,16 +28,19 @@
           android:layout_height="wrap_content"
           />
       <ImageView
+          android:id="@+id/icon_scan_barcode"
           android:src="@drawable/ic_barcode_scan"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           />
     </LinearLayout>
     <FrameLayout
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         >
       <ImageView
+          android:id="@+id/img_business_card"
           android:layout_width="match_parent"
           android:layout_height="match_parent"
           />
@@ -53,6 +56,7 @@
     <FrameLayout
         android:layout_width="150dp"
         android:layout_height="150dp"
+        android:visibility="gone"
         >
       <TextView
           android:id="@+id/txt_share_to"

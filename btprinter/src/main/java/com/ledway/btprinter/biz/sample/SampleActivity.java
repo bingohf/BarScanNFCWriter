@@ -1,6 +1,5 @@
 package com.ledway.btprinter.biz.sample;
 
-import android.graphics.ColorSpace;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -27,7 +26,7 @@ public class SampleActivity extends AppCompatActivity {
     ButterKnife.bind(this);
 
     String guid = getIntent().getStringExtra("guid");
-
+    loadSampleMaster(guid);
     mViewPager.setAdapter(new SampleFragmentPagerAdapter(getSupportFragmentManager(),
         this));
     mTabLayout.setupWithViewPager(mViewPager);
