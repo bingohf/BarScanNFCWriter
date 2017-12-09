@@ -30,6 +30,7 @@ import com.ledway.framework.FullScannerActivity;
 import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
@@ -87,6 +88,9 @@ public class SampleMainFragment extends Fragment{
   }
 
   @OnTextChanged(R.id.edt_spec) void onEdtSpecTextChanged(){
+    if(mSampleMaster.desc == null || !mSampleMaster.desc.equals(mEdtSpec.getText().toString())){
+      mSampleMaster.update_date = new Date();
+    }
     mSampleMaster.desc = mEdtSpec.getText().toString();
   }
   @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -109,6 +113,7 @@ public class SampleMainFragment extends Fragment{
           }
           if (f.exists()){
             mSampleMaster.image1 = mCurrentPhotoPath;
+            mSampleMaster.update_date = new Date();
             Picasso.with(mImgBusinssCard.getContext()).load(f).fit().into(mImgBusinssCard);
             mTxtHintBusinessCard.setVisibility(View.GONE);
           }

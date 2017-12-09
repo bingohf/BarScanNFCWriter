@@ -12,6 +12,8 @@ import com.activeandroid.query.Select;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.models.SampleMaster;
+import com.ledway.btprinter.models.SampleProdLink;
+import java.util.Date;
 import java.util.List;
 
 public class SampleActivity extends AppCompatActivity {
@@ -46,6 +48,20 @@ public class SampleActivity extends AppCompatActivity {
     });
   }
 
+  @Override protected void onDestroy() {
+    super.onDestroy();
+  }
+
+  @Override public void onBackPressed() {
+    if(mSampleMaster.update_date != null) {
+      for(SampleProdLink item :mSampleMaster.sampleProdLinks){
+        item.save();
+      }
+      mSampleMaster.save();
+    }
+    super.onBackPressed();
+
+  }
 
   private void loadSampleMaster(String guid) {
     mSampleMaster = new SampleMaster();

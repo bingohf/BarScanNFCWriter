@@ -24,7 +24,6 @@ import butterknife.Unbinder;
 import com.activeandroid.query.Select;
 import com.gturedi.views.StatefulLayout;
 import com.ledway.btprinter.AppConstants;
-import com.ledway.btprinter.ItemDetailActivity;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.biz.sample.SampleActivity;
@@ -117,6 +116,13 @@ public class SampleListFragment extends Fragment {
     return super.onOptionsItemSelected(item);
   }
 
+  private void stopLoading() {
+    if (mProgressDialog != null) {
+      mProgressDialog.dismiss();
+      mProgressDialog = null;
+    }
+  }
+
   private void initView() {
     mResourceSampleList.observe(this, listResource -> {
       switch (listResource.status) {
@@ -129,9 +135,9 @@ public class SampleListFragment extends Fragment {
           mSwipeRefresh.setRefreshing(false);
           mSampleListAdapter.setData(listResource.data);
           mSampleListAdapter.notifyDataSetChanged();
-          if(listResource.data.isEmpty()){
+          if (listResource.data.isEmpty()) {
             mStatefulLayout.showEmpty();
-          }else {
+          } else {
             mStatefulLayout.showContent();
           }
           break;
@@ -145,24 +151,11 @@ public class SampleListFragment extends Fragment {
     });
     mViewDisposables.add(mSampleListAdapter.getClickObservable().subscribe(sampleMaster -> {
       MApp.getApplication().getSession().put("current_data", sampleMaster);
-      startActivityForResult(new Intent(getActivity(), SampleActivity.class).putExtra("guid",((SampleMaster)sampleMaster).guid),
-          AppConstants.REQUEST_TYPE_MODIFY_RECORD);
+      startActivityForResult(new Intent(getActivity(), SampleActivity.class).putExtra("guid",
+          ((SampleMaster) sampleMaster).guid), AppConstants.REQUEST_TYPE_MODIFY_RECORD);
     }));
 
     mSwipeRefresh.setOnRefreshListener(this::loadRecordData);
-  }
-
-  private void showLoading() {
-    stopLoading();
-    mProgressDialog = ProgressDialog.show(getActivity(), getString(R.string.upload),
-        getString(R.string.wait_a_moment), false);
-  }
-
-  private void stopLoading() {
-    if (mProgressDialog != null) {
-      mProgressDialog.dismiss();
-      mProgressDialog = null;
-    }
   }
 
   private void loadRecordData() {
@@ -173,14 +166,15 @@ public class SampleListFragment extends Fragment {
     })
         .doOnSubscribe(disposable -> mResourceSampleList.postValue(Resource.loading(null)))
         .subscribeOn(Schedulers.io())
-        .subscribe(sampleMasters -> mResourceSampleList.postValue(Resource.success(toViewList(sampleMasters))),
+        .subscribe(sampleMasters -> mResourceSampleList.postValue(
+            Resource.success(toViewList(sampleMasters))),
             throwable -> mResourceSampleList.postValue(
                 Resource.error(throwable.getMessage(), null))));
   }
 
   private List<SampleListAdapter2.ItemData> toViewList(List<SampleMaster> sampleMasters) {
     ArrayList<SampleListAdapter2.ItemData> ret = new ArrayList<>();
-    for(SampleMaster item:sampleMasters){
+    for (SampleMaster item : sampleMasters) {
       SampleListAdapter2.ItemData itemData = new SampleListAdapter2.ItemData();
       itemData.hold = item;
       itemData.iconPath = item.image1;
@@ -190,5 +184,11 @@ public class SampleListFragment extends Fragment {
       ret.add(itemData);
     }
     return ret;
+  }
+
+  private void showLoading() {
+    stopLoading();
+    mProgressDialog = ProgressDialog.show(getActivity(), getString(R.string.upload),
+        getString(R.string.wait_a_moment), false);
   }
 }
