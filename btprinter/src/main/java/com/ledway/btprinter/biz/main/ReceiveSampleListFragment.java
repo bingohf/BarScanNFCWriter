@@ -105,11 +105,11 @@ public class ReceiveSampleListFragment extends Fragment {
     String query = "isnull(json,'') <>'' and shareToDeviceId like '" + MApp.getApplication()
         .getSystemInfo()
         .getDeviceId() + "%'";
-
+//    query = "isnull(json,'') <>'' and shareToDeviceId like '" + "becb8da230e0a7cb" + "%'";
+    String orderBy = "order by UPDATEDATE desc";
     new Delete().from(ReceivedSample.class).execute();
 
-    query = "isnull(json,'') <>'' and shareToDeviceId like '" + "becb8da230e0a7cb" + "%'";
-    String orderBy = "order by UPDATEDATE desc";
+
     Observable<RestDataSetResponse<ProductAppGetReturn>> obResponse =
         MyProjectApi.getInstance().getDbService().getProductAppGet(query, orderBy);
     mSubscriptions.add(obResponse.subscribeOn(Schedulers.io()).flatMap(response -> {
