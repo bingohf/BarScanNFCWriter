@@ -68,6 +68,9 @@
         android:name="com.ledway.framework.FullScannerActivity"/>
 
     <activity android:name=".SampleReadonlyActivity"/>
+
+    <activity android:name=".biz.sample.ReceivedSampleDetailActivity" android:label="@string/title_receive_sample"/>
+
     <activity android:name=".WebViewActivity"/>
     <provider
         android:name="android.support.v4.content.FileProvider"

@@ -1,6 +1,7 @@
 package com.ledway.btprinter.biz.main;
 
 import android.arch.lifecycle.MutableLiveData;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -30,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gturedi.views.StatefulLayout;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
+import com.ledway.btprinter.biz.sample.ReceivedSampleDetailActivity;
 import com.ledway.btprinter.models.ReceivedSample;
 import com.ledway.btprinter.models.Resource;
 import com.ledway.btprinter.models.SampleMaster;
@@ -38,6 +40,7 @@ import com.ledway.btprinter.network.model.ProductAppGetReturn;
 import com.ledway.btprinter.network.model.ProductReturn;
 import com.ledway.btprinter.network.model.RestDataSetResponse;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Consumer;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -68,6 +71,8 @@ public class ReceiveSampleListFragment extends Fragment {
     setHasOptionsMenu(true);
     mSampleListAdapter = new SampleListAdapter2(getContext());
     loadFromCache();
+    mDisposables.add(mSampleListAdapter.getClickObservable().subscribe(
+        guid -> startActivity(new Intent(getContext(), ReceivedSampleDetailActivity.class).putExtra("guid", (String)guid))));
   }
 
   private void loadFromCache(){
@@ -139,6 +144,7 @@ public class ReceiveSampleListFragment extends Fragment {
         title = title.substring(index + 1);
       }
       itemData.title = title.trim();
+      itemData.hold = sampleMaster.guid;
       ReceivedSample cached = new ReceivedSample();
       return Observable.from(sampleMaster.sampleProdLinks)
           .flatMap(sampleProdLink -> loadProductImage(sampleProdLink.prod_id))
