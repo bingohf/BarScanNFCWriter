@@ -51,7 +51,7 @@ public class SampleListAdapter2 extends RecyclerView.Adapter<SampleListAdapter2.
   @Override public void onBindViewHolder(SampleViewHolder holder, int position) {
     ItemData dataItem = mData.get(position);
     holder.imgIcon.setImageDrawable(
-        ContextCompat.getDrawable(holder.itemView.getContext(), R.drawable.ic_grid_on_black_24dp));
+        ContextCompat.getDrawable(holder.itemView.getContext(), R.drawable.ic_file_image_black_36dp));
     if (!TextUtils.isEmpty(dataItem.iconPath)) {
       File file = new File(dataItem.iconPath);
       if (file.exists()) {

@@ -141,6 +141,7 @@ import rx.functions.Func1;
       }
       while (cursor.moveToNext());
     }
+    this.sampleProdLinks = sampleProdLinks;
   }
 
   public List<SampleProdLink> items() {

@@ -99,6 +99,7 @@ public class SampleProductListFragment extends Fragment {
     SampleProdLink prodLink = new SampleProdLink();
     prodLink.prod_id = todoProd.prodNo;
     prodLink.create_date = new Date();
+    prodLink.sample_id = mSampleMaster.guid;
     prodLink.ext = mSampleMaster.sampleProdLinks.size();
     prodLink.link_id = mSampleMaster.guid + "_"+ prodLink.ext;
     prodLink.spec_desc = todoProd.spec_desc;
@@ -114,7 +115,9 @@ public class SampleProductListFragment extends Fragment {
     }
     while (mSampleMaster.sampleProdLinks.size()>0){
       SampleProdLink link = mSampleMaster.sampleProdLinks.get(0);
-      link.delete();
+      if(link.getId() != null) {
+        link.delete();
+      }
       mSampleMaster.sampleProdLinks.remove(0);
     }
     Observable.defer(() -> Observable.from(new Select().from(TodoProd.class)

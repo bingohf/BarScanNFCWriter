@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.activeandroid.Model;
@@ -15,6 +16,7 @@ import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.models.SampleProdLink;
 import java.util.Date;
 import java.util.List;
+import org.w3c.dom.Text;
 
 public class SampleActivity extends AppCompatActivity {
   @BindView(R.id.sliding_tabs) TabLayout mTabLayout;
@@ -29,6 +31,11 @@ public class SampleActivity extends AppCompatActivity {
 
     String guid = getIntent().getStringExtra("guid");
     loadSampleMaster(guid);
+    String sampleLabel = "NA";
+    if(!TextUtils.isEmpty(mSampleMaster.desc)){
+      sampleLabel = mSampleMaster.desc;
+    }
+    getSupportActionBar().setTitle(getString(R.string.formater_sample_title, sampleLabel));
     mViewPager.setAdapter(new SampleFragmentPagerAdapter(getSupportFragmentManager(),
         this));
     mTabLayout.setupWithViewPager(mViewPager);
