@@ -1,10 +1,7 @@
 package com.ledway.btprinter.biz.sample;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.Observer;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -15,7 +12,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -45,9 +41,6 @@ import java.util.Date;
 import java.util.List;
 import rx.Observable;
 import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
@@ -61,6 +54,7 @@ public class SampleMainFragment extends Fragment{
 
   private static final int RESULT_CAMERA_QR_CODE = 1;
   private static final int REQUEST_BUSINESS_CARD = 2;
+  private static final int REQUEST_CAMERA_SHARE_TO = 3;
   @BindView(R.id.edt_spec) EditText mEdtSpec;
   @BindView(R.id.img_business_card) ImageView mImgBusinssCard;
   @BindView(R.id.txt_hint_business_card) TextView mTxtHintBusinessCard;
@@ -153,6 +147,7 @@ public class SampleMainFragment extends Fragment{
   @OnTextChanged(R.id.edt_spec) void onEdtSpecTextChanged(){
     if(mSampleMaster.desc == null || !mSampleMaster.desc.equals(mEdtSpec.getText().toString())){
       mSampleMaster.update_date = new Date();
+      mSampleMaster.isDirty = true;
     }
     mSampleMaster.desc = mEdtSpec.getText().toString();
   }
@@ -178,11 +173,22 @@ public class SampleMainFragment extends Fragment{
             mSampleMaster.image1 = mCurrentPhotoPath;
             mSampleMaster.update_date = new Date();
             Picasso.with(mImgBusinssCard.getContext()).load(f).fit().into(mImgBusinssCard);
+            mSampleMaster.isDirty = true;
             mTxtHintBusinessCard.setVisibility(View.GONE);
           }
           //   upload();
 
         }
+        break;
+      }
+      case REQUEST_CAMERA_SHARE_TO:{
+        if(RESULT_OK == resultCode){
+          String qrcode = data.getStringExtra("barcode");
+          mSampleMaster.shareToDeviceId = qrcode;
+          mSampleMaster.update_date = new Date();
+          Toast.makeText(getActivity(), qrcode, Toast.LENGTH_LONG).show();
+        }
+
         break;
       }
     }
@@ -248,12 +254,18 @@ public class SampleMainFragment extends Fragment{
         }
         break;
       }
+      case R.id.action_share_to:{
+        startActivityForResult(new Intent(getActivity(), FullScannerActivity.class),
+            REQUEST_CAMERA_SHARE_TO);
+        break;
+      }
     }
     return super.onOptionsItemSelected(item);
   }
 
 
   private void uploadAll() {
+    mSampleMaster.isDirty = false;
     mSubscription.add(Observable.concat(Observable.just(mSampleMaster), Observable.defer(() -> {
       List<SampleMaster> data = new Select().from(SampleMaster.class)
           .where("isDirty =?", true)

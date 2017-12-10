@@ -12,4 +12,5 @@ public class ReceivedSample extends Model implements Serializable {
   @Column(name = "datetime") public Date datetime;
   @Column(name = "title") public String title;
   @Column(name = "icon_path") public String iconPath;
+  @Column(name ="detailJson") public  String detailJson;
 }

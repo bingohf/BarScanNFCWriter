@@ -15,25 +15,7 @@
       android:dividerPadding="10dp"
       android:padding="16dp"
       >
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        >
-      <EditText
-          android:id="@+id/edt_spec"
-          android:layout_width="0dp"
-          android:layout_weight="1"
-          android:layout_height="wrap_content"
-          />
-      <ImageView
-          android:id="@+id/icon_scan_barcode"
-          android:src="@drawable/ic_barcode_scan"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          />
-    </LinearLayout>
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -66,5 +48,25 @@
           android:layout_height="match_parent"
           />
     </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        >
+      <EditText
+          android:id="@+id/edt_spec"
+          android:layout_width="0dp"
+          android:layout_weight="1"
+          android:layout_height="wrap_content"
+          />
+      <ImageView
+          android:id="@+id/icon_scan_barcode"
+          android:src="@drawable/ic_barcode_scan"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          />
+    </LinearLayout>
   </LinearLayout>
 </ScrollView>

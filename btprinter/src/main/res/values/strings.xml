@@ -62,4 +62,5 @@
   <string name="customer">Customer</string>
   <string name="formater_selected">%1$d item(s) selected</string>
   <string name="formater_sample_title">Sample %1$s</string>
+  <string name="share">Share</string>
 </resources>

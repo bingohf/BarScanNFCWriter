@@ -26,6 +26,7 @@ import com.activeandroid.Model;
 import com.activeandroid.query.Select;
 import com.gturedi.views.StatefulLayout;
 import com.ledway.btprinter.R;
+import com.ledway.btprinter.TodoProdDetailActivity;
 import com.ledway.btprinter.biz.ProductPickerActivity;
 import com.ledway.btprinter.biz.main.ProductListFragment;
 import com.ledway.btprinter.biz.main.SampleListAdapter2;
@@ -34,6 +35,7 @@ import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.models.SampleProdLink;
 import com.ledway.btprinter.models.TodoProd;
 import com.ledway.framework.FullScannerActivity;
+import io.reactivex.disposables.CompositeDisposable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -43,6 +45,7 @@ import rx.Subscriber;
 public class SampleProductListFragment extends Fragment {
   private static final int REQUEST_PICKER = 1;
   private static final int RESULT_CAMERA_QR_CODE = 2;
+  private static final int REQUEST_PRODUCT = 3;
   @BindView(R.id.listview) RecyclerView mListView;
   @BindView(R.id.swiperefresh) SwipeRefreshLayout mSwipeRefresh;
   @BindView(R.id.statefulLayout) StatefulLayout mStatefulLayout;
@@ -52,6 +55,7 @@ public class SampleProductListFragment extends Fragment {
   private MutableLiveData<Resource<List<SampleListAdapter2.ItemData>>> dataResource =
       new MutableLiveData<>();
   private SampleMaster mSampleMaster;
+  private CompositeDisposable mDisposables = new CompositeDisposable();
 
   public SampleProductListFragment() {
     setHasOptionsMenu(true);
@@ -64,6 +68,7 @@ public class SampleProductListFragment extends Fragment {
       case REQUEST_PICKER: {
         if (resultCode == Activity.RESULT_OK) {
           receiveSelected(data.getStringArrayListExtra("selected"));
+          mSampleMaster.isDirty = true;
         }
         break;
       }
@@ -72,6 +77,14 @@ public class SampleProductListFragment extends Fragment {
           String qrcode = data.getStringExtra("barcode");
           appendOrNewProduct(qrcode);
         }
+        break;
+      }
+      case REQUEST_PRODUCT:{
+        ArrayList<String> prodList = new ArrayList<>();
+        for ( SampleProdLink item:mSampleMaster.sampleProdLinks){
+          prodList.add(item.prod_id);
+        }
+        receiveSelected(prodList);
         break;
       }
     }
@@ -91,7 +104,9 @@ public class SampleProductListFragment extends Fragment {
       viewData.add(0, toViewItem((TodoProd) list.get(0)));
       mSampleListAdapter.setData(viewData);
       mSampleListAdapter.notifyDataSetChanged();
+      mStatefulLayout.showContent();
       add((TodoProd) list.get(0));
+      mSampleMaster.isDirty = true;
     }
   }
 
@@ -121,7 +136,7 @@ public class SampleProductListFragment extends Fragment {
       mSampleMaster.sampleProdLinks.remove(0);
     }
     Observable.defer(() -> Observable.from(new Select().from(TodoProd.class)
-        .where("prodno in (" + TextUtils.join(",", placeholderArray) + ")", paramArray)
+        .where("prodno in (" + TextUtils.join(",", placeholderArray) + ")",       paramArray)
         .orderBy("update_time desc")
         .execute())).map(o -> {
       TodoProd todoProd = (TodoProd) o;
@@ -166,6 +181,11 @@ public class SampleProductListFragment extends Fragment {
     }
     receiveSelected(prodList);
     mSampleListAdapter = new SampleListAdapter2(getContext());
+
+    mDisposables.add(mSampleListAdapter.getClickObservable()
+        .subscribe(prodno -> startActivityForResult(
+            new Intent(getActivity(), TodoProdDetailActivity.class).putExtra("prod_no",
+                (String) prodno),REQUEST_PRODUCT)));
   }
 
   @Nullable @Override
@@ -218,6 +238,7 @@ public class SampleProductListFragment extends Fragment {
   @Override public void onDestroyView() {
     super.onDestroyView();
     mViewBinder.unbind();
+    mDisposables.clear();
   }
 
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {

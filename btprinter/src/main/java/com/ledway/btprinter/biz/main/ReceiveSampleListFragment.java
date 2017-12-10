@@ -24,6 +24,7 @@ import com.activeandroid.Model;
 import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gturedi.views.StatefulLayout;
@@ -109,13 +110,14 @@ public class ReceiveSampleListFragment extends Fragment {
     String orderBy = "order by UPDATEDATE desc";
     new Delete().from(ReceivedSample.class).execute();
 
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     Observable<RestDataSetResponse<ProductAppGetReturn>> obResponse =
         MyProjectApi.getInstance().getDbService().getProductAppGet(query, orderBy);
     mSubscriptions.add(obResponse.subscribeOn(Schedulers.io()).flatMap(response -> {
-      ObjectMapper objectMapper = new ObjectMapper();
-      objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
       ArrayList<ProductAppGetReturn> datasetResponse = response.result.get(0);
       ArrayList<SampleMaster> ret = new ArrayList<>();
       for (ProductAppGetReturn item : datasetResponse) {
@@ -137,6 +139,7 @@ public class ReceiveSampleListFragment extends Fragment {
         title = title.substring(index + 1);
       }
       itemData.title = title.trim();
+      ReceivedSample cached = new ReceivedSample();
       return Observable.from(sampleMaster.sampleProdLinks)
           .flatMap(sampleProdLink -> loadProductImage(sampleProdLink.prod_id))
           .toList()
@@ -144,7 +147,11 @@ public class ReceiveSampleListFragment extends Fragment {
             if (!files.isEmpty()) {
               itemData.iconPath = files.get(0).getAbsolutePath();
             }
-            ReceivedSample cached = new ReceivedSample();
+            try {
+              cached.detailJson = objectMapper.writeValueAsString(sampleMaster.sampleProdLinks);
+            } catch (JsonProcessingException e) {
+              e.printStackTrace();
+            }
             cached.iconPath = itemData.iconPath;
             cached.title = itemData.title;
             cached.datetime = itemData.timestamp;
