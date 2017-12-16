@@ -172,6 +172,7 @@ public class SampleMainFragment extends Fragment{
           if (f.exists()){
             mSampleMaster.image1 = mCurrentPhotoPath;
             mSampleMaster.update_date = new Date();
+            Picasso.with(mImgBusinssCard.getContext()).invalidate(f);
             Picasso.with(mImgBusinssCard.getContext()).load(f).fit().into(mImgBusinssCard);
             mSampleMaster.isDirty = true;
             mTxtHintBusinessCard.setVisibility(View.GONE);
@@ -265,17 +266,17 @@ public class SampleMainFragment extends Fragment{
 
 
   private void uploadAll() {
-    mSampleMaster.isDirty = false;
+    mSampleMaster.isDirty = true;
     mSubscription.add(Observable.concat(Observable.just(mSampleMaster), Observable.defer(() -> {
       List<SampleMaster> data = new Select().from(SampleMaster.class)
-          .where("isDirty =?", true)
+          .where("isDirty =? and guid <>?", true, mSampleMaster.guid)
           .orderBy(" create_date desc ")
           .execute();
       return Observable.from(data);
     }))
         .filter(sampleMaster -> !sampleMaster.isUploaded())
         .doOnSubscribe(() ->uploading.postValue(Resource.loading(null)))
-        .flatMap(sampleMaster -> sampleMaster.remoteSave())
+        .concatMap(sampleMaster -> sampleMaster.remoteSave())
         .subscribeOn(Schedulers.io())
         .subscribe(new Subscriber<SampleMaster>() {
           @Override public void onCompleted() {

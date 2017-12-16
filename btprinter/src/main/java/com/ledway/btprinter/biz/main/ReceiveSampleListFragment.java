@@ -138,7 +138,7 @@ public class ReceiveSampleListFragment extends Fragment {
     }).flatMap(sampleMaster -> {
       SampleListAdapter2.ItemData itemData = new SampleListAdapter2.ItemData();
       itemData.timestamp = sampleMaster.update_date;
-      String title = sampleMaster.shareToDeviceId;
+      String title = sampleMaster.dataFrom;
       int index = title.indexOf('|');
       if (index > 0) {
         title = title.substring(index + 1);

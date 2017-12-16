@@ -62,6 +62,7 @@ public class SampleListAdapter2 extends RecyclerView.Adapter<SampleListAdapter2.
     holder.txtSubTitle.setVisibility(TextUtils.isEmpty(dataItem.subTitle) ? View.GONE:View.VISIBLE);
     holder.txtSubTitle.setText(safeText(dataItem.subTitle));
     holder.txtTimestamp.setText(formatDate(dataItem.timestamp));
+    holder.txtTimestamp.setVisibility(dataItem.timestamp== null ?View.GONE:View.VISIBLE);
     holder.imgSynced.setVisibility(dataItem.redFlag ? View.VISIBLE : View.GONE);
     holder.checkBox.setVisibility(selectMode ? View.VISIBLE : View.GONE);
     holder.checkBox.setChecked(dataItem.isChecked);

@@ -74,6 +74,7 @@ public class SampleActivity extends AppCompatActivity {
     mSampleMaster = new SampleMaster();
     mSampleMaster.guid =
         MApp.getApplication().getSystemInfo().getDeviceId() + "_" + System.currentTimeMillis();
+
     if (guid != null) {
       List<Model> list = new Select().from(SampleMaster.class).where("guid =?", guid).execute();
       if (!list.isEmpty()) {
@@ -81,5 +82,6 @@ public class SampleActivity extends AppCompatActivity {
         mSampleMaster.fetchLink();
       }
     }
+    mSampleMaster.dataFrom = MApp.getApplication().getSystemInfo().getBusinessCard();
   }
 }

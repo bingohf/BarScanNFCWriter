@@ -63,7 +63,7 @@
           />
       <ImageView
           android:id="@+id/icon_scan_barcode"
-          android:src="@drawable/ic_barcode_scan"
+          android:src="@drawable/ic_qrcode_scan_black_24dp"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           />
