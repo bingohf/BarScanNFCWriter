@@ -188,6 +188,11 @@ public class SampleMainFragment extends Fragment{
           mSampleMaster.shareToDeviceId = qrcode;
           mSampleMaster.update_date = new Date();
           Toast.makeText(getActivity(), qrcode, Toast.LENGTH_LONG).show();
+          if (mSampleMaster.isHasData()) {
+            uploadAll();
+          } else {
+            Toast.makeText(getActivity(), R.string.pls_input_data, Toast.LENGTH_LONG).show();
+          }
         }
 
         break;
@@ -263,6 +268,7 @@ public class SampleMainFragment extends Fragment{
         break;
       }
       case R.id.action_share_to:{
+        Toast.makeText(getActivity(), R.string.help_share_to,Toast.LENGTH_LONG).show();
         startActivityForResult(new Intent(getActivity(), FullScannerActivity.class),
             REQUEST_CAMERA_SHARE_TO);
         break;

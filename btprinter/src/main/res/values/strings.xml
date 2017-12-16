@@ -69,4 +69,5 @@
   <string name="install_app_before_sharing">Install app before sharing</string>
   <string name="sample_will_sent_to_this_phone">Sample will sent to this phone by scanning QRCode below</string>
   <string name="delete">Delete</string>
+  <string name="help_share_to">Scan another phone\'s MY ID to send the samples</string>
 </resources>
