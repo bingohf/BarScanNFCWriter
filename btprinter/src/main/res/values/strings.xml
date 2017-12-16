@@ -64,4 +64,8 @@
   <string name="formater_sample_title">%1$s</string>
   <string name="share">Share</string>
   <string name="my_qrcode">My QRCode</string>
+  <string name="input_product_number">Input Product No.</string>
+  <string name="input_hint_product_no">Product No.</string>
+  <string name="install_app_before_sharing">Install app before sharing</string>
+  <string name="sample_will_sent_to_this_phone">Sample will sent to this phone by scanning QRCode below</string>
 </resources>

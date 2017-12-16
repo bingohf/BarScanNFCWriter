@@ -7,7 +7,7 @@
     >
 
   <TextView
-      android:text="@string/install_app_before_sharing"
+      android:text="@string/sample_will_sent_to_this_phone"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:textAppearance="@style/TextAppearance.AppCompat.Title"

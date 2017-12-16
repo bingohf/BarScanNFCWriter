@@ -39,7 +39,8 @@ public class MyAccountFragment extends Fragment {
   }
 
   private void initView() {
-    mViewPager.setAdapter(new MyProfileViewPagerAdapter(getChildFragmentManager(), new PagerFragment[]{new BusinessCardFragment(), new MyIDFragment(), new ShareAppFragment()}));
+    mViewPager.setAdapter(new MyProfileViewPagerAdapter(getChildFragmentManager(), new PagerFragment[]{
+        new ShareAppFragment(),new BusinessCardFragment(), new MyIDFragment()}));
     // END_INCLUDE (setup_viewpager)
 
     // BEGIN_INCLUDE (setup_slidingtablayout)

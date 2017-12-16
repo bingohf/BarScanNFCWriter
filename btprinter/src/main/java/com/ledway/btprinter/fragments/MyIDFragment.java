@@ -38,7 +38,7 @@ public class MyIDFragment extends PagerFragment {
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    View view = inflater.inflate(R.layout.fragment_my_id, container, false);
+    View view = inflater.inflate(R.layout.fragment_my_receive_id, container, false);
     mImageView = (ImageView) view.findViewById(R.id.img_qrcode);
     return view;
   }

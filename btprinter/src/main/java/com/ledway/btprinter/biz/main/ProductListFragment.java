@@ -13,6 +13,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.InputType;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,6 +26,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.activeandroid.query.Select;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.gturedi.views.StatefulLayout;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.TodoProdDetailActivity;
@@ -63,9 +66,7 @@ public class ProductListFragment extends Fragment {
       case RESULT_CAMERA_QR_CODE: {
         if (resultCode == Activity.RESULT_OK) {
           String qrcode = data.getStringExtra("barcode");
-          startActivityForResult(
-              new Intent(getActivity(), TodoProdDetailActivity.class).putExtra("prod_no", qrcode),
-              REQUEST_TODO_PRODUCT);
+          receiveQrCode(qrcode);
         }
         break;
       }
@@ -74,6 +75,13 @@ public class ProductListFragment extends Fragment {
         break;
       }
     }
+  }
+
+  private void receiveQrCode(String qrcode) {
+    receiveQrCode(qrcode);
+    startActivityForResult(
+        new Intent(getActivity(), TodoProdDetailActivity.class).putExtra("prod_no", qrcode),
+        REQUEST_TODO_PRODUCT);
   }
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -173,6 +181,17 @@ public class ProductListFragment extends Fragment {
     switch (item.getItemId()) {
       case R.id.action_add: {
         scanBarCode();
+        break;
+      }
+      case R.id.action_key:{
+        new MaterialDialog.Builder(getActivity())
+            .title(R.string.input_product_number)
+            .inputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD)
+            .input(R.string.input_hint_product_no, 0, (dialog, input) -> {
+              if(!TextUtils.isEmpty(input)){
+                receiveQrCode(input.toString());
+              }
+            }).show();
         break;
       }
       case R.id.action_done: {
