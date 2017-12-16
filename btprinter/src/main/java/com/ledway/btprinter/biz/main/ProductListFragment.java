@@ -15,16 +15,19 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.gturedi.views.StatefulLayout;
@@ -78,7 +81,6 @@ public class ProductListFragment extends Fragment {
   }
 
   private void receiveQrCode(String qrcode) {
-    receiveQrCode(qrcode);
     startActivityForResult(
         new Intent(getActivity(), TodoProdDetailActivity.class).putExtra("prod_no", qrcode),
         REQUEST_TODO_PRODUCT);
@@ -99,8 +101,31 @@ public class ProductListFragment extends Fragment {
         .subscribe(prodno -> startActivityForResult(
             new Intent(getActivity(), TodoProdDetailActivity.class).putExtra("prod_no",
                 (String) prodno), REQUEST_TODO_PRODUCT)));
+    mDisposables.add(mSampleListAdapter.getmLongClickSubject()
+        .subscribe(view -> {
+          PopupMenu popup = new PopupMenu(getActivity(), (View)view);
+
+          // This activity implements OnMenuItemClickListener
+          popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem menuItem) {
+              int index = (int) ((View) view).getTag();
+              String prodNo = (String) mSampleListAdapter.get(index).hold;
+              removeProduct(prodNo);
+              return false;
+            }
+          });
+          popup.inflate(R.menu.menu_product_delete);
+          popup.show();
+
+        }));
+
 
     mDisposables.add(mSampleListAdapter.getCheckObservable().subscribe(o -> titleChange()));
+    loadData();
+  }
+
+  private void removeProduct(String prodNo) {
+    new Delete().from(TodoProd.class).where("prodno=?",prodNo).execute();
     loadData();
   }
 
@@ -167,7 +192,7 @@ public class ProductListFragment extends Fragment {
   }
 
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-    inflater.inflate(R.menu.menu_sample_list, menu);
+    inflater.inflate(R.menu.menu_product_list, menu);
     super.onCreateOptionsMenu(menu, inflater);
   }
 

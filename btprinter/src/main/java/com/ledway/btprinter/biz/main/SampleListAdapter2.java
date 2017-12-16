@@ -24,12 +24,13 @@ import java.util.List;
 import java.util.Locale;
 
 public class SampleListAdapter2 extends RecyclerView.Adapter<SampleListAdapter2.SampleViewHolder>
-    implements View.OnClickListener {
+    implements View.OnClickListener, View.OnLongClickListener {
   private final LayoutInflater mLayoutInflater;
   private SimpleDateFormat mDateFormatter =
       new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault());
   private List<ItemData> mData = new ArrayList<>();
   private PublishSubject<Object> mClickSubject = PublishSubject.create();
+  private PublishSubject<Object> mLongClickSubject = PublishSubject.create();
   private PublishSubject<Object> mCheckSubject = PublishSubject.create();
   private boolean selectMode = false;
 
@@ -40,6 +41,7 @@ public class SampleListAdapter2 extends RecyclerView.Adapter<SampleListAdapter2.
   @Override public SampleViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
     View view = mLayoutInflater.inflate(R.layout.list_item_sample, parent, false);
     view.setOnClickListener(this);
+    view.setOnLongClickListener(this);
     SampleViewHolder hold = new SampleViewHolder(view);
     hold.checkBox.setOnCheckedChangeListener(
         (compoundButton, b) -> {mData.get(hold.position).isChecked = b;
@@ -97,6 +99,9 @@ public class SampleListAdapter2 extends RecyclerView.Adapter<SampleListAdapter2.
   public PublishSubject<Object> getClickObservable() {
     return mClickSubject;
   }
+  public PublishSubject<Object> getmLongClickSubject() {
+    return mLongClickSubject;
+  }
 
   public PublishSubject<Object> getCheckObservable() {
     return mCheckSubject;
@@ -106,6 +111,11 @@ public class SampleListAdapter2 extends RecyclerView.Adapter<SampleListAdapter2.
     ItemData item = mData.get((int) view.getTag());
     mClickSubject.onNext(item.hold);
   }
+
+  public ItemData get(int position){
+    return mData.get(position);
+  }
+
 
   public ItemData[] getSelection() {
     ArrayList<ItemData> temp = new ArrayList<>();
@@ -117,6 +127,12 @@ public class SampleListAdapter2 extends RecyclerView.Adapter<SampleListAdapter2.
     ItemData[] ret = new ItemData[temp.size()];
     ret = temp.toArray(ret);
     return ret;
+  }
+
+  @Override public boolean onLongClick(View view) {
+  //  ItemData item = mData.get((int) view.getTag());
+    mLongClickSubject.onNext(view);
+    return true;
   }
 
   public static class SampleViewHolder extends RecyclerView.ViewHolder {

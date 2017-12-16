@@ -228,7 +228,14 @@ public class SampleMainFragment extends Fragment{
   }
 
   @OnClick(R.id.img_business_card) void onImgBusinessCardClick(){
-    startTakePhoto();
+    if(mSampleMaster.image1 == null){
+      startTakePhoto();
+    }else {
+      Intent intent = new Intent();
+      intent.setAction(Intent.ACTION_VIEW);
+      intent.setDataAndType(Uri.parse("file://" + mSampleMaster.image1), "image/*");
+      getActivity().startActivity(intent);
+    }
   }
 
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -258,6 +265,10 @@ public class SampleMainFragment extends Fragment{
       case R.id.action_share_to:{
         startActivityForResult(new Intent(getActivity(), FullScannerActivity.class),
             REQUEST_CAMERA_SHARE_TO);
+        break;
+      }
+      case R.id.action_re_take_photo:{
+        startTakePhoto();
         break;
       }
     }

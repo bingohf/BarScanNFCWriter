@@ -19,7 +19,7 @@
   <item
       android:id="@+id/action_key"
       android:icon="@drawable/ic_keyboard_white_24dp"
-      android:title="Key ProdNo"
+      android:title="@string/input_product_number"
       app:showAsAction="ifRoom"
       />
 
