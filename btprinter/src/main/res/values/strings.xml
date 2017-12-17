@@ -67,7 +67,9 @@
   <string name="input_product_number">Input Product No.</string>
   <string name="input_hint_product_no">Product No.</string>
   <string name="install_app_before_sharing">Install app before sharing</string>
-  <string name="sample_will_sent_to_this_phone">Sample will sent to this phone by scanning QRCode below</string>
+  <string name="sample_will_sent_to_this_phone">Samples will be sent to this phone by scanning QRCODE below.</string>
   <string name="delete">Delete</string>
   <string name="help_share_to">Scan another phone\'s MY ID to send the samples</string>
+  <string name="pa">PA</string>
+  <string name="not_found_data">Not found data</string>
 </resources>

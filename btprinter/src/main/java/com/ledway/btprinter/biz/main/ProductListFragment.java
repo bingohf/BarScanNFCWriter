@@ -211,7 +211,7 @@ public class ProductListFragment extends Fragment {
       case R.id.action_key:{
         new MaterialDialog.Builder(getActivity())
             .title(R.string.input_product_number)
-            .inputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD)
+            .inputType(InputType.TYPE_CLASS_TEXT)
             .input(R.string.input_hint_product_no, 0, (dialog, input) -> {
               if(!TextUtils.isEmpty(input)){
                 receiveQrCode(input.toString());

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
@@ -39,7 +40,7 @@ public class MainActivity2 extends AppCompatActivity {
   @BindView(R.id.viewPager) ViewPager mViewPager;
   @BindView(R.id.bottomNavigation) BottomNavigationView mBottomNav;
   Fragment[] fragments = new Fragment[] {
-      new SampleListFragment(), new ReceiveSampleListFragment(), new ProductListFragment(),new MyAccountFragment()
+      new SampleListFragment(), new ReceiveSampleListFragment(), new ProductListFragment(),new MyAccountFragment(),new  WebViewFragment()
   };
   private CompositeSubscription mSubscriptions = new CompositeSubscription();
 
@@ -191,5 +192,9 @@ public class MainActivity2 extends AppCompatActivity {
   @Override public boolean onCreateOptionsMenu(Menu menu) {
     getMenuInflater().inflate(R.menu.menu_main, menu);
     return true;
+  }
+
+  @Override public void onBackPressed() {
+    super.onBackPressed();
   }
 }

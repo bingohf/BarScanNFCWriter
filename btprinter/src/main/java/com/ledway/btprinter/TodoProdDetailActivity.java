@@ -1,10 +1,12 @@
 package com.ledway.btprinter;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -16,10 +18,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.OnTextChanged;
 import com.activeandroid.query.Select;
 import com.ledway.btprinter.models.TodoProd;
@@ -27,6 +31,7 @@ import com.ledway.btprinter.network.model.RestSpResponse;
 import com.ledway.btprinter.network.model.SpReturn;
 import com.ledway.btprinter.utils.IOUtil;
 import com.ledway.btprinter.views.MImageView;
+import com.ledway.framework.FullScannerActivity;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -43,12 +48,14 @@ import rx.schedulers.Schedulers;
  */
 public class TodoProdDetailActivity extends AppCompatActivity {
   private static final int REQUEST_TAKE_IMAGE = 1;
+  private static final int RESULT_CAMERA_QR_CODE = 2;
 
   private TodoProd mTodoProd ;
   private String mCurrentPhotoPath;
   @BindView(R.id.image) MImageView mImageView;
   @BindView(R.id.txt_hint) TextView mTxtHint;
   @BindView(R.id.txt_spec) EditText mEdtSpec;
+  @BindView(R.id.img_qrcode) ImageView mImgQrCode;
   @Override public boolean onCreateOptionsMenu(Menu menu) {
     getMenuInflater().inflate(R.menu.todo_prod_menu, menu);
     return true;
@@ -127,6 +134,10 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     mTodoProd.spec_desc = mEdtSpec.getText().toString();
   }
 
+  @OnClick(R.id.img_qrcode) void onImgQrCodeClick(){
+    startActivityForResult(new Intent(this, FullScannerActivity.class),
+        RESULT_CAMERA_QR_CODE);
+  }
 
   private void loadTodoProd() {
     String prodno = getIntent().getStringExtra("prod_no");
@@ -151,6 +162,13 @@ public class TodoProdDetailActivity extends AppCompatActivity {
 
   @Override protected void onActivityResult(final int requestCode, int resultCode, Intent data) {
     switch (requestCode){
+      case RESULT_CAMERA_QR_CODE:{
+        if(resultCode == Activity.RESULT_OK) {
+          String qrcode = data.getStringExtra("barcode");
+          mEdtSpec.setText(qrcode);
+        }
+        break;
+      }
       case REQUEST_TAKE_IMAGE:{
         if (RESULT_OK ==  resultCode){
           File f = new File(mCurrentPhotoPath);

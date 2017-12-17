@@ -29,4 +29,12 @@
       android:orderInCategory="3"
       android:title="@string/my_qrcode"
       />
+  <item
+      android:id="@+id/action_my_webview"
+      android:icon="@drawable/ic_web_black_24dp"
+      android:orderInCategory="4"
+      android:title="@string/pa"
+      />
+
+
 </menu>

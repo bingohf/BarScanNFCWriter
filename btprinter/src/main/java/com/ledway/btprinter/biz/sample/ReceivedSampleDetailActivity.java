@@ -8,6 +8,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.activeandroid.Cache;
@@ -93,10 +94,16 @@ public class ReceivedSampleDetailActivity extends AppCompatActivity {
 
   private void loadData(String guid) throws IOException {
     List<Model> list = new Select().from(ReceivedSample.class).where("hold_id =?", guid).execute();
-    ReceivedSample item = (ReceivedSample) list.get(0);
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    mList = objectMapper.readValue(item.detailJson, SampleProdLink[].class);
+    mList = new SampleProdLink[0];
+    if(list.isEmpty()){
+      Toast.makeText(this, R.string.not_found_data, Toast.LENGTH_LONG).show();
+    }else {
+
+      ReceivedSample item = (ReceivedSample) list.get(0);
+      ObjectMapper objectMapper = new ObjectMapper();
+      objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      mList = objectMapper.readValue(item.detailJson, SampleProdLink[].class);
+    }
   }
 }
