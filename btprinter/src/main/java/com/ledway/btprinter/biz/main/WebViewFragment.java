@@ -43,6 +43,7 @@ public class WebViewFragment extends Fragment {
 
     mWebView.getSettings().setUseWideViewPort(true);
     mWebView.getSettings().setBuiltInZoomControls(true);
+    mWebView.getSettings().setDisplayZoomControls(false);
     mWebView.getSettings().setJavaScriptEnabled(true);
     if (savedInstanceState != null) {
       mWebView.restoreState(savedInstanceState);

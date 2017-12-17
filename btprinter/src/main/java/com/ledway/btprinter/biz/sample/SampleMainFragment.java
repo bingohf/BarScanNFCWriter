@@ -34,6 +34,7 @@ import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.models.Resource;
 import com.ledway.btprinter.models.SampleMaster;
+import com.ledway.btprinter.utils.ContextUtils;
 import com.ledway.btprinter.utils.IOUtil;
 import com.ledway.framework.FullScannerActivity;
 import com.squareup.picasso.Picasso;
@@ -87,7 +88,7 @@ public class SampleMainFragment extends Fragment{
   @Override public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     unbinder =ButterKnife.bind(this, view);
     if(mSampleMaster.image1 != null){
-      Picasso.with(mImgBusinssCard.getContext()).load(new File(mSampleMaster.image1)).fit().into(mImgBusinssCard);
+      Picasso.with(mImgBusinssCard.getContext()).load(new File(mSampleMaster.image1)).into(mImgBusinssCard);
       mTxtHintBusinessCard.setVisibility(View.GONE);
     }
     if(mSampleMaster.desc != null){
@@ -176,7 +177,7 @@ public class SampleMainFragment extends Fragment{
             mSampleMaster.image1 = mCurrentPhotoPath;
             mSampleMaster.update_date = new Date();
             Picasso.with(mImgBusinssCard.getContext()).invalidate(f);
-            Picasso.with(mImgBusinssCard.getContext()).load(f).fit().into(mImgBusinssCard);
+            Picasso.with(mImgBusinssCard.getContext()).load(f).into(mImgBusinssCard);
             mSampleMaster.isDirty = true;
             mTxtHintBusinessCard.setVisibility(View.GONE);
           }
@@ -304,7 +305,7 @@ public class SampleMainFragment extends Fragment{
           }
 
           @Override public void onError(Throwable e) {
-            uploading.postValue(Resource.error(e.getMessage(), null));
+            uploading.postValue(Resource.error(ContextUtils.getMessage(e), null));
           }
 
           @Override public void onNext(SampleMaster sampleMaster) {

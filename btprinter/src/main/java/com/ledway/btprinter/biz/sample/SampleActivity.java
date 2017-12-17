@@ -53,6 +53,9 @@ public class SampleActivity extends AppCompatActivity {
 
       }
     });
+    if(savedInstanceState == null) {
+      mViewPager.setCurrentItem(1);
+    }
   }
 
   @Override protected void onDestroy() {

@@ -10,6 +10,7 @@ import com.activeandroid.ActiveAndroid;
 import com.crashlytics.android.Crashlytics;
 import com.facebook.stetho.Stetho;
 import com.ledway.btprinter.models.SystemInfo;
+import com.ledway.btprinter.utils.ContextUtils;
 import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
 import io.fabric.sdk.android.Fabric;
@@ -26,6 +27,7 @@ public class MApp extends Application {
   @Override public void onCreate() {
     super.onCreate();
     Fabric.with(this, new Crashlytics());
+    ContextUtils.init(this);
     ActiveAndroid.initialize(this);
     Stetho.initializeWithDefaults(this);
     instance = this;

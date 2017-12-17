@@ -29,6 +29,7 @@ import com.activeandroid.query.Select;
 import com.ledway.btprinter.models.TodoProd;
 import com.ledway.btprinter.network.model.RestSpResponse;
 import com.ledway.btprinter.network.model.SpReturn;
+import com.ledway.btprinter.utils.ContextUtils;
 import com.ledway.btprinter.utils.IOUtil;
 import com.ledway.btprinter.views.MImageView;
 import com.ledway.framework.FullScannerActivity;
@@ -109,7 +110,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
 
       //Bitmap bitmap =  IOUtil.loadImage(mTodoProd.image1, 800,800);
       if(new File(mTodoProd.image1).exists()) {
-        Picasso.with(this).load(new File(mTodoProd.image1)).fit().into(mImageView);
+        Picasso.with(this).load(new File(mTodoProd.image1)).into(mImageView);
       }
       mImageView.setImagePath(mTodoProd.image1);
     }
@@ -205,7 +206,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
             }
             mImageView.setVisibility(View.VISIBLE);
             mTxtHint.setVisibility(View.GONE);
-            mImageView.setImageBitmap(bitmap);
+            Picasso.with(mImageView.getContext()).load(f).into(mImageView);
             mImageView.setImagePath(f.getAbsolutePath());
             mTodoProd.update_time = new Date();
             mTodoProd.save();
@@ -236,7 +237,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
 
           @Override public void onError(Throwable e) {
             progressDialog.dismiss();
-            Toast.makeText(TodoProdDetailActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(TodoProdDetailActivity.this, ContextUtils.getMessage(e), Toast.LENGTH_LONG).show();
             e.printStackTrace();
           }
 
