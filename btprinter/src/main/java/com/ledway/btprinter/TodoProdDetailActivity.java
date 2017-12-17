@@ -183,6 +183,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
           if (f.exists()){
             mTodoProd.image1 = mCurrentPhotoPath;
             IOUtil.cropImage(new File(mCurrentPhotoPath));
+            Picasso.with(this).invalidate(new File(mCurrentPhotoPath));
             Bitmap bitmap = IOUtil.loadImage(mCurrentPhotoPath, 800, 800);
             File file2 = new File(MApp.getApplication().getPicPath() + "/" + getProdNoFileName() + "_type_" + 2 +".jpeg");
             if (!file2.exists()){

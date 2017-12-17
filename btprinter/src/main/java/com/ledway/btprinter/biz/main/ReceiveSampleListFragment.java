@@ -39,6 +39,7 @@ import com.ledway.btprinter.network.MyProjectApi;
 import com.ledway.btprinter.network.model.ProductAppGetReturn;
 import com.ledway.btprinter.network.model.ProductReturn;
 import com.ledway.btprinter.network.model.RestDataSetResponse;
+import com.squareup.picasso.Picasso;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Consumer;
 import java.io.File;
@@ -244,6 +245,9 @@ public class ReceiveSampleListFragment extends Fragment {
           break;
         }
         case SUCCESS: {
+          for(SampleListAdapter2.ItemData item: resource.data){
+            Picasso.with(getContext()).invalidate(new File(item.iconPath));
+          }
           mSwipeRefresh.setRefreshing(false);
           mSampleListAdapter.setData(resource.data);
           mSampleListAdapter.notifyDataSetChanged();
