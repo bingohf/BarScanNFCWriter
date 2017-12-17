@@ -2,6 +2,9 @@ package com.ledway.btprinter.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapRegionDecoder;
+import android.graphics.Rect;
+import com.example.android.common.logger.Log;
 import java.io.*;
 
 public class IOUtil {
@@ -48,5 +51,31 @@ public class IOUtil {
         bmOptions.inPurgeable = true;
         return  BitmapFactory.decodeFile(path, bmOptions);
 }
+
+   public static void cropImage(File sourceImage){
+        final int size = 512;
+       try {
+
+           BitmapFactory.Options tmpOptions = new BitmapFactory.Options();
+           tmpOptions.inJustDecodeBounds = true;
+           BitmapFactory.decodeStream( new FileInputStream(sourceImage), null, tmpOptions);
+           int width = tmpOptions.outWidth;
+           int height = tmpOptions.outHeight;
+           int resizeWidth = Math.min(size, width);
+           int resizeHeight = Math.min(size, height);
+           int x = (width - resizeWidth) /2;
+           int y = (height - resizeHeight) /2;
+           BitmapRegionDecoder bitmapRegionDecoder = BitmapRegionDecoder.newInstance( new FileInputStream(sourceImage),false);
+           BitmapFactory.Options options1 = new BitmapFactory.Options();
+           options1.inPreferredConfig = Bitmap.Config.RGB_565;
+
+           Rect rect = new Rect(x, y, x + resizeWidth, y + resizeHeight);
+           Bitmap bitmap = bitmapRegionDecoder.decodeRegion(rect, options1);
+           bitmap.compress(Bitmap.CompressFormat.JPEG, 50, new FileOutputStream(sourceImage));
+       } catch (IOException e) {
+           e.printStackTrace();
+           Log.e("cropImage", e.getMessage(), e);
+       }
+   }
 
 }

@@ -5,6 +5,7 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -33,6 +34,7 @@ import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.models.Resource;
 import com.ledway.btprinter.models.SampleMaster;
+import com.ledway.btprinter.utils.IOUtil;
 import com.ledway.framework.FullScannerActivity;
 import com.squareup.picasso.Picasso;
 import java.io.File;
@@ -170,6 +172,7 @@ public class SampleMainFragment extends Fragment{
             }
           }
           if (f.exists()){
+            IOUtil.cropImage(f);
             mSampleMaster.image1 = mCurrentPhotoPath;
             mSampleMaster.update_date = new Date();
             Picasso.with(mImgBusinssCard.getContext()).invalidate(f);

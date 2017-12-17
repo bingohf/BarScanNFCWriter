@@ -32,6 +32,7 @@ import com.ledway.btprinter.network.model.SpReturn;
 import com.ledway.btprinter.utils.IOUtil;
 import com.ledway.btprinter.views.MImageView;
 import com.ledway.framework.FullScannerActivity;
+import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -106,8 +107,10 @@ public class TodoProdDetailActivity extends AppCompatActivity {
       mImageView.setVisibility(View.VISIBLE);
       mTxtHint.setVisibility(View.GONE);
 
-      Bitmap bitmap =  IOUtil.loadImage(mTodoProd.image1, 800,800);
-      mImageView.setImageBitmap(bitmap);
+      //Bitmap bitmap =  IOUtil.loadImage(mTodoProd.image1, 800,800);
+      if(new File(mTodoProd.image1).exists()) {
+        Picasso.with(this).load(new File(mTodoProd.image1)).fit().into(mImageView);
+      }
       mImageView.setImagePath(mTodoProd.image1);
     }
     mTxtHint.setOnClickListener(new View.OnClickListener() {
@@ -179,6 +182,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
           }
           if (f.exists()){
             mTodoProd.image1 = mCurrentPhotoPath;
+            IOUtil.cropImage(new File(mCurrentPhotoPath));
             Bitmap bitmap = IOUtil.loadImage(mCurrentPhotoPath, 800, 800);
             File file2 = new File(MApp.getApplication().getPicPath() + "/" + getProdNoFileName() + "_type_" + 2 +".jpeg");
             if (!file2.exists()){
