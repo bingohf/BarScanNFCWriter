@@ -27,7 +27,7 @@ import rx.Subscriber;
   @Column(name = "image2") public String image2;
   @Column(name = "uploaded_time") public Date uploaded_time;
   @Column(name = "update_time") public Date update_time;
-  @Column(name = "create_time") public Date create_time;
+  @Column(name = "create_time") public Date create_time = new Date();
   @Column(name = "spec_desc") public String spec_desc;
 
   public int todayCount;

@@ -154,6 +154,11 @@ public class SampleMainFragment extends Fragment{
     }
     mSampleMaster.desc = mEdtSpec.getText().toString();
   }
+
+  @OnClick(R.id.txt_hint_business_card) void onBtnHintBusinessCardClick(){
+    startTakePhoto();
+  }
+
   @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
     switch (requestCode){

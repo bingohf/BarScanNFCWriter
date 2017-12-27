@@ -50,7 +50,7 @@ import rx.functions.Func1;
   @Column(name = "guid", unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)
   public String guid;
 
-  @Column(name = "create_date") public Date create_date;
+  @Column(name = "create_date") public Date create_date = new Date();
 
   @Column(name = "update_date") public Date update_date;
 

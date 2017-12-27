@@ -29,6 +29,7 @@ import com.ledway.btprinter.R;
 import com.ledway.btprinter.biz.sample.SampleActivity;
 import com.ledway.btprinter.models.Resource;
 import com.ledway.btprinter.models.SampleMaster;
+import com.ledway.btprinter.utils.ContextUtils;
 import io.reactivex.Single;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
@@ -169,7 +170,7 @@ public class SampleListFragment extends Fragment {
         .subscribe(sampleMasters -> mResourceSampleList.postValue(
             Resource.success(toViewList(sampleMasters))),
             throwable -> mResourceSampleList.postValue(
-                Resource.error(throwable.getMessage(), null))));
+                Resource.error(ContextUtils.getMessage(throwable), null))));
   }
 
   private List<SampleListAdapter2.ItemData> toViewList(List<SampleMaster> sampleMasters) {
@@ -180,7 +181,7 @@ public class SampleListFragment extends Fragment {
       itemData.iconPath = item.image1;
       itemData.redFlag = item.isDirty;
       itemData.title = item.desc;
-      itemData.timestamp = item.update_date;
+      itemData.timestamp = item.create_date;
       ret.add(itemData);
     }
     return ret;

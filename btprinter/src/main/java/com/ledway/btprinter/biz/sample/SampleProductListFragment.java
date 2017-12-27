@@ -34,6 +34,7 @@ import com.ledway.btprinter.models.Resource;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.models.SampleProdLink;
 import com.ledway.btprinter.models.TodoProd;
+import com.ledway.btprinter.utils.ContextUtils;
 import com.ledway.framework.FullScannerActivity;
 import io.reactivex.disposables.CompositeDisposable;
 import java.util.ArrayList;
@@ -148,7 +149,7 @@ public class SampleProductListFragment extends Fragment {
       }
 
       @Override public void onError(Throwable e) {
-        dataResource.postValue(Resource.error(e.getMessage(), null));
+        dataResource.postValue(Resource.error(ContextUtils.getMessage(e), null));
       }
 
       @Override public void onNext(List<SampleListAdapter2.ItemData> itemData) {

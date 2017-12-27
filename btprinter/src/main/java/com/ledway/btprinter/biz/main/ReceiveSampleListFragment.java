@@ -39,6 +39,7 @@ import com.ledway.btprinter.network.MyProjectApi;
 import com.ledway.btprinter.network.model.ProductAppGetReturn;
 import com.ledway.btprinter.network.model.ProductReturn;
 import com.ledway.btprinter.network.model.RestDataSetResponse;
+import com.ledway.btprinter.utils.ContextUtils;
 import com.squareup.picasso.Picasso;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Consumer;
@@ -172,7 +173,7 @@ public class ReceiveSampleListFragment extends Fragment {
       }
 
       @Override public void onError(Throwable e) {
-        dataResource.postValue(Resource.error(e.getMessage(), null));
+        dataResource.postValue(Resource.error(ContextUtils.getMessage(e), null));
       }
 
       @Override public void onNext(List<SampleListAdapter2.ItemData> itemData) {
@@ -246,7 +247,9 @@ public class ReceiveSampleListFragment extends Fragment {
         }
         case SUCCESS: {
           for(SampleListAdapter2.ItemData item: resource.data){
-            Picasso.with(getContext()).invalidate(new File(item.iconPath));
+            if(item.iconPath != null) {
+              Picasso.with(getContext()).invalidate(new File(item.iconPath));
+            }
           }
           mSwipeRefresh.setRefreshing(false);
           mSampleListAdapter.setData(resource.data);
