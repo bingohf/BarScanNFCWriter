@@ -12,6 +12,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -167,6 +168,7 @@ public class ReceiveSampleListFragment extends Fragment {
       }
 
       @Override public void onError(Throwable e) {
+        Log.e("receive", e.getMessage(), e);
         dataResource.postValue(Resource.error(ContextUtils.getMessage(e), null));
       }
 
