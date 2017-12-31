@@ -26,8 +26,8 @@
   <string name="company">威虹資訊股份有限公司版權所有</string>
   <string name="company.tel">服務電話: +886222799889</string>
   <string name="company_short">威虹資訊</string>
-  <string name="setting.reader.title">Reader(##) </string>
-  <string name="setting.line.title">Line(####)</string>
+  <string name="setting.reader.title">User Name(##) </string>
+  <string name="setting.line.title">Group(####)</string>
   <string name="setting.server.title">Server</string>
   <string name="setting.data_list.title">Sample Room Server</string>
   <string name="setting.autoupload.title">自動上傳(Auto Upload)</string>

@@ -7,10 +7,13 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.view.Display;
 import com.activeandroid.ActiveAndroid;
+import com.crashlytics.android.Crashlytics;
 import com.facebook.stetho.Stetho;
 import com.ledway.btprinter.models.SystemInfo;
+import com.ledway.btprinter.utils.ContextUtils;
 import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
+import io.fabric.sdk.android.Fabric;
 import java.io.File;
 
 /**
@@ -23,6 +26,8 @@ public class MApp extends Application {
   public Point point = new Point();
   @Override public void onCreate() {
     super.onCreate();
+    Fabric.with(this, new Crashlytics());
+    ContextUtils.init(this);
     ActiveAndroid.initialize(this);
     Stetho.initializeWithDefaults(this);
     instance = this;
