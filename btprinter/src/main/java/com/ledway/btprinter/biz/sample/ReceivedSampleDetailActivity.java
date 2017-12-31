@@ -14,15 +14,13 @@ import butterknife.ButterKnife;
 import com.activeandroid.Cache;
 import com.activeandroid.Model;
 import com.activeandroid.query.Select;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gturedi.views.StatefulLayout;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.biz.main.SampleListAdapter2;
 import com.ledway.btprinter.models.ReceivedSample;
 import com.ledway.btprinter.models.SampleProdLink;
+import com.ledway.btprinter.utils.JsonUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -100,10 +98,7 @@ public class ReceivedSampleDetailActivity extends AppCompatActivity {
     }else {
 
       ReceivedSample item = (ReceivedSample) list.get(0);
-      ObjectMapper objectMapper = new ObjectMapper();
-      objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-      mList = objectMapper.readValue(item.detailJson, SampleProdLink[].class);
+      mList = JsonUtils.Companion.fromJson(item.detailJson, SampleProdLink[].class);
     }
   }
 }

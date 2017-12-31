@@ -13,9 +13,6 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 import com.activeandroid.util.Log;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.SampleReadonlyActivity;
@@ -24,6 +21,7 @@ import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.network.MyProjectApi;
 import com.ledway.btprinter.network.model.ProductAppGetReturn;
 import com.ledway.btprinter.network.model.RestDataSetResponse;
+import com.ledway.btprinter.utils.JsonUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import rx.Observable;
@@ -93,14 +91,11 @@ public class ReceiveSampleFragment extends PagerFragment {
               final RestDataSetResponse<ProductAppGetReturn> response) {
             return Observable.create(new Observable.OnSubscribe<SampleMaster>() {
               @Override public void call(Subscriber<? super SampleMaster> subscriber) {
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-                objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 ArrayList<ProductAppGetReturn> datasetResponse = response.result.get(0);
                 try {
                   for (ProductAppGetReturn item : datasetResponse) {
                     String json = item.json;
-                    SampleMaster sampleMaster = objectMapper.readValue(json, SampleMaster.class);
+                    SampleMaster sampleMaster = JsonUtils.Companion.fromJson(json, SampleMaster.class);
 /*                    File photoFile = new File(MApp.getApplication().getPicPath()
                         + "/"
                         + sampleMaster.guid

@@ -9,10 +9,6 @@ import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 import com.activeandroid.query.From;
 import com.activeandroid.query.Select;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.network.MyProjectApi;
@@ -22,6 +18,7 @@ import com.ledway.btprinter.network.model.Sp_UpSampleDetail_Request;
 import com.ledway.btprinter.network.model.Sp_UpSampleDetail_Return;
 import com.ledway.btprinter.network.model.Sp_UpSample_v3_Request;
 import com.ledway.btprinter.utils.IOUtil;
+import com.ledway.btprinter.utils.JsonUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -59,9 +56,9 @@ import rx.functions.Func1;
   @Column(name = "line") public String line;
   @Column(name = "reader") public String reader;
   @Column(name = "qrcode") public String qrcode;
-  @Column(name = "image1") public String image1;
-  @Column(name = "image2") public String image2;
-  @Column(name = "desc") public String desc;
+  @Column(name = "image1") public transient  String image1;
+  @Column(name = "image2") public transient  String image2;
+  @Column(name = "desc") public transient  String desc;
   @Column(name = "isDirty") public boolean isDirty = true;
   @Column(name ="ShareToDeviceId") public String shareToDeviceId;
 
@@ -82,12 +79,10 @@ import rx.functions.Func1;
   public SampleMaster() {
     super();
   }
-  @JsonIgnore
   public String getImage1() {
     return image1;
   }
 
-  @JsonIgnore
   public void setImage1(String image1) {
     mIsChanged = true;
     isDirty = true;
@@ -96,13 +91,11 @@ import rx.functions.Func1;
   public String getImage2() {
     return image2;
   }
-  @JsonIgnore
   public void setImage2(String image2) {
     mIsChanged = true;
     isDirty = true;
     this.image2 = image2;
   }
-  @JsonIgnore
   public String getDesc() {
     return desc;
   }
@@ -370,14 +363,7 @@ import rx.functions.Func1;
 
 
   private String toJson(){
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-    try {
-      return mapper.writeValueAsString(this);
-    } catch (JsonProcessingException e) {
-      e.printStackTrace();
-      return "";
-    }
+    return JsonUtils.Companion.toJson(this);
   }
 
 

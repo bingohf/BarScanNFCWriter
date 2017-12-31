@@ -21,13 +21,9 @@ import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import com.activeandroid.Model;
 import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonSyntaxException;
 import com.gturedi.views.StatefulLayout;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
@@ -40,9 +36,9 @@ import com.ledway.btprinter.network.model.ProductAppGetReturn;
 import com.ledway.btprinter.network.model.ProductReturn;
 import com.ledway.btprinter.network.model.RestDataSetResponse;
 import com.ledway.btprinter.utils.ContextUtils;
+import com.ledway.btprinter.utils.JsonUtils;
 import com.squareup.picasso.Picasso;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.functions.Consumer;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -52,8 +48,6 @@ import java.util.ArrayList;
 import java.util.List;
 import rx.Observable;
 import rx.Subscriber;
-import rx.functions.Func0;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
@@ -117,9 +111,7 @@ public class ReceiveSampleListFragment extends Fragment {
     String orderBy = "order by UPDATEDATE desc";
     new Delete().from(ReceivedSample.class).execute();
 
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
 
     Observable<RestDataSetResponse<ProductAppGetReturn>> obResponse =
         MyProjectApi.getInstance().getDbService().getProductAppGet(query, orderBy);
@@ -130,9 +122,10 @@ public class ReceiveSampleListFragment extends Fragment {
       for (ProductAppGetReturn item : datasetResponse) {
         String json = item.json;
         try {
-          SampleMaster sampleMaster = objectMapper.readValue(json, SampleMaster.class);
+         // SampleMaster sampleMaster = objectMapper.readValue(json, SampleMaster.class);
+          SampleMaster sampleMaster = JsonUtils.Companion.fromJson(json, SampleMaster.class);
           ret.add(sampleMaster);
-        } catch (IOException e) {
+        } catch (JsonSyntaxException e) {
           e.printStackTrace();
         }
       }
@@ -156,8 +149,9 @@ public class ReceiveSampleListFragment extends Fragment {
               itemData.iconPath = files.get(0).getAbsolutePath();
             }
             try {
-              cached.detailJson = objectMapper.writeValueAsString(sampleMaster.sampleProdLinks);
-            } catch (JsonProcessingException e) {
+              //cached.detailJson = objectMapper.writeValueAsString(sampleMaster.sampleProdLinks);
+              cached.detailJson = JsonUtils.Companion.toJson(sampleMaster.sampleProdLinks);
+            } catch (Exception e) {
               e.printStackTrace();
             }
             cached.iconPath = itemData.iconPath;

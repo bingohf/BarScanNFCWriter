@@ -1,15 +1,12 @@
 package com.ledway.btprinter.network;
 
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.concurrent.TimeUnit;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.jackson.JacksonConverterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Created by togb on 2016/8/7.
@@ -27,18 +24,15 @@ public class MyProjectApi {
 
     Retrofit retrofit = new Retrofit.Builder()
         .baseUrl("http://www.ledway.com.tw/uploads/")
-        .addConverterFactory(JacksonConverterFactory.create())
+        .addConverterFactory(GsonConverterFactory.create())
         .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
         .client(client)
         .build();
     ledwayService = retrofit.create(LedwayService.class);
 
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     Retrofit retrofit2 = new Retrofit.Builder()
         .baseUrl("http://ledwayvip.cloudapp.net:8080/datasnap/rest/TLwDataModule/")
-        .addConverterFactory(JacksonConverterFactory.create(objectMapper))
+        .addConverterFactory(GsonConverterFactory.create())
         .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
         .client(client)
         .build();

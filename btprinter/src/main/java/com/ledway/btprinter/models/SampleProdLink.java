@@ -4,7 +4,6 @@ import android.text.TextUtils;
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
 
 /**
@@ -31,8 +30,7 @@ public class SampleProdLink extends Model{
 
   public String spec_desc = "";
 
-  @JsonIgnore
-  public String getSpec(){
+  public String toSpec(){
     if(TextUtils.isEmpty(spec_desc)){
       return "";
     }
