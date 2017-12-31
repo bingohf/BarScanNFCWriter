@@ -29,7 +29,6 @@ public class SampleProdLink extends Model{
   public int ext;
 
 
-  @JsonIgnore
   public String spec_desc = "";
 
   @JsonIgnore

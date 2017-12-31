@@ -21,7 +21,9 @@ import com.activeandroid.util.Log;
 import com.activeandroid.util.SQLiteUtils;
 import com.ledway.btprinter.adapters.TodoProdAdapter;
 import com.ledway.btprinter.models.TodoProd;
-import com.ledway.framework.RemoteDB;
+import com.ledway.btprinter.network.MyProjectApi;
+import com.ledway.btprinter.network.model.RestDataSetResponse;
+import com.ledway.btprinter.network.model.TotalUserReturn;
 import java.lang.reflect.Constructor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -193,13 +195,11 @@ public class ProdListActivity extends AppCompatActivity {
     if (count >0){
       getSupportActionBar().setTitle("產品  總用戶數:" + count);
     }
-    String connectionString =
-        "jdbc:jtds:sqlserver://vip.ledway.com.tw:1433;DatabaseName=iSamplePub;charset=UTF8";
-    final RemoteDB remoteDB = new RemoteDB(connectionString);
-    remoteDB.executeQuery("select count(distinct salesno) total_Users from dbo.PRODUCTAPPGET")
+
+    MyProjectApi.getInstance().getDbService().queryTotalUser("select count(distinct salesno) total_Users from dbo.PRODUCTAPPGET")
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Subscriber<ResultSet>() {
+        .subscribe(new Subscriber<RestDataSetResponse<TotalUserReturn>>() {
           @Override public void onCompleted() {
 
           }
@@ -211,21 +211,17 @@ public class ProdListActivity extends AppCompatActivity {
             }
           }
 
-          @Override public void onNext(ResultSet resultSet) {
-            try {
-              while(resultSet.next()) {
-                int count = resultSet.getInt("total_Users");
-                if (count > 0) {
-                  getSupportActionBar().setTitle("產品  總用戶數:" + count);
-                }
-                sp.edit()
-                    .putInt("count", count)
-                    .apply();
+          @Override
+          public void onNext(RestDataSetResponse<TotalUserReturn> response) {
+              int count = response.result.get(0).get(0).total_users;
+              if (count > 0) {
+                getSupportActionBar().setTitle("產品  總用戶數:" + count);
               }
-            } catch (SQLException e) {
-              e.printStackTrace();
-            }
+              sp.edit()
+                  .putInt("count", count)
+                  .apply();
           }
         });
+
   }
 }

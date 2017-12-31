@@ -3,14 +3,14 @@ apply plugin: 'com.android.application'
 def shortName ="barscan"
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    buildToolsVersion '26.0.2'
 
     defaultConfig {
         applicationId "com.ledway.barcodescannfcwriter"
         minSdkVersion 17
         targetSdkVersion 22
-        versionCode 28
-        versionName "2.8"
+        versionCode 29
+        versionName "2.9"
     }
     signingConfigs{
         relase_signing_config{
@@ -37,7 +37,7 @@ android {
     }
 
 
-    applicationVariants.all { variant ->
+  /*  applicationVariants.all { variant ->
         variant.outputs.each { output ->
             def outputFile = output.outputFile;
             if (outputFile != null && outputFile.name.endsWith(".apk")){
@@ -49,7 +49,7 @@ android {
 
 
         }
-    }
+    }*/
 
 }
 
@@ -63,6 +63,8 @@ dependencies {
     compile 'io.reactivex:rxandroid:1.0.1'
     compile 'com.facebook.stetho:stetho:1.3.1'
     compile 'com.jakewharton:butterknife:8.0.1'
+    compile 'com.squareup.okhttp3:okhttp:3.3.0'
+    compile 'com.squareup.okhttp3:logging-interceptor:3.3.0'
     compile project(':framework')
 
 }

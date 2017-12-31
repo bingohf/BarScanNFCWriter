@@ -31,6 +31,7 @@
         android:orientation="horizontal"
         >
       <Button
+          android:drawableStart="@drawable/ic_camera"
           android:id="@+id/btn_take_photo_1"
           android:layout_width="0dp"
           android:layout_height="wrap_content"
@@ -44,6 +45,7 @@
           />
 
       <Button
+          android:drawableLeft="@drawable/ic_qrcode_scan"
           android:id="@+id/btn_shareto"
           android:layout_width="0dp"
           android:layout_height="wrap_content"
@@ -59,6 +61,7 @@
         android:orientation="horizontal"
         >
       <Button
+          android:drawableStart="@drawable/ic_camera"
           android:id="@+id/btn_take_photo_2"
           android:layout_width="0dp"
           android:layout_height="wrap_content"
@@ -72,6 +75,7 @@
           android:layout_height="1dp"
           />
       <Button
+          android:drawableLeft="@drawable/ic_keyboard"
           android:id="@+id/btn_input_barcode"
           android:layout_width="0dp"
           android:layout_height="wrap_content"
@@ -93,14 +97,17 @@
           android:layout_width="0dp"
           android:layout_height="wrap_content"
           android:layout_weight="1"
+          android:drawableLeft="@drawable/ic_qrcode_scan"
           android:text="@string/read_qr_code"
           android:textAllCaps="false"
           />
       <View
+          android:id="@+id/view"
           android:layout_width="8dp"
           android:layout_height="1dp"
           />
       <Button
+          android:drawableLeft="@drawable/ic_barcode_scan"
           android:id="@+id/btn_scan_barcode"
           android:layout_width="0dp"
           android:layout_height="wrap_content"

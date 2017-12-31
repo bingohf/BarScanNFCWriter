@@ -16,6 +16,12 @@
         android:shouldDisableView="false">
         ></EditTextPreference>
 
+    <EditTextPreference android:title="@string/setting.data_list.title"
+        android:key="cloudDataListUrl"
+        android:summary="Please provide cloud data list url"
+        android:shouldDisableView="false">
+        ></EditTextPreference>
+
     <Preference
         android:key="app_version"
         android:shouldDisableView="false"

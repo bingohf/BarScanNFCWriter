@@ -17,9 +17,9 @@ import com.ledway.btprinter.adapters.PhotoData;
 import com.ledway.btprinter.adapters.TextData;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.models.SampleProdLink;
-import com.ledway.framework.RemoteDB;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import com.ledway.btprinter.network.MyProjectApi;
+import com.ledway.btprinter.network.model.ProductReturn;
+import com.ledway.btprinter.network.model.RestDataSetResponse;
 import java.util.Iterator;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -32,7 +32,6 @@ public class SampleReadonlyActivity extends AppCompatActivity {
   private RecyclerView mListViewProd;
   private DataAdapter mDataAdapter;
   private SampleMaster mSampleMaster;
-  private RemoteDB remoteDB = RemoteDB.getDefault();
 
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -42,6 +41,50 @@ public class SampleReadonlyActivity extends AppCompatActivity {
     initView();
     loadData();
     loadProduct();
+  }
+
+  private void initView() {
+
+    mListViewProd = (RecyclerView) findViewById(R.id.list_data);
+    mDataAdapter = new DataAdapter(this);
+    LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+    linearLayoutManager.setAutoMeasureEnabled(true);
+    mListViewProd.setLayoutManager(linearLayoutManager);
+    mListViewProd.setAdapter(mDataAdapter);
+
+    final GestureDetector gestureDetector =
+        new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+
+          @Override public boolean onSingleTapUp(MotionEvent e) {
+            return true;
+          }
+        });
+    mListViewProd.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+      @Override public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+        View childView = rv.findChildViewUnder(e.getX(), e.getY());
+        int position = rv.getChildAdapterPosition(childView);
+        if (position > 0 && position < mDataAdapter.getItemCount()) {
+          BaseData baseData = mDataAdapter.getItem(position);
+          if (gestureDetector.onTouchEvent(e)
+              && baseData.getType() == DataAdapter.DATA_TYPE_BARCODE) {
+            String prodno = (String) baseData.value;
+            startActivity(
+                new Intent(SampleReadonlyActivity.this, RemoteProdActivity.class).putExtra("prodno",
+                    prodno).putExtra("deviceId", mSampleMaster.mac_address));
+            return true;
+          }
+        }
+        return false;
+      }
+
+      @Override public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+
+      }
+
+      @Override public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+
+      }
+    });
   }
 
   private void loadData() {
@@ -79,20 +122,24 @@ public class SampleReadonlyActivity extends AppCompatActivity {
   }
 
   private void loadProduct() {
-    String sql = "select specdesc,prodno from product where empNo =? and  ( 1=2 ";
+    String sql = "select specdesc,prodno from product where empNo ='%s' and  ( 1=2 ";
     int i = 1;
-    Object[] objects = new Object[mSampleMaster.sampleProdLinks.size() +1];
+    Object[] objects = new Object[mSampleMaster.sampleProdLinks.size() + 1];
     objects[0] = mSampleMaster.mac_address;
     for (SampleProdLink prodLink : mSampleMaster.sampleProdLinks) {
       objects[i] = prodLink.prod_id;
-      sql += "or  prodNo =?";
+      sql += "or  prodNo ='%s'";
       ++i;
     }
     sql += " )";
-    remoteDB.executeQuery(sql, objects)
+    String query = String.format(sql, objects);
+    MyProjectApi.getInstance()
+        .getDbService()
+        .getProduct(query, "")
+
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Subscriber<ResultSet>() {
+        .subscribe(new Subscriber<RestDataSetResponse<ProductReturn>>() {
           @Override public void onCompleted() {
             loadData();
           }
@@ -101,14 +148,14 @@ public class SampleReadonlyActivity extends AppCompatActivity {
             Log.e("error", e.getMessage(), e);
           }
 
-          @Override public void onNext(ResultSet resultSet) {
+          @Override public void onNext(RestDataSetResponse<ProductReturn> response) {
             try {
-              while (resultSet.next()) {
-                String desc = resultSet.getString("specdesc");
-                String prodno = resultSet.getString("prodno");
+              for (ProductReturn item : response.result.get(0)) {
+                String desc = item.specdesc;
+                String prodno = item.prodno;
                 setProdDesc(prodno, desc);
               }
-            } catch (SQLException e) {
+            } catch (Exception e) {
               e.printStackTrace();
             }
           }
@@ -116,55 +163,11 @@ public class SampleReadonlyActivity extends AppCompatActivity {
   }
 
   private void setProdDesc(String prodno, String desc) {
-    for(SampleProdLink sampleProdLink :mSampleMaster.sampleProdLinks){
-      if(sampleProdLink.prod_id.equals(prodno)){
+    for (SampleProdLink sampleProdLink : mSampleMaster.sampleProdLinks) {
+      if (sampleProdLink.prod_id.equals(prodno)) {
         sampleProdLink.spec_desc = desc;
         break;
       }
     }
-  }
-
-  private void initView() {
-
-    mListViewProd = (RecyclerView) findViewById(R.id.list_data);
-    mDataAdapter = new DataAdapter(this);
-    LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-    linearLayoutManager.setAutoMeasureEnabled(true);
-    mListViewProd.setLayoutManager(linearLayoutManager);
-    mListViewProd.setAdapter(mDataAdapter);
-
-
-    final GestureDetector gestureDetector = new GestureDetector(this,new GestureDetector.SimpleOnGestureListener(){
-
-      @Override public boolean onSingleTapUp(MotionEvent e) {
-        return true;
-      }
-    });
-    mListViewProd.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
-      @Override public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-        View childView = rv.findChildViewUnder(e.getX(), e.getY());
-        int position = rv.getChildAdapterPosition(childView);
-        if (position > 0 && position< mDataAdapter.getItemCount()) {
-          BaseData baseData = mDataAdapter.getItem(position);
-          if (gestureDetector.onTouchEvent(e)
-              && baseData.getType() == DataAdapter.DATA_TYPE_BARCODE) {
-            String prodno = (String) baseData.value;
-            startActivity(new Intent(SampleReadonlyActivity.this, RemoteProdActivity.class).putExtra("prodno",
-                prodno).putExtra("deviceId", mSampleMaster.mac_address));
-            return true;
-          }
-        }
-        return false;
-      }
-
-      @Override public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-
-      }
-
-      @Override public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-
-      }
-    });
-
   }
 }

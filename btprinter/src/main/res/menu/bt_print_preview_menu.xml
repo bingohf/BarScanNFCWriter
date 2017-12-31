@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+  <item
+      android:id="@+id/action_sample_view"
+      android:orderInCategory="100"
+      android:title="@string/action_sample_track"
+      app:showAsAction="ifRoom"/>
   <item
       android:id="@+id/action_print"
       android:orderInCategory="100"
       android:title="@string/action_print"
+      android:icon="@drawable/ic_printer"
       app:showAsAction="ifRoom"/>
+
+
 </menu>

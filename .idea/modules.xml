@@ -3,11 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/BarScanNFCWriter.iml" filepath="$PROJECT_DIR$/BarScanNFCWriter.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/btprinter/btprinter.iml" filepath="$PROJECT_DIR$/btprinter/btprinter.iml" />
-      <module fileurl="file://$PROJECT_DIR$/bundlechecking/bundlechecking.iml" filepath="$PROJECT_DIR$/bundlechecking/bundlechecking.iml" />
       <module fileurl="file://$PROJECT_DIR$/framework/framework.iml" filepath="$PROJECT_DIR$/framework/framework.iml" />
-      <module fileurl="file://$PROJECT_DIR$/zbar/zbar.iml" filepath="$PROJECT_DIR$/zbar/zbar.iml" />
     </modules>
   </component>
 </project>

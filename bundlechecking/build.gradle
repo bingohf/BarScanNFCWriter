@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 def shortName ="bc"
 android {
   compileSdkVersion 23
-  buildToolsVersion "23.0.3"
+  buildToolsVersion '26.0.2'
 
   defaultConfig {
     applicationId "com.ledway.bundlechecking"
@@ -37,7 +37,7 @@ android {
   }
 
 
-  applicationVariants.all { variant ->
+/*  applicationVariants.all { variant ->
     variant.outputs.each { output ->
       def outputFile = output.outputFile;
       if (outputFile != null && outputFile.name.endsWith(".apk")){
@@ -49,7 +49,7 @@ android {
 
 
     }
-  }
+  }*/
 }
 
 dependencies {
