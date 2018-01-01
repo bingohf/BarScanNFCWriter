@@ -24,7 +24,7 @@ public class MApp extends Application {
 
   private void crashLog() {
     Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-      Timber.v("Crashed : %s - %d", thread.getName(), thread.getId());
+      Timber.i("Crashed : %s - %d", thread.getName(), thread.getId());
       Timber.e(throwable, throwable.getMessage());
     });
   }

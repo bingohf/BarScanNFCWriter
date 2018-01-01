@@ -23,7 +23,7 @@
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
   <application
-      android:name=".MApp"
+      android:name="com.ledway.scanmaster.MApp"
       android:allowBackup="true"
       android:icon="@drawable/ic_launcher"
       android:label="@string/app_name"
@@ -31,14 +31,30 @@
       android:theme="@style/AppTheme"
 
       >
-    <activity android:name=".biz.startup.StartupActivity"
+
+    <activity android:name="com.ledway.scanmaster.MainActivity">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+
+        <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
+
+      <intent-filter>
+        <action android:name="android.nfc.action.TECH_DISCOVERED"/>
+      </intent-filter>
+
+      <meta-data
+          android:name="android.nfc.action.TECH_DISCOVERED"
+          android:resource="@xml/nfc_tech_filter"/>
+    </activity>
+<!--    <activity android:name=".biz.startup.StartupActivity"
         android:theme="@style/AppTheme.NoActionBar"
         >
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
-    </activity>
+    </activity>-->
     <activity android:name=".biz.main.MainActivity2"
         android:windowSoftInputMode="adjustResize"
        >

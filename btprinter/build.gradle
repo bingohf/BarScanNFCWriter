@@ -76,6 +76,7 @@ dependencies {
   implementation "android.arch.lifecycle:extensions:1.0.0"
   compile fileTree(include: ['*.jar'], dir: 'libs')
   implementation project(':framework')
+  compile project(':scanMaster')
   testCompile 'junit:junit:4.12'
   implementation 'com.squareup.okhttp3:okhttp:3.9.1'
   implementation 'com.squareup.okhttp3:logging-interceptor:3.9.1'
