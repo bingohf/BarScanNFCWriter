@@ -1,0 +1,75 @@
+apply plugin: 'com.android.library'
+
+
+android {
+  compileSdkVersion 27
+  buildToolsVersion '26.0.2'
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+  defaultConfig {
+    minSdkVersion 17
+    targetSdkVersion 21
+    versionCode 30
+    versionName "3.0"
+    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+  }
+
+  lintOptions {
+    abortOnError false
+  }
+  signingConfigs{
+    relase_signing_config{
+      keyAlias "androidrelease"
+      storePassword "ledway"
+      keyPassword "ledway"
+      storeFile file("../ledway.keystore.jks")
+    }
+  }
+  buildTypes {
+    debug{
+      versionNameSuffix ".dev"
+    }
+
+    release {
+      minifyEnabled false
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+      signingConfig signingConfigs.relase_signing_config
+      versionNameSuffix ".prod"
+    }
+  }
+
+}
+
+dependencies {
+  compile fileTree(dir: 'libs', include: ['*.jar'])
+  compile project(':rxbus')
+  compile project(':zkc')
+  androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    exclude group: 'com.android.support', module: 'support-annotations'
+  })
+  compile "com.android.support:appcompat-v7:27.0.1"
+  compile "com.android.support:design:27.0.1"
+
+  testCompile 'junit:junit:4.12'
+
+  compile "com.google.dagger:dagger:2.14.1"
+  annotationProcessor "com.google.dagger:dagger-compiler:2.14.1"
+  provided 'javax.annotation:jsr250-api:1.0'
+
+  compile group: 'com.jakewharton.timber', name: 'timber', version: '4.5.1'
+
+
+  provided "org.projectlombok:lombok:1.12.6"
+
+
+  compile 'com.jakewharton:butterknife:8.8.1'
+  annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+
+  compile 'com.jakewharton.rxbinding:rxbinding:1.0.1'
+
+  compile 'com.journeyapps:zxing-android-embedded:3.4.0'
+
+
+}

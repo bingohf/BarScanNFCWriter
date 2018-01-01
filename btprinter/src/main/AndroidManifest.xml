@@ -31,13 +31,17 @@
       android:theme="@style/AppTheme"
 
       >
-    <activity android:name=".biz.main.MainActivity2"
-        android:windowSoftInputMode="adjustResize"
-       >
+    <activity android:name=".biz.startup.StartupActivity"
+        android:theme="@style/AppTheme.NoActionBar"
+        >
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
+    </activity>
+    <activity android:name=".biz.main.MainActivity2"
+        android:windowSoftInputMode="adjustResize"
+       >
     </activity>
 
     <activity android:name=".biz.sample.SampleActivity"

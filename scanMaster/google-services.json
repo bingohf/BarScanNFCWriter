@@ -1,0 +1,73 @@
+{
+  "project_info": {
+    "project_number": "225380711256",
+    "firebase_url": "https://scan-master-e3b13.firebaseio.com",
+    "project_id": "scan-master-e3b13",
+    "storage_bucket": "scan-master-e3b13.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:225380711256:android:c0ba2d161c780bff",
+        "android_client_info": {
+          "package_name": "com.ledway.scanmaster"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "225380711256-5fgfgg4m2029484ugdqp6g06su5a1skc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhqsUUJgk3so6lTozsK2vhFmt08QkWobI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:225380711256:android:bba4064fe81aeb1f",
+        "android_client_info": {
+          "package_name": "com.ledway.scanmaster.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "225380711256-5fgfgg4m2029484ugdqp6g06su5a1skc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhqsUUJgk3so6lTozsK2vhFmt08QkWobI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

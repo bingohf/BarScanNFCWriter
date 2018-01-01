@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <Preference android:title="@string/setting.server.title"
+        android:key="Server"
+        android:summary="Please provide cloud server"
+        android:shouldDisableView="false">
+        ></Preference>
+
+    <Preference android:title="@string/setting.db.title"
+        android:key="DB"
+        android:summary="Please provide cloud server"
+        android:shouldDisableView="false">
+        ></Preference>
+
+    <Preference android:title="@string/setting.line.title"
+        android:key="Line"
+        android:summary="Please provide cloud server"
+        android:shouldDisableView="false">
+        ></Preference>
+
+    <Preference android:title="@string/setting.reader.title"
+        android:key="Reader"
+        android:summary="Please provide cloud server"
+        android:shouldDisableView="false">
+        ></Preference>
+
+    <Preference
+        android:key="about"
+        android:shouldDisableView="false"
+        android:title="@string/company"
+        android:summary="@string/company.tel"/>
+    <Preference
+        android:key="version"
+        android:shouldDisableView="false"
+        android:title="@string/app_version"/>
+    </PreferenceScreen>

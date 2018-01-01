@@ -5,6 +5,9 @@
       <module fileurl="file://$PROJECT_DIR$/BarScanNFCWriter.iml" filepath="$PROJECT_DIR$/BarScanNFCWriter.iml" />
       <module fileurl="file://$PROJECT_DIR$/btprinter/btprinter.iml" filepath="$PROJECT_DIR$/btprinter/btprinter.iml" />
       <module fileurl="file://$PROJECT_DIR$/framework/framework.iml" filepath="$PROJECT_DIR$/framework/framework.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rxbus/rxbus.iml" filepath="$PROJECT_DIR$/rxbus/rxbus.iml" />
+      <module fileurl="file://$PROJECT_DIR$/scanMaster/scanMaster.iml" filepath="$PROJECT_DIR$/scanMaster/scanMaster.iml" />
+      <module fileurl="file://$PROJECT_DIR$/zkc/zkc.iml" filepath="$PROJECT_DIR$/zkc/zkc.iml" />
     </modules>
   </component>
 </project>

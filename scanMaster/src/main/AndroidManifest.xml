@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.ledway.scanmaster">
+
+  <uses-permission android:name="android.permission.CALL_PHONE" />
+  <uses-permission android:name="android.permission.NFC" />
+  <uses-permission android:name="android.permission.INJECT_EVENT" />
+  <uses-permission android:name="android.permission.VIBRATE" />
+  <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" >
+  </uses-permission>
+  <uses-permission android:name="android.permission.CAMERA" />
+  <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+
+  <application
+      android:allowBackup="true"
+      android:icon="@drawable/ic_launcher"
+      android:label="@string/app_name"
+      android:supportsRtl="true"
+      android:theme="@style/AppTheme"
+      android:name=".MApp"
+      >
+
+    <activity android:name=".MainActivity"
+        android:label="@string/ledway">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+
+        <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
+
+      <intent-filter>
+        <action android:name="android.nfc.action.TECH_DISCOVERED"/>
+      </intent-filter>
+
+      <meta-data
+          android:name="android.nfc.action.TECH_DISCOVERED"
+          android:resource="@xml/nfc_tech_filter"/>
+    </activity>
+    <activity android:name=".setting.AppPreferences">
+    </activity>
+
+    <activity
+        android:name="com.journeyapps.barcodescanner.CaptureActivity"
+        android:screenOrientation="fullSensor"
+        tools:replace="screenOrientation" />
+
+
+    <!-- 按键广播 -->
+    <receiver
+        android:name="com.zkc.Receiver.RemoteControlReceiver"
+        android:permission="com.zkc.keycode" >
+      <!--            <intent-filter android:priority="1000" />-->
+      <intent-filter>
+        <action android:name="com.zkc.keycode" />
+      </intent-filter>
+    </receiver>
+    <!-- 扫描服务 -->
+    <service android:name="com.zkc.Service.CaptureService" >
+      <intent-filter>
+        <action android:name="com.zkc.Service.CaptureService" />
+      </intent-filter>
+    </service>
+
+  </application>
+
+</manifest>
