@@ -55,11 +55,11 @@ public class MainActivity extends AppCompatActivity {
   private static final int REQUEST_SET = 1;
   @Inject Settings settings;
   @Inject IDGenerator mIDGenerator;
-  @BindView(R.id.txt_bill_no) EditText mTxtBill;
-  @BindView(R.id.txt_barcode) EditText mTxtBarcode;
-  @BindView(R.id.prg_loading) View mLoading;
-  @BindView(R.id.web_response) WebView mWebResponse;
-  @BindView(R.id.btn_scan) Button mBtnScan;
+  @BindView(R2.id.txt_bill_no) EditText mTxtBill;
+  @BindView(R2.id.txt_barcode) EditText mTxtBarcode;
+  @BindView(R2.id.prg_loading) View mLoading;
+  @BindView(R2.id.web_response) WebView mWebResponse;
+  @BindView(R2.id.btn_scan) Button mBtnScan;
   private DBCommand dbCommand = new DBCommand();
   private CompositeSubscription mSubscriptions = new CompositeSubscription();
   private EditText mCurrEdit;
@@ -170,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
-      case R.id.action_settings: {
+      case R2.id.action_settings: {
         startActivityForResult(new Intent(this, AppPreferences.class), REQUEST_SET);
         break;
       }
@@ -331,19 +331,19 @@ public class MainActivity extends AppCompatActivity {
         .show();
   }
 
-  @OnClick(R.id.btn_camera_scan_bill) void onBillCameraClick() {
+  @OnClick(R2.id.btn_camera_scan_bill) void onBillCameraClick() {
     mCurrEdit = mTxtBill;
     mCurrEdit.requestFocus();
     new IntentIntegrator(this).initiateScan();
   }
 
-  @OnClick(R.id.btn_camera_scan_barcode) void onBarCodeCameraClick() {
+  @OnClick(R2.id.btn_camera_scan_barcode) void onBarCodeCameraClick() {
     mCurrEdit = mTxtBarcode;
     mCurrEdit.requestFocus();
     new IntentIntegrator(this).initiateScan();
   }
 
-  @OnFocusChange({ R.id.txt_barcode, R.id.txt_bill_no }) void onEditFocusChange(View view,
+  @OnFocusChange({ R2.id.txt_barcode, R2.id.txt_bill_no }) void onEditFocusChange(View view,
       boolean hasFocus) {
     if (hasFocus) {
       mCurrEdit = (EditText) view;
@@ -356,11 +356,11 @@ public class MainActivity extends AppCompatActivity {
       if (view.isEnabled() && (actionId == EditorInfo.IME_ACTION_SEARCH || (keyEvent.getAction()
           == ACTION_UP && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER))) {
         switch (view.getId()) {
-          case R.id.txt_bill_no: {
+          case R2.id.txt_bill_no: {
             queryBill();
             break;
           }
-          case R.id.txt_barcode: {
+          case R2.id.txt_barcode: {
             queryBarCode();
             break;
           }
@@ -375,7 +375,7 @@ public class MainActivity extends AppCompatActivity {
     return true;
   }
 
-  @OnClick(R.id.btn_scan) void onBtnScanClick() {
+  @OnClick(R2.id.btn_scan) void onBtnScanClick() {
     mContinueScan = true;
     openScan();
   }

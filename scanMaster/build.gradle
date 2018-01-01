@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-
+apply plugin: 'com.jakewharton.butterknife'
 
 android {
   compileSdkVersion 27
@@ -61,7 +61,7 @@ dependencies {
   compile group: 'com.jakewharton.timber', name: 'timber', version: '4.5.1'
 
 
-  provided "org.projectlombok:lombok:1.12.6"
+  annotationProcessor "org.projectlombok:lombok:1.12.6"
 
 
   compile 'com.jakewharton:butterknife:8.8.1'
