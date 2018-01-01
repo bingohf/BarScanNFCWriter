@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     vibrator = (Vibrator) getSystemService(Service.VIBRATOR_SERVICE);
-    setContentView(R.layout.activity_main);
+    setContentView(R.layout.activity_scan_master_main);
     ButterKnife.bind(this);
     mWebResponse.getSettings().setJavaScriptEnabled(false);
     ((MApp) getApplication()).getAppComponet().inject(this);
@@ -164,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   @Override public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.menu_main, menu);
+    getMenuInflater().inflate(R.menu.menu_scan_master_main, menu);
     return true;
   }
 
