@@ -15,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.ledway.btprinter.AgreementActivity;
@@ -39,7 +40,7 @@ public class MainActivity2 extends AppCompatActivity {
   @BindView(R.id.viewPager) ViewPager mViewPager;
   @BindView(R.id.bottomNavigation) BottomNavigationView mBottomNav;
   Fragment[] fragments = new Fragment[] {
-      new SampleListFragment(), new ReceiveSampleListFragment(), new ProductListFragment(),new MyAccountFragment(),new  WebViewFragment()
+      new CombinFramgment(), new ReceiveSampleListFragment(), new ProductListFragment(),new MyAccountFragment(),new  WebViewFragment()
   };
   private CompositeSubscription mSubscriptions = new CompositeSubscription();
 
@@ -49,7 +50,7 @@ public class MainActivity2 extends AppCompatActivity {
     initView();
     Intent newIntent = new Intent(this, CaptureService.class);
     newIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-    startService(newIntent);
+   // startService(newIntent);
     checkAgreement();
     doCheckSetting();
     checkVersion();
@@ -189,8 +190,16 @@ public class MainActivity2 extends AppCompatActivity {
   }
 
   @Override public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.menu_scan_master_main, menu);
+    getMenuInflater().inflate(R.menu.menu_main, menu);
     return true;
+  }
+
+  @Override public boolean onOptionsItemSelected(MenuItem item) {
+    if(item.getItemId() == R.id.action_scan_master){
+      startActivity(new Intent(this, com.ledway.scanmaster.MainActivity.class));
+    }
+    return super.onOptionsItemSelected(item);
+
   }
 
   @Override public void onBackPressed() {

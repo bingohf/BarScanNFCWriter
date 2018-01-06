@@ -19,7 +19,7 @@ import java.io.File;
 /**
  * Created by togb on 2016/5/29.
  */
-public class MApp extends Application {
+public class MApp extends com.ledway.scanmaster.MApp {
   private static MApp instance;
   private SystemInfo systemInfo;
   private Session session ;
