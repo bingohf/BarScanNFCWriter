@@ -26,6 +26,7 @@ import com.ledway.btprinter.R;
 import com.ledway.btprinter.fragments.NewVersionDialogFragment;
 import com.ledway.btprinter.network.ApkVersionResponse;
 import com.ledway.btprinter.network.MyProjectApi;
+import com.ledway.scanmaster.ScanMasterFragment;
 import com.zkc.Service.CaptureService;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -40,7 +41,7 @@ public class MainActivity2 extends AppCompatActivity {
   @BindView(R.id.viewPager) ViewPager mViewPager;
   @BindView(R.id.bottomNavigation) BottomNavigationView mBottomNav;
   Fragment[] fragments = new Fragment[] {
-      new CombinFramgment(), new ReceiveSampleListFragment(), new ProductListFragment(),new MyAccountFragment(),new  WebViewFragment()
+      new CombinFramgment(),  new ProductListFragment(),new ScanMasterFragment(),new MyAccountFragment(),new  WebViewFragment()
   };
   private CompositeSubscription mSubscriptions = new CompositeSubscription();
 
@@ -190,7 +191,7 @@ public class MainActivity2 extends AppCompatActivity {
   }
 
   @Override public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.menu_main, menu);
+    //getMenuInflater().inflate(R.menu.menu_main, menu);
     return true;
   }
 

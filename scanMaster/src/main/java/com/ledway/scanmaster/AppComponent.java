@@ -14,5 +14,6 @@ import javax.inject.Singleton;
 public interface AppComponent {
   @ApplicationContext Context context();
   void inject(MainActivity mainActivity);
+  void inject(ScanMasterFragment scanMasterFragment);
   Settings settings();
 }

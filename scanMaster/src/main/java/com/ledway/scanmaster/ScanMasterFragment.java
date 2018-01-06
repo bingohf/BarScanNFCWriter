@@ -1,0 +1,333 @@
+package com.ledway.scanmaster;
+
+import android.app.Activity;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.nfc.NfcAdapter;
+import android.nfc.Tag;
+import android.os.Bundle;
+import android.os.Vibrator;
+import android.serialport.api.SerialPort;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.webkit.WebView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.OnFocusChange;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
+import com.jakewharton.rxbinding.widget.RxTextView;
+import com.ledway.scanmaster.data.DBCommand;
+import com.ledway.scanmaster.data.Settings;
+import com.ledway.scanmaster.domain.InvalidBarCodeException;
+import com.ledway.scanmaster.interfaces.IDGenerator;
+import com.ledway.scanmaster.nfc.GNfc;
+import com.ledway.scanmaster.nfc.GNfcLoader;
+import com.ledway.scanmaster.setting.AppPreferences;
+import com.zkc.Service.CaptureService;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
+import javax.inject.Inject;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
+import timber.log.Timber;
+
+/**
+ * Created by togb on 2018/1/6.
+ */
+
+public class ScanMasterFragment extends Fragment {
+  @Inject Settings settings;
+  @Inject IDGenerator mIDGenerator;
+  @BindView(R2.id.txt_bill_no) EditText mTxtBill;
+  @BindView(R2.id.txt_barcode) EditText mTxtBarcode;
+  @BindView(R2.id.prg_loading) View mLoading;
+  @BindView(R2.id.web_response) WebView mWebResponse;
+  @BindView(R2.id.btn_scan) Button mBtnScan;
+  private Vibrator vibrator;
+  private CompositeSubscription mSubscriptions = new CompositeSubscription();
+  private DBCommand dbCommand = new DBCommand();
+  private NfcAdapter nfcAdapter;
+  private BroadcastReceiver sysBroadcastReceiver;
+  private boolean mContinueScan;
+  private EditText mCurrEdit;
+  private BroadcastReceiver scanBroadcastReceiver;
+
+  @Override public void onCreate(@Nullable Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+   ((MApp)  getActivity().getApplication()).getAppComponet().inject(this);
+    vibrator = (Vibrator) getActivity().getApplication().getSystemService(Service.VIBRATOR_SERVICE);
+
+  }
+
+  @Nullable @Override
+  public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+      @Nullable Bundle savedInstanceState) {
+    return inflater.inflate(R.layout.activity_scan_master_main, container,false);
+  }
+
+  @Override public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+    ButterKnife.bind(this, view);
+    mWebResponse.getSettings().setJavaScriptEnabled(false);
+    settingChanged();
+
+    listenKeyCode();
+    receiveZkcCode();
+
+    nfcAdapter = NfcAdapter.getDefaultAdapter(getActivity().getApplicationContext());
+
+    mSubscriptions.add(Observable.merge(RxTextView.editorActionEvents(mTxtBarcode),
+        RxTextView.editorActionEvents(mTxtBill))
+        // .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(actionEvent -> {
+          onEditAction(actionEvent.view(), actionEvent.actionId(), actionEvent.keyEvent());
+        }));
+    Timber.v(mIDGenerator.genID());
+  }
+
+  @Override public void onStart() {
+    super.onStart();
+    CaptureService.scanGpio.openPower();
+  }
+
+  private void listenKeyCode() {
+
+    sysBroadcastReceiver = new BroadcastReceiver() {
+      @Override public void onReceive(Context context, Intent intent) {
+        String action = intent.getAction();
+        Timber.v(action);
+        if (action.equals("com.zkc.keycode")) {
+          mContinueScan = false;
+          hideInputMethod();
+        } else if (action.equals("android.intent.action.SCREEN_ON")) {
+        } else if (action.equals("android.intent.action.SCREEN_OFF")) {
+          closeScan();
+        } else if (action.equals("android.intent.action.ACTION_SHUTDOWN")) {
+
+        }
+      }
+    };
+    IntentFilter screenStatusIF = new IntentFilter();
+    screenStatusIF.addAction(Intent.ACTION_SCREEN_ON);
+    screenStatusIF.addAction(Intent.ACTION_SCREEN_OFF);
+    screenStatusIF.addAction(Intent.ACTION_SHUTDOWN);
+    screenStatusIF.addAction("com.zkc.keycode");
+    getActivity().getApplication().registerReceiver(sysBroadcastReceiver, screenStatusIF);
+  }
+
+  private void hideInputMethod() {
+    if (mCurrEdit != null) {
+      InputMethodManager inputMethodManager =
+          (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
+      inputMethodManager.hideSoftInputFromWindow(mCurrEdit.getWindowToken(), 0);
+    }
+  }
+
+  private void closeScan() {
+    CaptureService.scanGpio.closeScan();
+    CaptureService.scanGpio.closePower();
+  }
+
+  private void settingChanged() {
+    String connectionStr =
+        String.format("jdbc:jtds:sqlserver://%s;DatabaseName=%s;charset=UTF8", settings.getServer(),
+            settings.getDb());
+    Timber.v(connectionStr);
+    dbCommand.setConnectionString(connectionStr);
+
+    mBtnScan.setText("PDA#" +settings.getLine()+" / " + settings.getReader());
+
+  }
+
+  boolean onEditAction(TextView view, int actionId, KeyEvent keyEvent) {
+    try {
+      Timber.v("onEditAction");
+      if (view.isEnabled() && (actionId == EditorInfo.IME_ACTION_SEARCH || (keyEvent.getAction()
+          == KeyEvent.ACTION_UP && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER))) {
+        if(view.getId() == R.id.txt_bill_no){
+          queryBill();
+        }else if(view.getId() == R.id.txt_barcode){
+          queryBarCode();
+        }
+      }
+    } catch (InvalidBarCodeException e) {
+      Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+    }
+    InputMethodManager inputMethodManager =
+        (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+    inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    return true;
+  }
+
+  private void queryBill() throws InvalidBarCodeException {
+    String billNo = mTxtBill.getText().toString();
+    validBarCode(billNo);
+    mTxtBill.setEnabled(false);
+    mLoading.setVisibility(View.VISIBLE);
+    mWebResponse.setVisibility(View.GONE);
+    mSubscriptions.add(
+        dbCommand.rxExecute("{call sp_getBill(?,?,?,?)}", settings.getLine(), settings.getReader(),
+            billNo)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnUnsubscribe(() -> {
+              mTxtBill.setEnabled(true);
+              mLoading.setVisibility(View.GONE);
+              mWebResponse.setVisibility(View.VISIBLE);
+            })
+            .subscribe(this::showResponse, this::showWarning));
+  }
+  private void showResponse(String s) {
+    Timber.v(s);
+    mWebResponse.loadData(s, "text/html; charset=utf-8", "UTF-8");
+    //mWebResponse.setBackgroundColor(Color.parseColor("#eeeeee"));
+    alertWarning(s);
+  }
+
+  private void alertWarning(String message) {
+    String msg = message.replaceAll("^!+", "");
+    int vibratorLen = message.length() - msg.length();
+    if (vibratorLen > 0) {
+      long[] vv = new long[vibratorLen * 2];
+      for (int i = 0; i < vv.length / 2; ++i) {
+        vv[i * 2] = 300;
+        vv[i * 2 + 1] = 100;
+      }
+      vibrator.vibrate(vv, -1);
+      AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+      builder.setTitle(R.string.warning)
+          .setMessage(msg)
+          .setPositiveButton(R.string.ok, null)
+          .create()
+          .show();
+    }
+  }
+
+  private void queryBarCode() throws InvalidBarCodeException {
+    String billNo = mTxtBill.getText().toString();
+    String barCode = mTxtBarcode.getText().toString();
+    validBarCode(billNo);
+    validBarCode(barCode);
+    mTxtBarcode.setEnabled(false);
+    mLoading.setVisibility(View.VISIBLE);
+    mWebResponse.setVisibility(View.GONE);
+    Timber.v("start_query");
+    mSubscriptions.add(dbCommand.rxExecute("{call sp_getDetail(?,?,?,?,?,?)}", settings.getLine(),
+        settings.getReader(), billNo, barCode, mIDGenerator.genID())
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .doOnUnsubscribe(() -> {
+          mLoading.setVisibility(View.GONE);
+          mWebResponse.setVisibility(View.VISIBLE);
+          mTxtBarcode.setEnabled(true);
+          Timber.v("end_query");
+        })
+        .subscribe(this::showResponse, this::showWarning));
+  }
+
+  private void validBarCode(String barcode) throws InvalidBarCodeException {
+    Pattern pattern = Pattern.compile("^[0-9a-zA-Z\\-\\#\\/\\~\\.]*$");
+    if (!pattern.matcher(barcode).matches()) {
+      throw new InvalidBarCodeException();
+    }
+  }
+  private void showWarning(String message) {
+    Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+    alertWarning(message);
+  }
+
+  private void showWarning(Throwable throwable) {
+    Timber.e(throwable, throwable.getMessage());
+    showWarning(throwable.getMessage());
+  }
+
+  private void receiveZkcCode() {
+    scanBroadcastReceiver = new BroadcastReceiver() {
+
+      @Override public void onReceive(Context context, Intent intent) {
+        String text = intent.getExtras().getString("code");
+        Timber.v(text);
+        if (text.length() < 10) {
+          Toast.makeText(getActivity(), R.string.invalid_barcode, Toast.LENGTH_LONG).show();
+        }
+        receiveCode(text);
+        if (mContinueScan) {
+          mSubscriptions.add(Observable.timer(2, TimeUnit.SECONDS)
+              .observeOn(AndroidSchedulers.mainThread())
+              .subscribe(l -> openScan()));
+        }
+      }
+    };
+    IntentFilter intentFilter = new IntentFilter();
+    intentFilter.addAction("com.zkc.scancode");
+    getActivity().getApplication().registerReceiver(scanBroadcastReceiver, intentFilter);
+  }
+
+  private void receiveCode(String code) {
+
+    hideInputMethod();
+    try {
+      if (mCurrEdit == null) {
+        mTxtBarcode.requestFocus();
+        mCurrEdit = mTxtBarcode;
+      }
+      if (mCurrEdit.isEnabled()) {
+        mCurrEdit.setText(code);
+        mCurrEdit.selectAll();
+        if (mCurrEdit.getId() == R.id.txt_bill_no) {
+          queryBill();
+        } else if (mCurrEdit.getId() == R.id.txt_barcode) {
+          queryBarCode();
+        }
+        mTxtBarcode.requestFocus();
+      }
+    } catch (InvalidBarCodeException e) {
+      Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+    }
+  }
+
+  protected void openScan() {
+    SerialPort.CleanBuffer();
+    CaptureService.scanGpio.openScan();
+  }
+
+  @Override public void onDestroyView() {
+    super.onDestroyView();
+    mSubscriptions.clear();
+    closeScan();
+    getActivity().getApplication().unregisterReceiver(scanBroadcastReceiver);
+    getActivity().getApplication().unregisterReceiver(sysBroadcastReceiver);
+  }
+
+  @OnFocusChange({ R2.id.txt_barcode, R2.id.txt_bill_no }) void onEditFocusChange(View view,
+      boolean hasFocus) {
+    if (hasFocus) {
+      mCurrEdit = (EditText) view;
+    }
+  }
+}
