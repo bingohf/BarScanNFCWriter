@@ -33,6 +33,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.OnFocusChange;
 import com.jakewharton.rxbinding.widget.RxTextView;
 import com.ledway.scanmaster.data.DBCommand;
@@ -349,6 +350,9 @@ public class ScanMasterFragment extends Fragment {
       mMode = "Out";
     }else if(id == R.id.action_Check){
       mMode = "Check";
+    } else if (id == R.id.action_set_group){
+      startActivityForResult(new Intent(getActivity(), FullScannerActivity.class),
+          RESULT_CAMERA_QR_CODE);
     }
     getActivity().invalidateOptionsMenu();
     return super.onOptionsItemSelected(item);
@@ -364,6 +368,13 @@ public class ScanMasterFragment extends Fragment {
     }else if ("Check".equals(mMode)){
       menu.findItem(R.id.action_Check).setChecked(true);
     }
+    String myTaxNo = getActivity().getSharedPreferences("group", Context.MODE_PRIVATE).getString("MyTaxNo","");
+    menu.findItem(R.id.action_in).setVisible(!myTaxNo.isEmpty());
+    menu.findItem(R.id.action_out).setVisible(!myTaxNo.isEmpty());
+  }
 
+  @OnClick(R2.id.btn_scan) void onBtnScanClick() {
+    mContinueScan = true;
+    openScan();
   }
 }
