@@ -32,8 +32,11 @@
 
       >
 
-<!--    <activity android:name=".biz.main.MainActivity2">
-
+    <activity android:name=".biz.main.MainActivity2">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+        <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
 
       <intent-filter>
         <action android:name="android.nfc.action.TECH_DISCOVERED"/>
@@ -42,7 +45,8 @@
       <meta-data
           android:name="android.nfc.action.TECH_DISCOVERED"
           android:resource="@xml/nfc_tech_filter"/>
-    </activity>-->
+
+    </activity>
 <!--    <activity android:name=".biz.startup.StartupActivity"
         android:theme="@style/AppTheme.NoActionBar"
         >
@@ -51,7 +55,7 @@
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>-->
-    <activity android:name=".biz.main.MainActivity2"
+<!--    <activity android:name=".biz.main.MainActivity2"
         android:windowSoftInputMode="adjustResize"
        >
       <intent-filter>
@@ -59,7 +63,7 @@
 
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
-    </activity>
+    </activity>-->
 
     <activity android:name=".biz.sample.SampleActivity"
         android:screenOrientation="portrait"/>

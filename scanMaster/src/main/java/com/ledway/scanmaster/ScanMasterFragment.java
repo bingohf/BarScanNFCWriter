@@ -16,11 +16,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -32,10 +29,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import butterknife.OnFocusChange;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
 import com.jakewharton.rxbinding.widget.RxTextView;
 import com.ledway.scanmaster.data.DBCommand;
 import com.ledway.scanmaster.data.Settings;
@@ -43,7 +37,6 @@ import com.ledway.scanmaster.domain.InvalidBarCodeException;
 import com.ledway.scanmaster.interfaces.IDGenerator;
 import com.ledway.scanmaster.nfc.GNfc;
 import com.ledway.scanmaster.nfc.GNfcLoader;
-import com.ledway.scanmaster.setting.AppPreferences;
 import com.zkc.Service.CaptureService;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -70,24 +63,22 @@ public class ScanMasterFragment extends Fragment {
   private Vibrator vibrator;
   private CompositeSubscription mSubscriptions = new CompositeSubscription();
   private DBCommand dbCommand = new DBCommand();
-  private NfcAdapter nfcAdapter;
   private BroadcastReceiver sysBroadcastReceiver;
   private boolean mContinueScan;
   private EditText mCurrEdit;
   private BroadcastReceiver scanBroadcastReceiver;
+  private BroadcastReceiver mNfcReceiver;
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-
-   ((MApp)  getActivity().getApplication()).getAppComponet().inject(this);
+    ((MApp) getActivity().getApplication()).getAppComponet().inject(this);
     vibrator = (Vibrator) getActivity().getApplication().getSystemService(Service.VIBRATOR_SERVICE);
-
   }
 
   @Nullable @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.activity_scan_master_main, container,false);
+    return inflater.inflate(R.layout.activity_scan_master_main, container, false);
   }
 
   @Override public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -98,8 +89,7 @@ public class ScanMasterFragment extends Fragment {
 
     listenKeyCode();
     receiveZkcCode();
-
-    nfcAdapter = NfcAdapter.getDefaultAdapter(getActivity().getApplicationContext());
+    registerNfc();
 
     mSubscriptions.add(Observable.merge(RxTextView.editorActionEvents(mTxtBarcode),
         RxTextView.editorActionEvents(mTxtBill))
@@ -113,6 +103,56 @@ public class ScanMasterFragment extends Fragment {
   @Override public void onStart() {
     super.onStart();
     CaptureService.scanGpio.openPower();
+  }
+
+  @Override public void onDestroyView() {
+    super.onDestroyView();
+    mSubscriptions.clear();
+    closeScan();
+    getActivity().getApplication().unregisterReceiver(scanBroadcastReceiver);
+    getActivity().getApplication().unregisterReceiver(sysBroadcastReceiver);
+    getActivity().unregisterReceiver(mNfcReceiver);
+  }
+
+  private void closeScan() {
+    CaptureService.scanGpio.closeScan();
+    CaptureService.scanGpio.closePower();
+  }
+
+  private void registerNfc() {
+    NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(getActivity().getApplicationContext());
+    if (nfcAdapter != null && nfcAdapter.isEnabled()) {
+      PendingIntent pendingIntent = PendingIntent.getActivity(getActivity(), 0,
+          new Intent(getActivity(), getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+      IntentFilter ndef = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
+      ndef.addCategory("*/*");
+      IntentFilter[] mFilters = new IntentFilter[] { ndef };// 过滤器
+      nfcAdapter.enableForegroundDispatch(getActivity(), pendingIntent, mFilters, GNfcLoader.TechList);
+    }
+
+    mNfcReceiver = new BroadcastReceiver() {
+      @Override public void onReceive(Context context, Intent intent) {
+        if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction())) {
+          Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+          GNfc gnfc = GNfcLoader.load(tagFromIntent);
+
+          try {
+            gnfc.connect();
+            String reader = gnfc.read();
+            settings.setReader(reader);
+            settingChanged();
+            Toast.makeText(getActivity(), String.format("Set Reader to %s", reader),
+                Toast.LENGTH_LONG).show();
+          } catch (IOException e) {
+            e.printStackTrace();
+            Timber.e(e, e.getMessage());
+          }
+        }
+      }
+    };
+    IntentFilter intentFilter = new IntentFilter();
+    intentFilter.addAction("android.nfc.action.TECH_DISCOVERED");
+    getActivity().registerReceiver(mNfcReceiver, intentFilter);
   }
 
   private void listenKeyCode() {
@@ -148,11 +188,6 @@ public class ScanMasterFragment extends Fragment {
     }
   }
 
-  private void closeScan() {
-    CaptureService.scanGpio.closeScan();
-    CaptureService.scanGpio.closePower();
-  }
-
   private void settingChanged() {
     String connectionStr =
         String.format("jdbc:jtds:sqlserver://%s;DatabaseName=%s;charset=UTF8", settings.getServer(),
@@ -160,8 +195,7 @@ public class ScanMasterFragment extends Fragment {
     Timber.v(connectionStr);
     dbCommand.setConnectionString(connectionStr);
 
-    mBtnScan.setText("PDA#" +settings.getLine()+" / " + settings.getReader());
-
+    mBtnScan.setText("PDA#" + settings.getLine() + " / " + settings.getReader());
   }
 
   boolean onEditAction(TextView view, int actionId, KeyEvent keyEvent) {
@@ -169,9 +203,9 @@ public class ScanMasterFragment extends Fragment {
       Timber.v("onEditAction");
       if (view.isEnabled() && (actionId == EditorInfo.IME_ACTION_SEARCH || (keyEvent.getAction()
           == KeyEvent.ACTION_UP && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER))) {
-        if(view.getId() == R.id.txt_bill_no){
+        if (view.getId() == R.id.txt_bill_no) {
           queryBill();
-        }else if(view.getId() == R.id.txt_barcode){
+        } else if (view.getId() == R.id.txt_barcode) {
           queryBarCode();
         }
       }
@@ -202,6 +236,7 @@ public class ScanMasterFragment extends Fragment {
             })
             .subscribe(this::showResponse, this::showWarning));
   }
+
   private void showResponse(String s) {
     Timber.v(s);
     mWebResponse.loadData(s, "text/html; charset=utf-8", "UTF-8");
@@ -256,14 +291,15 @@ public class ScanMasterFragment extends Fragment {
       throw new InvalidBarCodeException();
     }
   }
-  private void showWarning(String message) {
-    Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-    alertWarning(message);
-  }
 
   private void showWarning(Throwable throwable) {
     Timber.e(throwable, throwable.getMessage());
     showWarning(throwable.getMessage());
+  }
+
+  private void showWarning(String message) {
+    Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+    alertWarning(message);
   }
 
   private void receiveZkcCode() {
@@ -314,14 +350,6 @@ public class ScanMasterFragment extends Fragment {
   protected void openScan() {
     SerialPort.CleanBuffer();
     CaptureService.scanGpio.openScan();
-  }
-
-  @Override public void onDestroyView() {
-    super.onDestroyView();
-    mSubscriptions.clear();
-    closeScan();
-    getActivity().getApplication().unregisterReceiver(scanBroadcastReceiver);
-    getActivity().getApplication().unregisterReceiver(sysBroadcastReceiver);
   }
 
   @OnFocusChange({ R2.id.txt_barcode, R2.id.txt_bill_no }) void onEditFocusChange(View view,

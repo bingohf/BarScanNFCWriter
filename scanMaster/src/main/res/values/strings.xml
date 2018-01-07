@@ -76,5 +76,8 @@
   <string name="password">Password</string>
   <string name="invalid_password">Invalid password</string>
   <string name="digits">0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-#/~.</string>
+  <string name="in">In</string>
+  <string name="out">Out</string>
+  <string name="check">Check</string>
 
 </resources>

@@ -1,9 +1,13 @@
 package com.ledway.btprinter.biz.main;
 
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.nfc.NfcAdapter;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.BottomNavigationView;
@@ -16,6 +20,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.ledway.btprinter.AgreementActivity;
@@ -27,13 +32,17 @@ import com.ledway.btprinter.fragments.NewVersionDialogFragment;
 import com.ledway.btprinter.network.ApkVersionResponse;
 import com.ledway.btprinter.network.MyProjectApi;
 import com.ledway.scanmaster.ScanMasterFragment;
+import com.ledway.scanmaster.nfc.GNfc;
+import com.ledway.scanmaster.nfc.GNfcLoader;
 import com.zkc.Service.CaptureService;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
+import timber.log.Timber;
 
 import static com.ledway.btprinter.AppConstants.REQUEST_AGREEMENT;
 
@@ -164,6 +173,18 @@ public class MainActivity2 extends AppCompatActivity {
     mSubscriptions.clear();
   }
 
+  @Override protected void onResume() {
+    super.onResume();
+    NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(getApplicationContext());
+    if(nfcAdapter != null && nfcAdapter.isEnabled()) {
+      PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+      IntentFilter ndef = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
+      ndef.addCategory("*/*");
+      IntentFilter[] mFilters = new IntentFilter[] { ndef };// 过滤器
+      nfcAdapter.enableForegroundDispatch(this, pendingIntent, mFilters, GNfcLoader.TechList);
+    }
+  }
+
   private void checkAgreement() {
     SharedPreferences sp = getSharedPreferences("agreement", Context.MODE_PRIVATE);
     if (!sp.getBoolean("agree", false)) {
@@ -206,4 +227,28 @@ public class MainActivity2 extends AppCompatActivity {
   @Override public void onBackPressed() {
     super.onBackPressed();
   }
+
+
+
+  @Override protected void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+    if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction())) {
+      Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+      GNfc gnfc = GNfcLoader.load(tagFromIntent);
+
+      try {
+        gnfc.connect();
+        String reader = gnfc.read();
+
+     //   settings.setReader(reader);
+      //  settingChanged();
+        Toast.makeText(this,String.format("Set Reader to %s", reader) , Toast.LENGTH_LONG).show();
+      } catch (IOException e) {
+        e.printStackTrace();
+        Timber.e(e, e.getMessage());
+      }
+    }
+  }
+
+
 }
