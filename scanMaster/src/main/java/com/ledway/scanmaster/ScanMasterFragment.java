@@ -369,7 +369,7 @@ public class ScanMasterFragment extends Fragment {
     }else if ("Check".equals(mMode)){
       menu.findItem(R.id.action_Check).setChecked(true);
     }
-    String myTaxNo = getActivity().getSharedPreferences("group", Context.MODE_PRIVATE).getString("MyTaxNo","");
+    String myTaxNo = settings.myTaxNo;
     menu.findItem(R.id.action_in).setVisible(!myTaxNo.isEmpty());
     menu.findItem(R.id.action_out).setVisible(!myTaxNo.isEmpty());
   }
@@ -431,6 +431,7 @@ public class ScanMasterFragment extends Fragment {
         Toast.makeText(getActivity(),R.string.group_success, Toast.LENGTH_LONG).show();
         settings.setMyTaxNo(groupResponse.result[0].myTaxNo);
         settings.setLine(groupResponse.result[0].line);
+        getActivity().invalidateOptionsMenu();
       }
     });
   }
