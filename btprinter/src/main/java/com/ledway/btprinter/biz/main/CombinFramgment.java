@@ -42,8 +42,6 @@ public class CombinFramgment extends Fragment {
 
       }
     });
-    if(savedInstanceState == null) {
-      mViewPager.setCurrentItem(1);
-    }
+
   }
 }

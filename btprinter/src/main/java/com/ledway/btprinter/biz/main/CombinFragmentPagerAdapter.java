@@ -10,7 +10,7 @@ import com.ledway.btprinter.biz.sample.SampleMainFragment;
 import com.ledway.btprinter.biz.sample.SampleProductListFragment;
 
 public class CombinFragmentPagerAdapter extends FragmentPagerAdapter {
-    int[] titles = new int[]{ R.string.my_sample2, R.string.received};
+    int[] titles = new int[]{ R.string.my_list, R.string.received};
     private Fragment[] fragments = new Fragment[]{new SampleListFragment(), new ReceiveSampleListFragment()};
 
     public CombinFragmentPagerAdapter(FragmentManager fm) {

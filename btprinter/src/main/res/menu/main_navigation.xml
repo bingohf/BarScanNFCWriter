@@ -16,19 +16,19 @@
       android:orderInCategory="1"
       android:title="@string/product"
       />
-
-  <item
-      android:id="@+id/action_receive_sample"
-      android:icon="@drawable/ic_barcode_scan_black_24dp"
-      android:orderInCategory="2"
-      android:title="@string/scan_master"
-      />
   <item
       android:id="@+id/action_my_account"
       android:icon="@drawable/ic_account_box_black_24dp"
-      android:orderInCategory="3"
+      android:orderInCategory="2"
       android:title="@string/my_qrcode"
       />
+  <item
+      android:id="@+id/action_receive_sample"
+      android:icon="@drawable/ic_barcode_scan_black_24dp"
+      android:orderInCategory="3"
+      android:title="@string/scan_master"
+      />
+
   <item
       android:id="@+id/action_my_webview"
       android:icon="@drawable/ic_web_black_24dp"

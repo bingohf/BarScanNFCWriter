@@ -52,7 +52,7 @@ public class MainActivity2 extends AppCompatActivity {
   @BindView(R.id.viewPager) ViewPager mViewPager;
   @BindView(R.id.bottomNavigation) BottomNavigationView mBottomNav;
   Fragment[] fragments = new Fragment[] {
-      new CombinFramgment(),  new ProductListFragment(),new ScanMasterFragment(),new MyAccountFragment(),new  WebViewFragment()
+      new CombinFramgment(),  new ProductListFragment(),new MyAccountFragment(),new ScanMasterFragment(),new  WebViewFragment()
   };
   private CompositeSubscription mSubscriptions = new CompositeSubscription();
 
