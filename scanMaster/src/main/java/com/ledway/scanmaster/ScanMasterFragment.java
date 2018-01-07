@@ -41,6 +41,9 @@ import com.ledway.scanmaster.interfaces.IDGenerator;
 import com.ledway.scanmaster.network.GroupRequest;
 import com.ledway.scanmaster.network.GroupResponse;
 import com.ledway.scanmaster.network.MyNetWork;
+import com.ledway.scanmaster.network.SpResponse;
+import com.ledway.scanmaster.network.Sp_getBill_Request;
+import com.ledway.scanmaster.network.Sp_getDetail_Request;
 import com.zkc.Service.CaptureService;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
@@ -203,9 +206,13 @@ public class ScanMasterFragment extends Fragment {
     mTxtBill.setEnabled(false);
     mLoading.setVisibility(View.VISIBLE);
     mWebResponse.setVisibility(View.GONE);
-    mSubscriptions.add(
-        dbCommand.rxExecute("{call sp_getBill(?,?,?,?)}", settings.getLine(), settings.getReader(),
-            billNo)
+    Sp_getBill_Request request = new Sp_getBill_Request();
+    request.billNo = billNo;
+    request.line= settings.line;
+    request.reader = settings.reader;
+    request.type = mMode;
+    request.MyTaxNo = settings.myTaxNo;
+    mSubscriptions.add(MyNetWork.getServiceApi().sp_getBill(request)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnUnsubscribe(() -> {
@@ -251,8 +258,16 @@ public class ScanMasterFragment extends Fragment {
     mLoading.setVisibility(View.VISIBLE);
     mWebResponse.setVisibility(View.GONE);
     Timber.v("start_query");
-    mSubscriptions.add(dbCommand.rxExecute("{call sp_getDetail(?,?,?,?,?,?)}", settings.getLine(),
-        settings.getReader(), billNo, barCode, mIDGenerator.genID())
+
+    Sp_getDetail_Request request = new Sp_getDetail_Request();
+    request.line = settings.line;
+    request.reader = settings.reader;
+    request.billNo = billNo;
+    request.detailNo = barCode;
+    request.MyTaxNo = settings.myTaxNo;
+    request.pdaGuid = mIDGenerator.genID();
+    request.type = mMode;
+    mSubscriptions.add(MyNetWork.getServiceApi().sp_UpSampleDetail(request)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .doOnUnsubscribe(() -> {
@@ -262,6 +277,10 @@ public class ScanMasterFragment extends Fragment {
           Timber.v("end_query");
         })
         .subscribe(this::showResponse, this::showWarning));
+  }
+
+  private void showResponse(SpResponse spResponse) {
+    showResponse(spResponse.result[0].memotext);
   }
 
   private void validBarCode(String barcode) throws InvalidBarCodeException {
@@ -403,8 +422,10 @@ public class ScanMasterFragment extends Fragment {
         break;
       }
       case REQUEST_GROUP:{
-        String barCode = data.getStringExtra("barcode");
-        receiveGroup(barCode);
+        if(resultCode == Activity.RESULT_OK) {
+          String barCode = data.getStringExtra("barcode");
+          receiveGroup(barCode);
+        }
         break;
       }
     }
@@ -415,7 +436,7 @@ public class ScanMasterFragment extends Fragment {
     MaterialDialog progressDialog = builder.progress(true, 0).build();
     GroupRequest request = new GroupRequest();
     request.macNo = getArguments().getString("macNo");
-    MyNetWork.getServiceApi().getGroup("24BD65CF-1EE0-41FE-94B6-F56116DD54A3",request)
+    MyNetWork.getServiceApi().getGroup(barCode,request)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread()).subscribe(new Subscriber<GroupResponse>() {
       @Override public void onCompleted() {

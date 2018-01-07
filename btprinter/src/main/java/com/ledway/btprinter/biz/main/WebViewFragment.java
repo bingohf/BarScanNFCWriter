@@ -20,7 +20,7 @@ import com.ledway.btprinter.R;
  */
 
 public class WebViewFragment extends Fragment {
-  private static final String URL = "http://ledwayazure.cloudapp.net/ma/PAempLogin.aspx";
+  private static final String URL = "http://ledwayazure.cloudapp.net/mobile";
   @BindView(R.id.webView) WebView mWebView;
   @BindView(R.id.progressBar) ProgressBar mProgressBar;
 
