@@ -14,6 +14,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -434,6 +435,7 @@ public class ScanMasterFragment extends Fragment {
   private void receiveGroup(String barCode) {
     MaterialDialog.Builder builder = new MaterialDialog.Builder(getActivity());
     MaterialDialog progressDialog = builder.progress(true, 0).build();
+    progressDialog.show();
     GroupRequest request = new GroupRequest();
     request.macNo = getArguments().getString("macNo");
     MyNetWork.getServiceApi().getGroup(barCode,request)
@@ -452,6 +454,8 @@ public class ScanMasterFragment extends Fragment {
         Toast.makeText(getActivity(),R.string.group_success, Toast.LENGTH_LONG).show();
         settings.setMyTaxNo(groupResponse.result[0].myTaxNo);
         settings.setLine(groupResponse.result[0].line);
+        settingChanged();
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.app_name) + "(" + settings.myTaxNo +")");
         getActivity().invalidateOptionsMenu();
       }
     });

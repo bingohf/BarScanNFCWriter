@@ -40,6 +40,7 @@ import com.zkc.Service.CaptureService;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import javax.inject.Inject;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -51,19 +52,26 @@ import static com.ledway.btprinter.AppConstants.REQUEST_AGREEMENT;
 public class MainActivity2 extends AppCompatActivity {
   @BindView(R.id.viewPager) ViewPager mViewPager;
   @BindView(R.id.bottomNavigation) BottomNavigationView mBottomNav;
+
+  Fragment scanMasterFragment = new ScanMasterFragment();
   Fragment[] fragments = new Fragment[] {
-      new CombinFramgment(),  new ProductListFragment(),new MyAccountFragment(),new ScanMasterFragment(),new  WebViewFragment()
+      new CombinFramgment(),  new ProductListFragment(),new MyAccountFragment(),scanMasterFragment,new  WebViewFragment()
   };
   private CompositeSubscription mSubscriptions = new CompositeSubscription();
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main2);
+
+    String myTaxNo = getSharedPreferences("setting", Context.MODE_PRIVATE).getString("MyTaxNo","");
+    if(!myTaxNo.isEmpty()){
+      getSupportActionBar().setTitle(getString(R.string.app_name) + "(" + myTaxNo +")");
+    }
     Bundle bundle = new Bundle();
     bundle.putString("macNo", MApp.getApplication()
             .getSystemInfo()
             .getDeviceId());
-    fragments[2].setArguments(bundle);
+    scanMasterFragment.setArguments(bundle);
 
     initView();
     Intent newIntent = new Intent(this, CaptureService.class);
