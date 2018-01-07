@@ -114,6 +114,11 @@ dependencies {
     transitive = true;
   }
   compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+
+  compile "com.google.dagger:dagger:2.14.1"
+  annotationProcessor "com.google.dagger:dagger-compiler:2.14.1"
+  provided 'javax.annotation:jsr250-api:1.0'
 }
 repositories {
   mavenCentral()

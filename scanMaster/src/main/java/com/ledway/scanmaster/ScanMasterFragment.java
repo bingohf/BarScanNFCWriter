@@ -351,8 +351,7 @@ public class ScanMasterFragment extends Fragment {
     }else if(id == R.id.action_Check){
       mMode = "Check";
     } else if (id == R.id.action_set_group){
-      startActivityForResult(new Intent(getActivity(), FullScannerActivity.class),
-          RESULT_CAMERA_QR_CODE);
+
     }
     getActivity().invalidateOptionsMenu();
     return super.onOptionsItemSelected(item);
