@@ -9,4 +9,5 @@ public class SettingSnap {
   public String db;
   public String line;
   public String reader;
+  public String myTaxNo;
 }

@@ -26,6 +26,7 @@ public class SPModel {
     settingSnap.db = sp.getString(AppConstants.SP_DB, "WINUPRFID401");
     settingSnap.line = sp.getString(AppConstants.SP_LINE, "01");
     settingSnap.reader = sp.getString(AppConstants.SP_READER, "01");
+    settingSnap.myTaxNo = sp.getString("MyTaxNo", "");
     return settingSnap;
   }
 
@@ -33,6 +34,8 @@ public class SPModel {
     sp.edit().putString(AppConstants.SP_SERVER, settingSnap.server)
         .putString(AppConstants.SP_DB, settingSnap.db)
         .putString(AppConstants.SP_LINE, settingSnap.line)
-        .putString(AppConstants.SP_READER, settingSnap.reader).apply();
+        .putString(AppConstants.SP_READER, settingSnap.reader)
+        .putString("MyTaxNo", settingSnap.myTaxNo)
+        .apply();
   }
 }

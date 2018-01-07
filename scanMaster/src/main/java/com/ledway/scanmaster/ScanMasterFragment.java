@@ -2,6 +2,7 @@ package com.ledway.scanmaster;
 
 import android.app.Activity;
 import android.app.Service;
+import android.arch.lifecycle.MutableLiveData;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -31,16 +32,22 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnFocusChange;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.jakewharton.rxbinding.widget.RxTextView;
 import com.ledway.scanmaster.data.DBCommand;
 import com.ledway.scanmaster.data.Settings;
 import com.ledway.scanmaster.domain.InvalidBarCodeException;
 import com.ledway.scanmaster.interfaces.IDGenerator;
+import com.ledway.scanmaster.network.GroupRequest;
+import com.ledway.scanmaster.network.GroupResponse;
+import com.ledway.scanmaster.network.MyNetWork;
 import com.zkc.Service.CaptureService;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
 import rx.Observable;
+import rx.Scheduler;
+import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -396,13 +403,35 @@ public class ScanMasterFragment extends Fragment {
         break;
       }
       case REQUEST_GROUP:{
-        receiveGroup();
+        String barCode = data.getStringExtra("barcode");
+        receiveGroup(barCode);
         break;
       }
     }
   }
 
-  private void receiveGroup() {
+  private void receiveGroup(String barCode) {
+    MaterialDialog.Builder builder = new MaterialDialog.Builder(getActivity());
+    MaterialDialog progressDialog = builder.progress(true, 0).build();
+    GroupRequest request = new GroupRequest();
+    request.macNo = getArguments().getString("macNo");
+    MyNetWork.getServiceApi().getGroup("24BD65CF-1EE0-41FE-94B6-F56116DD54A3",request)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread()).subscribe(new Subscriber<GroupResponse>() {
+      @Override public void onCompleted() {
+        progressDialog.dismiss();
+      }
 
+      @Override public void onError(Throwable e) {
+        progressDialog.dismiss();
+        Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+      }
+
+      @Override public void onNext(GroupResponse groupResponse) {
+        Toast.makeText(getActivity(),R.string.group_success, Toast.LENGTH_LONG).show();
+        settings.setMyTaxNo(groupResponse.result[0].myTaxNo);
+        settings.setLine(groupResponse.result[0].line);
+      }
+    });
   }
 }

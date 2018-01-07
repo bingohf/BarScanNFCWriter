@@ -27,6 +27,7 @@ import com.ledway.btprinter.AgreementActivity;
 import com.ledway.btprinter.AppConstants;
 import com.ledway.btprinter.AppPreferences;
 import com.ledway.btprinter.BuildConfig;
+import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.fragments.NewVersionDialogFragment;
 import com.ledway.btprinter.network.ApkVersionResponse;
@@ -58,6 +59,12 @@ public class MainActivity2 extends AppCompatActivity {
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main2);
+    Bundle bundle = new Bundle();
+    bundle.putString("macNo", MApp.getApplication()
+            .getSystemInfo()
+            .getDeviceId());
+    fragments[2].setArguments(bundle);
+
     initView();
     Intent newIntent = new Intent(this, CaptureService.class);
     newIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);

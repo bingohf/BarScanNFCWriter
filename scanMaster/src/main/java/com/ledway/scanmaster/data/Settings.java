@@ -12,6 +12,7 @@ public class Settings {
   public String db;
   public String line;
   public String reader;
+  public String myTaxNo;
 
   public Settings(SPModel spModel){
     this.spModel = spModel;
@@ -26,6 +27,7 @@ public class Settings {
     db = settingSnap.db;
     line = settingSnap.line;
     reader = settingSnap.reader;
+    myTaxNo = settingSnap.myTaxNo;
   }
 
   public String getServer() {
@@ -64,12 +66,18 @@ public class Settings {
     save();
   }
 
+  public void setMyTaxNo(String myTaxNo) {
+    this.myTaxNo = myTaxNo;
+    save();
+  }
+
   private SettingSnap toSnap(){
     SettingSnap settingSnap = new SettingSnap();
     settingSnap.server = server;
     settingSnap.db = db;
     settingSnap.line = line;
     settingSnap.reader = reader;
+    settingSnap.myTaxNo = myTaxNo;
     return settingSnap;
   }
 

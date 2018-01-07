@@ -27,7 +27,7 @@ import javax.inject.Singleton;
     return new TimeIDGenerator(mContext);
   }
 
-  @Provides @Singleton Settings provideSettings(SPModel spModel) {
+  @Provides Settings provideSettings(SPModel spModel) {
     return new Settings(spModel);
   }
 }

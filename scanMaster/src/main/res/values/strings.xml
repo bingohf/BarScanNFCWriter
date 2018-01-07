@@ -81,5 +81,6 @@
   <string name="check">Check</string>
   <string name="scan_group">Change Group</string>
   <string name="In">In</string>
+  <string name="group_success">Change group success</string>
 
 </resources>
