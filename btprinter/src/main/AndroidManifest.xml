@@ -90,7 +90,12 @@
     <activity android:name=".RemoteProdActivity"/>
     <activity
         android:theme="@style/AppOverlayTheme"
-        android:name="com.ledway.framework.FullScannerActivity"/>
+        android:name="com.ledway.framework.FullScannerActivity">
+      <intent-filter>
+        <action android:name="android.intent.action.full.scanner"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+      </intent-filter>
+    </activity>
 
     <activity android:name=".SampleReadonlyActivity"/>
 

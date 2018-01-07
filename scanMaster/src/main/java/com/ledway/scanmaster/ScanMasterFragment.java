@@ -1,15 +1,11 @@
 package com.ledway.scanmaster;
 
 import android.app.Activity;
-import android.app.PendingIntent;
 import android.app.Service;
-import android.arch.lifecycle.Observer;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.nfc.NfcAdapter;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.serialport.api.SerialPort;
@@ -40,10 +36,7 @@ import com.ledway.scanmaster.data.DBCommand;
 import com.ledway.scanmaster.data.Settings;
 import com.ledway.scanmaster.domain.InvalidBarCodeException;
 import com.ledway.scanmaster.interfaces.IDGenerator;
-import com.ledway.scanmaster.nfc.GNfc;
-import com.ledway.scanmaster.nfc.GNfcLoader;
 import com.zkc.Service.CaptureService;
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
@@ -58,6 +51,8 @@ import timber.log.Timber;
  */
 
 public class ScanMasterFragment extends Fragment {
+  private static final int REQUEST_GROUP = 1;
+  private static final int REQUEST_BAR_CODE = 2;
   @Inject Settings settings;
   @Inject IDGenerator mIDGenerator;
   @BindView(R2.id.txt_bill_no) EditText mTxtBill;
@@ -351,7 +346,7 @@ public class ScanMasterFragment extends Fragment {
     }else if(id == R.id.action_Check){
       mMode = "Check";
     } else if (id == R.id.action_set_group){
-
+      startActivityForResult(new Intent("android.intent.action.full.scanner"), REQUEST_GROUP);
     }
     getActivity().invalidateOptionsMenu();
     return super.onOptionsItemSelected(item);
@@ -375,5 +370,39 @@ public class ScanMasterFragment extends Fragment {
   @OnClick(R2.id.btn_scan) void onBtnScanClick() {
     mContinueScan = true;
     openScan();
+  }
+
+  @OnClick(R2.id.btn_camera_scan_bill) void onBillCameraClick() {
+    mCurrEdit = mTxtBill;
+    mCurrEdit.requestFocus();
+    startActivityForResult(new Intent("android.intent.action.full.scanner"), REQUEST_BAR_CODE);
+
+  }
+
+  @OnClick(R2.id.btn_camera_scan_barcode) void onBarCodeCameraClick() {
+    mCurrEdit = mTxtBarcode;
+    mCurrEdit.requestFocus();
+    startActivityForResult(new Intent("android.intent.action.full.scanner"), REQUEST_BAR_CODE);
+  }
+
+  @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    switch (requestCode){
+      case REQUEST_BAR_CODE:{
+        if(resultCode == Activity.RESULT_OK){
+          String barCode = data.getStringExtra("barcode");
+          receiveCode(barCode);
+        }
+        break;
+      }
+      case REQUEST_GROUP:{
+        receiveGroup();
+        break;
+      }
+    }
+  }
+
+  private void receiveGroup() {
+
   }
 }
