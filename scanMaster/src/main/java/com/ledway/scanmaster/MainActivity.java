@@ -169,12 +169,12 @@ public class MainActivity extends AppCompatActivity {
   }
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
-    switch (item.getItemId()) {
+/*    switch (item.getItemId()) {
       case R2.id.action_settings: {
         startActivityForResult(new Intent(this, AppPreferences.class), REQUEST_SET);
         break;
       }
-    }
+    }*/
     return true;
   }
 

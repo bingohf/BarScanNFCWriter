@@ -1,11 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     >
+  <item android:id="@+id/action_label"
+      android:title="@string/check"
+      app:showAsAction="always"
+      />
   <item
-      android:id="@+id/action_settings"
+      android:id="@+id/action_set_group"
+      android:icon="@drawable/ic_qrcode_scan_white_24dp"
       android:orderInCategory="100"
-      android:title="@string/action_settings"
-      app:showAsAction="ifRoom" />
+      android:title="@string/scan_group"
+      app:showAsAction="ifRoom"/>
+  <group android:checkableBehavior="single">
+    <item
+        android:id="@+id/action_in"
+        android:orderInCategory="100"
+        android:title="@string/In"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_out"
+        android:orderInCategory="100"
+        android:title="@string/out"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_Check"
+        android:checked="true"
+        android:orderInCategory="100"
+        android:title="@string/check"
+        app:showAsAction="never"
+        />
+  </group>
 </menu>

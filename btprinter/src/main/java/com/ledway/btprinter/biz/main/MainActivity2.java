@@ -32,6 +32,7 @@ import com.ledway.btprinter.fragments.NewVersionDialogFragment;
 import com.ledway.btprinter.network.ApkVersionResponse;
 import com.ledway.btprinter.network.MyProjectApi;
 import com.ledway.scanmaster.ScanMasterFragment;
+import com.ledway.scanmaster.ScanMasterViewModel;
 import com.ledway.scanmaster.nfc.GNfc;
 import com.ledway.scanmaster.nfc.GNfcLoader;
 import com.zkc.Service.CaptureService;
@@ -239,9 +240,10 @@ public class MainActivity2 extends AppCompatActivity {
       try {
         gnfc.connect();
         String reader = gnfc.read();
-
-     //   settings.setReader(reader);
-      //  settingChanged();
+        getSharedPreferences("setting", Context.MODE_PRIVATE).edit().putString("reader", reader).apply();
+        ScanMasterViewModel.getInstance().reader.setValue(reader);
+        //   settings.setReader(reader);
+        //  settingChanged();
         Toast.makeText(this,String.format("Set Reader to %s", reader) , Toast.LENGTH_LONG).show();
       } catch (IOException e) {
         e.printStackTrace();

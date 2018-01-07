@@ -3,6 +3,7 @@ package com.ledway.scanmaster;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.arch.lifecycle.Observer;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +19,9 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -67,8 +71,11 @@ public class ScanMasterFragment extends Fragment {
   private boolean mContinueScan;
   private EditText mCurrEdit;
   private BroadcastReceiver scanBroadcastReceiver;
-  private BroadcastReceiver mNfcReceiver;
+  private String mMode ="Check";
 
+  public ScanMasterFragment(){
+    setHasOptionsMenu(true);
+  }
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     ((MApp) getActivity().getApplication()).getAppComponet().inject(this);
@@ -85,11 +92,10 @@ public class ScanMasterFragment extends Fragment {
     super.onViewCreated(view, savedInstanceState);
     ButterKnife.bind(this, view);
     mWebResponse.getSettings().setJavaScriptEnabled(false);
-    settingChanged();
 
     listenKeyCode();
     receiveZkcCode();
-    registerNfc();
+
 
     mSubscriptions.add(Observable.merge(RxTextView.editorActionEvents(mTxtBarcode),
         RxTextView.editorActionEvents(mTxtBill))
@@ -98,6 +104,12 @@ public class ScanMasterFragment extends Fragment {
           onEditAction(actionEvent.view(), actionEvent.actionId(), actionEvent.keyEvent());
         }));
     Timber.v(mIDGenerator.genID());
+
+    settingChanged();
+    ScanMasterViewModel.getInstance().reader.observe(this, reader -> {
+      settings.setReader(reader);
+      settingChanged();
+    });
   }
 
   @Override public void onStart() {
@@ -111,7 +123,6 @@ public class ScanMasterFragment extends Fragment {
     closeScan();
     getActivity().getApplication().unregisterReceiver(scanBroadcastReceiver);
     getActivity().getApplication().unregisterReceiver(sysBroadcastReceiver);
-    getActivity().unregisterReceiver(mNfcReceiver);
   }
 
   private void closeScan() {
@@ -119,41 +130,6 @@ public class ScanMasterFragment extends Fragment {
     CaptureService.scanGpio.closePower();
   }
 
-  private void registerNfc() {
-    NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(getActivity().getApplicationContext());
-    if (nfcAdapter != null && nfcAdapter.isEnabled()) {
-      PendingIntent pendingIntent = PendingIntent.getActivity(getActivity(), 0,
-          new Intent(getActivity(), getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
-      IntentFilter ndef = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
-      ndef.addCategory("*/*");
-      IntentFilter[] mFilters = new IntentFilter[] { ndef };// 过滤器
-      nfcAdapter.enableForegroundDispatch(getActivity(), pendingIntent, mFilters, GNfcLoader.TechList);
-    }
-
-    mNfcReceiver = new BroadcastReceiver() {
-      @Override public void onReceive(Context context, Intent intent) {
-        if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction())) {
-          Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-          GNfc gnfc = GNfcLoader.load(tagFromIntent);
-
-          try {
-            gnfc.connect();
-            String reader = gnfc.read();
-            settings.setReader(reader);
-            settingChanged();
-            Toast.makeText(getActivity(), String.format("Set Reader to %s", reader),
-                Toast.LENGTH_LONG).show();
-          } catch (IOException e) {
-            e.printStackTrace();
-            Timber.e(e, e.getMessage());
-          }
-        }
-      }
-    };
-    IntentFilter intentFilter = new IntentFilter();
-    intentFilter.addAction("android.nfc.action.TECH_DISCOVERED");
-    getActivity().registerReceiver(mNfcReceiver, intentFilter);
-  }
 
   private void listenKeyCode() {
 
@@ -357,5 +333,37 @@ public class ScanMasterFragment extends Fragment {
     if (hasFocus) {
       mCurrEdit = (EditText) view;
     }
+  }
+
+  @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    super.onCreateOptionsMenu(menu, inflater);
+    inflater.inflate(R.menu.menu_scan_master_main, menu);
+  }
+
+  @Override public boolean onOptionsItemSelected(MenuItem item) {
+    int id = item.getItemId();
+    item.setChecked(true);
+    if(id == R.id.action_in){
+      mMode = "In";
+    }else if(id == R.id.action_out){
+      mMode = "Out";
+    }else if(id == R.id.action_Check){
+      mMode = "Check";
+    }
+    getActivity().invalidateOptionsMenu();
+    return super.onOptionsItemSelected(item);
+  }
+
+  @Override public void onPrepareOptionsMenu(Menu menu) {
+    super.onPrepareOptionsMenu(menu);
+    menu.findItem(R.id.action_label).setTitle(mMode);
+    if("In".equals(mMode)){
+      menu.findItem(R.id.action_in).setChecked(true);
+    }else if ("Out".equals(mMode)){
+      menu.findItem(R.id.action_out).setChecked(true);
+    }else if ("Check".equals(mMode)){
+      menu.findItem(R.id.action_Check).setChecked(true);
+    }
+
   }
 }

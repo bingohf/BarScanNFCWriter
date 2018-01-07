@@ -79,5 +79,7 @@
   <string name="in">In</string>
   <string name="out">Out</string>
   <string name="check">Check</string>
+  <string name="scan_group">Scan Group</string>
+  <string name="In">In</string>
 
 </resources>
