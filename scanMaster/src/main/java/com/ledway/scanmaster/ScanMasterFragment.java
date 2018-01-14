@@ -15,6 +15,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -87,6 +88,9 @@ public class ScanMasterFragment extends Fragment {
     super.onCreate(savedInstanceState);
     ((MApp) getActivity().getApplication()).getAppComponet().inject(this);
     vibrator = (Vibrator) getActivity().getApplication().getSystemService(Service.VIBRATOR_SERVICE);
+    if(!TextUtils.isEmpty(settings.myTaxNo)){
+      mMode = "In";
+    }
   }
 
   @Nullable @Override
@@ -371,8 +375,10 @@ public class ScanMasterFragment extends Fragment {
       mMode = "In";
     }else if(id == R.id.action_out){
       mMode = "Out";
-    }else if(id == R.id.action_Check){
-      mMode = "Check";
+    }else if(id == R.id.action_return){
+      mMode = "Return";
+    }else if(id == R.id.action_special){
+      mMode = "Special";
     } else if (id == R.id.action_set_group){
       startActivityForResult(new Intent("android.intent.action.full.scanner"), REQUEST_GROUP);
     }
@@ -389,10 +395,16 @@ public class ScanMasterFragment extends Fragment {
       menu.findItem(R.id.action_out).setChecked(true);
     }else if ("Check".equals(mMode)){
       menu.findItem(R.id.action_Check).setChecked(true);
+    }else if ("Return".equals(mMode)){
+      menu.findItem(R.id.action_return).setChecked(true);
+    }else if ("Special".equals(mMode)){
+      menu.findItem(R.id.action_special).setChecked(true);
     }
     String myTaxNo = settings.myTaxNo;
     menu.findItem(R.id.action_in).setVisible(!myTaxNo.isEmpty());
     menu.findItem(R.id.action_out).setVisible(!myTaxNo.isEmpty());
+    menu.findItem(R.id.action_return).setVisible(!myTaxNo.isEmpty());
+    menu.findItem(R.id.action_special).setVisible(!myTaxNo.isEmpty());
   }
 
   @OnClick(R2.id.btn_scan) void onBtnScanClick() {
@@ -457,6 +469,7 @@ public class ScanMasterFragment extends Fragment {
         settings.setLine(groupResponse.result[0].line);
         settingChanged();
         ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.app_name) + "(" + settings.myTaxNo +")");
+        mMode ="In";
         getActivity().invalidateOptionsMenu();
       }
     });

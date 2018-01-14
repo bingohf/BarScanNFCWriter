@@ -82,5 +82,6 @@
   <string name="scan_group">Change Group</string>
   <string name="In">In</string>
   <string name="group_success">Change group success</string>
-
+  <string name="txt_return">Return</string>
+  <string name="special">Special</string>
 </resources>

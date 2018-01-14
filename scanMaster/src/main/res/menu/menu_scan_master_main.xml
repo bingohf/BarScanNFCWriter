@@ -23,6 +23,19 @@
         android:orderInCategory="100"
         android:title="@string/out"
         app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_return"
+        android:orderInCategory="100"
+        android:title="@string/txt_return"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_special"
+        android:orderInCategory="100"
+        android:title="@string/special"
+        app:showAsAction="never"/>
+
     <item
         android:id="@+id/action_Check"
         android:checked="true"
