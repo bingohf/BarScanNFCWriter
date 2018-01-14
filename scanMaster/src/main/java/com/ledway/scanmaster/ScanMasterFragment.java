@@ -203,7 +203,7 @@ public class ScanMasterFragment extends Fragment {
 
   private void queryBill() throws InvalidBarCodeException {
     String billNo = mTxtBill.getText().toString();
-    validBarCode(billNo);
+   // validBarCode(billNo);
     mTxtBill.setEnabled(false);
     mLoading.setVisibility(View.VISIBLE);
     mWebResponse.setVisibility(View.GONE);
@@ -253,8 +253,8 @@ public class ScanMasterFragment extends Fragment {
   private void queryBarCode() throws InvalidBarCodeException {
     String billNo = mTxtBill.getText().toString();
     String barCode = mTxtBarcode.getText().toString();
-    validBarCode(billNo);
-    validBarCode(barCode);
+    //validBarCode(billNo);
+   // validBarCode(barCode);
     mTxtBarcode.setEnabled(false);
     mLoading.setVisibility(View.VISIBLE);
     mWebResponse.setVisibility(View.GONE);
