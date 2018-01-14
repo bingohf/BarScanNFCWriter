@@ -213,6 +213,7 @@ public class ScanMasterFragment extends Fragment {
     request.reader = settings.reader;
     request.type = mMode;
     request.MyTaxNo = settings.myTaxNo;
+    request.pdaGuid = mIDGenerator.genID();
     mSubscriptions.add(MyNetWork.getServiceApi().sp_getBill(request)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())

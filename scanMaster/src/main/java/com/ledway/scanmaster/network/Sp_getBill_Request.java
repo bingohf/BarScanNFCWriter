@@ -12,4 +12,5 @@ public class Sp_getBill_Request {
   public String type;
   public String billNo;
 
+  public String pdaGuid;
 }
