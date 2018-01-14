@@ -231,9 +231,11 @@ public class ScanMasterFragment extends Fragment {
 
   private void showResponse(String s) {
     Timber.v(s);
-    mWebResponse.loadData(s, "text/html; charset=utf-8", "UTF-8");
-    //mWebResponse.setBackgroundColor(Color.parseColor("#eeeeee"));
-    alertWarning(s);
+    if(s != null) {
+      mWebResponse.loadData(s, "text/html; charset=utf-8", "UTF-8");
+      //mWebResponse.setBackgroundColor(Color.parseColor("#eeeeee"));
+      alertWarning(s);
+    }
   }
 
   private void alertWarning(String message) {
@@ -377,7 +379,9 @@ public class ScanMasterFragment extends Fragment {
       mMode = "Out";
     }else if(id == R.id.action_return){
       mMode = "Return";
-    }else if(id == R.id.action_special){
+    }else if(id == R.id.action_Check){
+      mMode = "Check";
+    } else if(id == R.id.action_special){
       mMode = "Special";
     } else if (id == R.id.action_set_group){
       startActivityForResult(new Intent("android.intent.action.full.scanner"), REQUEST_GROUP);
