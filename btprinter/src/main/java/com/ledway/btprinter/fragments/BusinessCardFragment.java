@@ -39,12 +39,17 @@ public class BusinessCardFragment extends PagerFragment {
     return MApp.getApplication().getString(R.string.title_my_business_card);
   }
 
+  @Override public void onCreate(@Nullable Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    sp = getActivity().getSharedPreferences("qrcode", Context.MODE_PRIVATE);
+  }
+
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_my_business_card, container, false);
 
-    sp = getActivity().getSharedPreferences("qrcode", Context.MODE_PRIVATE);
+
     initView(view);
     return view;
   }
