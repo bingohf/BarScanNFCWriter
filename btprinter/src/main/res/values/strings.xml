@@ -76,4 +76,5 @@
   <string name="network_is_not_available">Network is not available</string>
   <string name="scan_master">Scan Master</string>
   <string name="received">Received</string>
+  <string name="are_you_sure_to_exit">Are you sure to exit</string>
 </resources>

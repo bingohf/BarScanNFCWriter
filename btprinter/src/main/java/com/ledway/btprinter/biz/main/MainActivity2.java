@@ -10,6 +10,7 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -23,6 +24,8 @@ import android.view.MenuItem;
 import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.ledway.btprinter.AgreementActivity;
 import com.ledway.btprinter.AppConstants;
 import com.ledway.btprinter.AppPreferences;
@@ -241,7 +244,14 @@ public class MainActivity2 extends AppCompatActivity {
   }
 
   @Override public void onBackPressed() {
-    super.onBackPressed();
+    new MaterialDialog.Builder(this).title(R.string.exit).content(R.string.are_you_sure_to_exit)
+        .positiveText(R.string.yes)
+        .negativeText(R.string.no)
+        .onPositive((dialog, which) -> {
+          finish();
+        }).show();
+
+
   }
 
 
