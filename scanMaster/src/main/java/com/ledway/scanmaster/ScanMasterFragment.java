@@ -104,7 +104,7 @@ public class ScanMasterFragment extends Fragment {
     super.onViewCreated(view, savedInstanceState);
     ButterKnife.bind(this, view);
     mWebResponse.getSettings().setJavaScriptEnabled(false);
-
+    mTxtBarcode.requestFocus();
     listenKeyCode();
     receiveZkcCode();
 

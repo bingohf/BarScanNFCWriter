@@ -147,6 +147,9 @@ public class MainActivity2 extends AppCompatActivity {
 
       }
     });
+
+    int lastIndex = getSharedPreferences("view", Context.MODE_PRIVATE).getInt("pagerIndex", 0);
+    mViewPager.setCurrentItem(lastIndex);
   }
 
   private void checkVersion() {
@@ -190,6 +193,8 @@ public class MainActivity2 extends AppCompatActivity {
   @Override protected void onDestroy() {
     super.onDestroy();
     mSubscriptions.clear();
+    int currentIndex = mViewPager.getCurrentItem();
+    getSharedPreferences("view", Context.MODE_PRIVATE).edit().putInt("pagerIndex", currentIndex).apply();
   }
 
   @Override protected void onResume() {
