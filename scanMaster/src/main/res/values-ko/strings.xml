@@ -1,0 +1,89 @@
+﻿<resources>
+  <string name="app_name">Scan Master</string>
+  <string name="main_activity_name">威虹資訊RFID工票查詢</string>
+  <string name="barcode">Barcode</string>
+  <string name="barcode.help">C1610550030 or Tag the RFID Card with the same contents</string>
+  <string name="scanner_activity">ZXing Scanner - Full Activity</string>
+  <string name="scanner_fragment_activity">ZXing Scanner - Full Fragment Activity</string>
+  <string name="simple_scanner_activity">ZXing Scanner - Simple Activity</string>
+  <string name="simple_scanner_fragment_activity">ZXing Scanner - Simple Fragment Activity</string>
+  <string name="full_screen_scanner_fragment_activity">ZXing Scanner - Full Screen Fragment Activity</string>
+  <string name="simple_activity_sample">Simple Activity Sample</string>
+  <string name="simple_fragment_sample">Simple Fragment Sample</string>
+  <string name="activity_sample">Full Activity Sample</string>
+  <string name="fragment_sample">Full Fragment Sample</string>
+  <string name="full_screen_sample">Full Screen Fragment Sample</string>
+  <string name="toggle_flash">Flash</string>
+  <string name="flash_on">Flash [ON]</string>
+  <string name="flash_off">Flash [OFF]</string>
+  <string name="auto_focus_on">Auto Focus [ON]</string>
+  <string name="auto_focus_off">Auto Focus [OFF]</string>
+  <string name="formats">Formats</string>
+  <string name="choose_formats">Choose Formats</string>
+  <string name="select_camera">Select a Camera</string>
+  <string name="ok_button">OK</string>
+  <string name="cancel_button">Cancel</string>
+
+
+
+  <string name="setting.line.title">Line(####)</string>
+  <string name="setting.server.title">Server</string>
+  <string name="setting.autoupload.title">自動上傳(Auto Upload)</string>
+  <string name="setting.type.title">Type</string>
+  <string name="empty"/>
+  <string name="invalid_barcode">條碼不全(Barcode Error)</string>
+  <string name="app_version">App Version</string>
+
+
+
+  <string name="wait_a_moment">wait a moment</string>
+
+
+
+  <string name="company">威虹資訊股份有限公司版權所有</string>
+  <string name="company.tel">服務電話: +886222799889</string>
+  <string name="company_short">威虹資訊</string>
+  <string name="setting.db.title">DB</string>
+  <string name="setting.reader.title">Reader</string>
+
+
+  <string name="nfc.hint">請將IC放到感應區</string>
+  <string name="write_to_mifare">寫入IC卡</string>
+  <string name="device_no_nfc">妳的設備不支持NFC</string>
+  <string name="device_nfc_disabled">請到系統設置裏開啟NFC</string>
+  <string name="no_card_found">請將IC卡放到感應區</string>
+  <string name="check_nfc_card">請檢查NFC功能是否正常，並將IC卡貼到感應區</string>
+  <string name="auth_fail_card">無法識別該卡</string>
+  <string name="scan.btn">PDA掃描器 (Scan)</string>
+  <string name="had_to_mifare">此條碼已經錄入</string>
+  <string name="ok">確認(OK)</string>
+  <string name="cancel">取消(Cancel)</string>
+  <string name="upload">上傳(Upload)</string>
+  <string name="invalid_setting">本機設置信息不完整</string>
+  <string name="goto_setting">進入設置</string>
+  <string name="setting">設置</string>
+  <string name="uploading">正在上傳(uploading)</string>
+  <string name="ledway">威虹Scan Master</string>
+
+  <string name="digits">0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-#/~.$</string>
+  <string name="password">Password</string>
+  <string name="invalid_password">Invalid password</string>
+  <string name="action_settings">Set</string>
+
+
+  <string name="exit">출구</string>
+  <string name="yes">예</string>
+  <string name="no">아니</string>
+  <string name="warning">경고</string>
+  <string name="exit_confirm">이탈 확인?</string>
+  <string name="scan_group">비즈니스 그룹 변경</string>
+  <string name="group_success">완료된 비즈니스 그룹 변경</string>
+  <string name="in">창고에</string>
+  <string name="out">배송</string>
+  <string name="txt_return">반품 배송비</string>
+  <string name="special">특수 기능</string>
+  <string name="check">일반</string>
+  <string name="barcode.hint">PA 바코드 스캔</string>
+  <string name="billno.hint">저장소 또는 배송 번호 스캔</string>
+  <string name="barcode_invalid">바코드가 잘못되었습니다.다시 시도하십시오.</string>
+</resources>

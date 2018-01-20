@@ -1,0 +1,89 @@
+﻿<resources>
+  <string name="app_name">Scan Master</string>
+  <string name="main_activity_name">威虹資訊RFID工票查詢</string>
+  <string name="barcode">Barcode</string>
+  <string name="barcode.help">C1610550030 or Tag the RFID Card with the same contents</string>
+  <string name="scanner_activity">ZXing Scanner - Full Activity</string>
+  <string name="scanner_fragment_activity">ZXing Scanner - Full Fragment Activity</string>
+  <string name="simple_scanner_activity">ZXing Scanner - Simple Activity</string>
+  <string name="simple_scanner_fragment_activity">ZXing Scanner - Simple Fragment Activity</string>
+  <string name="full_screen_scanner_fragment_activity">ZXing Scanner - Full Screen Fragment Activity</string>
+  <string name="simple_activity_sample">Simple Activity Sample</string>
+  <string name="simple_fragment_sample">Simple Fragment Sample</string>
+  <string name="activity_sample">Full Activity Sample</string>
+  <string name="fragment_sample">Full Fragment Sample</string>
+  <string name="full_screen_sample">Full Screen Fragment Sample</string>
+  <string name="toggle_flash">Flash</string>
+  <string name="flash_on">Flash [ON]</string>
+  <string name="flash_off">Flash [OFF]</string>
+  <string name="auto_focus_on">Auto Focus [ON]</string>
+  <string name="auto_focus_off">Auto Focus [OFF]</string>
+  <string name="formats">Formats</string>
+  <string name="choose_formats">Choose Formats</string>
+  <string name="select_camera">Select a Camera</string>
+  <string name="ok_button">OK</string>
+  <string name="cancel_button">Cancel</string>
+
+
+
+  <string name="setting.line.title">Line(####)</string>
+  <string name="setting.server.title">Server</string>
+  <string name="setting.autoupload.title">自動上傳(Auto Upload)</string>
+  <string name="setting.type.title">Type</string>
+  <string name="empty"/>
+  <string name="invalid_barcode">條碼不全(Barcode Error)</string>
+  <string name="app_version">App Version</string>
+
+
+
+  <string name="wait_a_moment">wait a moment</string>
+
+
+
+  <string name="company">威虹資訊股份有限公司版權所有</string>
+  <string name="company.tel">服務電話: +886222799889</string>
+  <string name="company_short">威虹資訊</string>
+  <string name="setting.db.title">DB</string>
+  <string name="setting.reader.title">Reader</string>
+
+
+  <string name="nfc.hint">請將IC放到感應區</string>
+  <string name="write_to_mifare">寫入IC卡</string>
+  <string name="device_no_nfc">妳的設備不支持NFC</string>
+  <string name="device_nfc_disabled">請到系統設置裏開啟NFC</string>
+  <string name="no_card_found">請將IC卡放到感應區</string>
+  <string name="check_nfc_card">請檢查NFC功能是否正常，並將IC卡貼到感應區</string>
+  <string name="auth_fail_card">無法識別該卡</string>
+  <string name="scan.btn">PDA掃描器 (Scan)</string>
+  <string name="had_to_mifare">此條碼已經錄入</string>
+  <string name="ok">確認(OK)</string>
+  <string name="cancel">取消(Cancel)</string>
+  <string name="upload">上傳(Upload)</string>
+  <string name="invalid_setting">本機設置信息不完整</string>
+  <string name="goto_setting">進入設置</string>
+  <string name="setting">設置</string>
+  <string name="uploading">正在上傳(uploading)</string>
+  <string name="ledway">威虹Scan Master</string>
+
+  <string name="digits">0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-#/~.$</string>
+  <string name="password">Password</string>
+  <string name="invalid_password">Invalid password</string>
+  <string name="action_settings">Set</string>
+
+
+  <string name="exit">Lối thoát</string>
+  <string name="yes">Vâng</string>
+  <string name="no">Không</string>
+  <string name="warning">Cảnh báo</string>
+  <string name="exit_confirm">Xác nhận lối ra?</string>
+  <string name="scan_group">Thay đổi nhóm doanh nghiệp</string>
+  <string name="group_success">Thay đổi nhóm doanh nghiệp đã hoàn thành</string>
+  <string name="in">Vào kho</string>
+  <string name="out">Đang chuyển hàng</string>
+  <string name="txt_return">Vận chuyển trở lại</string>
+  <string name="special">Chức năng đặc biệt</string>
+  <string name="check">Chung</string>
+  <string name="barcode.hint">Quét mã vạch PA</string>
+  <string name="billno.hint">Quét số liệu lưu trữ hoặc vận chuyển</string>
+  <string name="barcode_invalid">Mã vạch không hợp lệ, vui lòng thử lại</string>
+</resources>
