@@ -47,6 +47,7 @@ import com.ledway.scanmaster.network.SpResponse;
 import com.ledway.scanmaster.network.Sp_getBill_Request;
 import com.ledway.scanmaster.network.Sp_getDetail_Request;
 import com.zkc.Service.CaptureService;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
@@ -217,7 +218,7 @@ public class ScanMasterFragment extends Fragment {
     request.reader = settings.reader;
     request.type = mMode;
     request.MyTaxNo = settings.myTaxNo;
-    request.pdaGuid = mIDGenerator.genID();
+    request.pdaGuid = mIDGenerator.genID() +"~" + getLanguage();
     mSubscriptions.add(MyNetWork.getServiceApi().sp_getBill(request)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -273,7 +274,7 @@ public class ScanMasterFragment extends Fragment {
     request.billNo = billNo;
     request.detailNo = barCode;
     request.MyTaxNo = settings.myTaxNo;
-    request.pdaGuid = mIDGenerator.genID();
+    request.pdaGuid = mIDGenerator.genID() +"~" + getLanguage();
     request.type = mMode;
     mSubscriptions.add(MyNetWork.getServiceApi().sp_UpSampleDetail(request)
         .subscribeOn(Schedulers.io())
@@ -477,5 +478,10 @@ public class ScanMasterFragment extends Fragment {
         getActivity().invalidateOptionsMenu();
       }
     });
+  }
+
+  private String getLanguage(){
+    Locale locale = Locale.getDefault();
+    return locale.getLanguage() +"_" + locale.getCountry();
   }
 }
