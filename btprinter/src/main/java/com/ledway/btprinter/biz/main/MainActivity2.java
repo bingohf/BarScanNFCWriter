@@ -19,6 +19,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -283,4 +284,21 @@ public class MainActivity2 extends AppCompatActivity {
   }
 
 
+  @Override public boolean onKeyDown(int keyCode, KeyEvent event) {
+    if(event.getAction() == KeyEvent.ACTION_DOWN){
+      if(keyCode == KeyEvent.KEYCODE_BACK){
+        Fragment currentFragment = fragments[mViewPager.getCurrentItem()];
+        boolean handled = false;
+        if(currentFragment instanceof OnKeyPress){
+          handled =  ((OnKeyPress) currentFragment).onKeyDown(keyCode,event);
+        }
+        if(handled){
+          return true;
+        }else {
+          return super.onKeyDown(keyCode, event);
+        }
+      }
+    }
+    return super.onKeyDown(keyCode, event);
+  }
 }

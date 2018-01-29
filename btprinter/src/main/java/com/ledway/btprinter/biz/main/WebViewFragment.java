@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +20,7 @@ import com.ledway.btprinter.R;
  * Created by togb on 2017/12/16.
  */
 
-public class WebViewFragment extends Fragment {
+public class WebViewFragment extends Fragment implements OnKeyPress {
   private static final String URL = "http://ledwayazure.cloudapp.net/mobile";
   @BindView(R.id.webView) WebView mWebView;
   @BindView(R.id.progressBar) ProgressBar mProgressBar;
@@ -87,5 +88,19 @@ public class WebViewFragment extends Fragment {
 
   @Override public void onStop() {
     super.onStop();
+  }
+
+
+  @Override
+  public boolean onKeyDown(int keyCode, KeyEvent event) {
+    if (event.getAction() == KeyEvent.ACTION_DOWN) {
+      if (keyCode == KeyEvent.KEYCODE_BACK) {
+        if (mWebView.canGoBack()) {
+          mWebView.goBack();
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }
