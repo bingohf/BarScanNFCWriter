@@ -11,7 +11,7 @@ android {
     pickFirst  'META-INF/LICENSE'
   }
   defaultConfig {
-    applicationId "com.ledway.btprinter"
+    applicationId "com.ledway.sales_edge"
     minSdkVersion 17
     targetSdkVersion 21
     versionCode 66
@@ -32,6 +32,7 @@ android {
 
   buildTypes {
     debug{
+      debuggable false
       versionNameSuffix ".dev"
       signingConfig signingConfigs.relase_signing_config
     }
@@ -42,7 +43,9 @@ android {
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
   }
-
+  dexOptions {
+    jumboMode true
+  }
 /*  applicationVariants.all { variant ->
     variant.outputs.each { output ->
       def outputFile = output.outputFile;
