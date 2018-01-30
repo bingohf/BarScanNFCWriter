@@ -35,7 +35,7 @@
   <string name="prod_exists">Duplicated</string>
   <string name="title_my_business_card">My</string>
   <string name="action_my_business_card">My</string>
-  <string name="default_my_business_card">Ledway Information Co., Ltd.\nToll Free:080-0717688\nTel:+886-2-22799889
+  <string name="default_my_business_card">The data entry here will be converted to QRCode
   </string>
   <string name="title_new_version">New version found</string>
   <string name="btn_install">Install</string>
