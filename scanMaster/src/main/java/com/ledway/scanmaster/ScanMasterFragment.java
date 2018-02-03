@@ -3,7 +3,6 @@ package com.ledway.scanmaster;
 import android.app.Activity;
 import android.app.Service;
 import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.Observer;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -45,22 +44,17 @@ import com.ledway.scanmaster.network.GroupRequest;
 import com.ledway.scanmaster.network.GroupResponse;
 import com.ledway.scanmaster.network.MyNetWork;
 import com.ledway.scanmaster.network.RemoteMenu;
-import com.ledway.scanmaster.network.ServiceApi;
 import com.ledway.scanmaster.network.SpGetMenuRequest;
 import com.ledway.scanmaster.network.SpResponse;
 import com.ledway.scanmaster.network.Sp_getBill_Request;
 import com.ledway.scanmaster.network.Sp_getDetail_Request;
 import com.ledway.scanmaster.utils.JsonUtils;
 import com.zkc.Service.CaptureService;
-import java.io.IOException;
-import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
-import okhttp3.ResponseBody;
 import rx.Observable;
-import rx.Scheduler;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -72,6 +66,7 @@ import timber.log.Timber;
  */
 
 public class ScanMasterFragment extends Fragment {
+  final int GROUP_ID = 1001;
   private static final int REQUEST_GROUP = 1;
   private static final int REQUEST_BAR_CODE = 2;
   @Inject Settings settings;
@@ -417,54 +412,33 @@ public class ScanMasterFragment extends Fragment {
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     int id = item.getItemId();
-    item.setChecked(true);
-    if(id == R.id.action_in){
-      mMode = "In";
-    }else if(id == R.id.action_out){
-      mMode = "Out";
-    }else if(id == R.id.action_return){
-      mMode = "Return";
-    }else if(id == R.id.action_Check){
-      mMode = "Check";
-    } else if(id == R.id.action_special){
-      mMode = "Special";
-    } else if (id == R.id.action_set_group){
+   if (id == R.id.action_set_group){
       startActivityForResult(new Intent("android.intent.action.full.scanner"), REQUEST_GROUP);
     }
-    getActivity().invalidateOptionsMenu();
+    if(item.getGroupId() ==GROUP_ID) {
+      item.setChecked(true);
+      int index = item.getItemId();
+      if(menus.getValue() != null) {
+        mMode = menus.getValue()[index].menu_Label_Eng;
+      }
+    }
+    if(getActivity() != null) {
+      getActivity().invalidateOptionsMenu();
+    }
     return super.onOptionsItemSelected(item);
   }
 
   @Override public void onPrepareOptionsMenu(Menu menu) {
     super.onPrepareOptionsMenu(menu);
     menu.findItem(R.id.action_label).setTitle(mMode);
-    if("In".equals(mMode)){
-      menu.findItem(R.id.action_in).setChecked(true);
-    }else if ("Out".equals(mMode)){
-      menu.findItem(R.id.action_out).setChecked(true);
-    }else if ("Check".equals(mMode)){
-      menu.findItem(R.id.action_Check).setChecked(true);
-    }else if ("Return".equals(mMode)){
-      menu.findItem(R.id.action_return).setChecked(true);
-    }else if ("Special".equals(mMode)){
-      menu.findItem(R.id.action_special).setChecked(true);
-    }
-    String myTaxNo = settings.myTaxNo;
-    menu.findItem(R.id.action_in).setVisible(!myTaxNo.isEmpty());
-    menu.findItem(R.id.action_out).setVisible(!myTaxNo.isEmpty());
-    menu.findItem(R.id.action_return).setVisible(!myTaxNo.isEmpty());
-    menu.findItem(R.id.action_special).setVisible(!myTaxNo.isEmpty());
-
-    final int remoteGroupId = 1001;
-    menu.removeGroup(remoteGroupId);
-    int i = remoteGroupId;
+    menu.removeGroup(GROUP_ID);
+    int i = 0;
     if(menus.getValue() != null) {
       for (RemoteMenu item : menus.getValue()) {
-        menu.add(remoteGroupId, i++, i , item.menu_Label_Eng);
+        menu.add(GROUP_ID, i++, i , item.menu_Label_Eng).setCheckable(true).setChecked(item.menu_Label_Eng.equals(mMode));
       }
     }
-
-
+    menu.setGroupCheckable(GROUP_ID, true, true);
   }
 
   @OnClick(R2.id.btn_scan) void onBtnScanClick() {
