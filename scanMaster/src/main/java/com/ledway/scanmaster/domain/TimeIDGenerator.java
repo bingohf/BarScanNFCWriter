@@ -12,7 +12,7 @@ import java.util.Date;
 
 public class TimeIDGenerator implements IDGenerator {
   private static final String DATA_FORMAT ="yyyyMMdd'T'HHmmss.S";
-  private static final String ID_FORMAT ="%s-%s-%s";
+  private static final String ID_FORMAT ="%s-%s-LEDWAY-%s";
   private final Context mContext;
   private String mDeviceId;
   private String mDeviceName;
@@ -31,6 +31,6 @@ public class TimeIDGenerator implements IDGenerator {
   }
 
   @Override public String genID() {
-    return String.format(ID_FORMAT, mDeviceName, mDeviceId, mSimpleDateFormater.format(new Date()));
+    return String.format(ID_FORMAT,  mDeviceId,mDeviceName, mSimpleDateFormater.format(new Date()));
   }
 }
