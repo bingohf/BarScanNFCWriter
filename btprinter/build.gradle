@@ -32,9 +32,15 @@ android {
 
   buildTypes {
     debug{
+      debuggable true
+      versionNameSuffix ".dev"
+      signingConfig signingConfigs.relase_signing_config
+    }
+    googleplay{
       debuggable false
       versionNameSuffix ".dev"
       signingConfig signingConfigs.relase_signing_config
+      matchingFallbacks = ['debug']
     }
     release {
       versionNameSuffix ".prod"
