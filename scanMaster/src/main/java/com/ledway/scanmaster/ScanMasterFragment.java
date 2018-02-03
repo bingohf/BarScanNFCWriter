@@ -7,12 +7,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.serialport.api.SerialPort;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -28,6 +30,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import butterknife.BindView;
@@ -76,6 +79,7 @@ public class ScanMasterFragment extends Fragment {
   @BindView(R2.id.prg_loading) View mLoading;
   @BindView(R2.id.web_response) WebView mWebResponse;
   @BindView(R2.id.btn_scan) Button mBtnScan;
+  @BindView(R2.id.btn_camera_scan_barcode) ImageView mPAIcon;
   private Vibrator vibrator;
   private CompositeSubscription mSubscriptions = new CompositeSubscription();
   private DBCommand dbCommand = new DBCommand();
@@ -425,7 +429,14 @@ public class ScanMasterFragment extends Fragment {
     if(getActivity() != null) {
       getActivity().invalidateOptionsMenu();
     }
+    resetView();
     return super.onOptionsItemSelected(item);
+  }
+
+  private void resetView() {
+    Drawable drawable = ContextCompat.getDrawable(getActivity(),
+        "Photo".equals(mMode) ? R.drawable.ic_camera_black_24dp : R.drawable.ic_qrcode_scan_black_24dp);
+    mPAIcon.setImageDrawable(drawable);
   }
 
   @Override public void onPrepareOptionsMenu(Menu menu) {
