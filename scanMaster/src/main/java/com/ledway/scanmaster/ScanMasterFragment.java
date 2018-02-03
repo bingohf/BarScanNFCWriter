@@ -3,6 +3,7 @@ package com.ledway.scanmaster;
 import android.app.Activity;
 import android.app.Service;
 import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Observer;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -43,14 +44,21 @@ import com.ledway.scanmaster.interfaces.IDGenerator;
 import com.ledway.scanmaster.network.GroupRequest;
 import com.ledway.scanmaster.network.GroupResponse;
 import com.ledway.scanmaster.network.MyNetWork;
+import com.ledway.scanmaster.network.RemoteMenu;
+import com.ledway.scanmaster.network.ServiceApi;
+import com.ledway.scanmaster.network.SpGetMenuRequest;
 import com.ledway.scanmaster.network.SpResponse;
 import com.ledway.scanmaster.network.Sp_getBill_Request;
 import com.ledway.scanmaster.network.Sp_getDetail_Request;
+import com.ledway.scanmaster.utils.JsonUtils;
 import com.zkc.Service.CaptureService;
+import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
+import okhttp3.ResponseBody;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscriber;
@@ -81,6 +89,7 @@ public class ScanMasterFragment extends Fragment {
   private EditText mCurrEdit;
   private BroadcastReceiver scanBroadcastReceiver;
   private String mMode ="Check";
+  private MutableLiveData<RemoteMenu[]> menus = new MutableLiveData<>();
 
   public ScanMasterFragment(){
     setHasOptionsMenu(true);
@@ -92,6 +101,41 @@ public class ScanMasterFragment extends Fragment {
     if(!TextUtils.isEmpty(settings.myTaxNo)){
       mMode = "In";
     }
+    loadMenu();
+    subscribeView();
+  }
+
+  private void subscribeView() {
+    menus.observe(this, remoteMenus -> getActivity().invalidateOptionsMenu());
+  }
+
+  private void loadMenu() {
+    SpGetMenuRequest request = new SpGetMenuRequest();
+    request.line= settings.line;
+    request.reader = settings.reader;
+    request.MyTaxNo = settings.myTaxNo;
+    request.pdaGuid = mIDGenerator.genID() +"~" + getLanguage();
+    MyNetWork.getServiceApi().spGetScanMasterMenu(request).subscribeOn(Schedulers.io()).subscribe(
+        new Subscriber<SpResponse>() {
+          @Override public void onCompleted() {
+
+          }
+
+          @Override public void onError(Throwable e) {
+
+          }
+
+          @Override public void onNext(SpResponse response) {
+            try {
+              RemoteMenu[] tempMenus =
+                  JsonUtils.Companion.fromJson(response.result[0].memotext, RemoteMenu[].class);
+              menus.postValue(tempMenus);
+            } catch (Exception e) {
+              e.printStackTrace();
+              Timber.e(e);
+            }
+          }
+        });
   }
 
   @Nullable @Override
@@ -410,6 +454,17 @@ public class ScanMasterFragment extends Fragment {
     menu.findItem(R.id.action_out).setVisible(!myTaxNo.isEmpty());
     menu.findItem(R.id.action_return).setVisible(!myTaxNo.isEmpty());
     menu.findItem(R.id.action_special).setVisible(!myTaxNo.isEmpty());
+
+    final int remoteGroupId = 1001;
+    menu.removeGroup(remoteGroupId);
+    int i = remoteGroupId;
+    if(menus.getValue() != null) {
+      for (RemoteMenu item : menus.getValue()) {
+        menu.add(remoteGroupId, i++, i , item.menu_Label_Eng);
+      }
+    }
+
+
   }
 
   @OnClick(R2.id.btn_scan) void onBtnScanClick() {

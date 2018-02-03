@@ -1,4 +1,4 @@
-package com.ledway.btprinter.utils
+package com.ledway.scanmaster.utils
 
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializer

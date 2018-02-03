@@ -21,7 +21,7 @@ import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.network.MyProjectApi;
 import com.ledway.btprinter.network.model.ProductAppGetReturn;
 import com.ledway.btprinter.network.model.RestDataSetResponse;
-import com.ledway.btprinter.utils.JsonUtils;
+import com.ledway.scanmaster.utils.JsonUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import rx.Observable;

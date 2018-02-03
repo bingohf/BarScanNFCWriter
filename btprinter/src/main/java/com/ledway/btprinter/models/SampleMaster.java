@@ -18,15 +18,10 @@ import com.ledway.btprinter.network.model.Sp_UpSampleDetail_Request;
 import com.ledway.btprinter.network.model.Sp_UpSampleDetail_Return;
 import com.ledway.btprinter.network.model.Sp_UpSample_v3_Request;
 import com.ledway.btprinter.utils.IOUtil;
-import com.ledway.btprinter.utils.JsonUtils;
+import com.ledway.scanmaster.utils.JsonUtils;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FilterInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -34,7 +29,6 @@ import java.util.List;
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Action0;
-import rx.functions.Action1;
 import rx.functions.Func1;
 
 /**
