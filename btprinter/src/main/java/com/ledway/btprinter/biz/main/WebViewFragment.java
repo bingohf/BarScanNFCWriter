@@ -1,5 +1,7 @@
 package com.ledway.btprinter.biz.main;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -62,8 +64,13 @@ public class WebViewFragment extends Fragment implements OnKeyPress {
 
     mWebView.setWebViewClient(new WebViewClient() {
       @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        // view.loadUrl(url);
-        return false;
+        if (url != null && url.endsWith("pdf")) {
+          view.getContext().startActivity(
+              new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+          return true;
+        } else {
+          return false;
+        }
       }
 
       @Override public void onPageFinished(WebView view, String url) {
