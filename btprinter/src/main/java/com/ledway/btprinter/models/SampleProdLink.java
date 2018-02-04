@@ -12,7 +12,7 @@ import java.util.Date;
 @Table(name = "SampleProdLink")
 public class SampleProdLink extends Model{
 
-  @Column(name = "link_id", unique = true, onUniqueConflict = Column.ConflictAction.FAIL)
+  @Column(name = "link_id", unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)
   public String link_id;
 
   @Column(name = "sample_id")
