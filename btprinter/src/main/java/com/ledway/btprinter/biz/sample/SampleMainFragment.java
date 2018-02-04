@@ -12,6 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
+import android.text.TextUtils;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -321,15 +322,12 @@ public class SampleMainFragment extends Fragment {
 
   private Observable<Object> uploadProduct() {
     StringBuilder sb = new StringBuilder();
+    sb.append(" 1 > 2");
     ArrayList<String> ids = new ArrayList<>();
-    boolean isFirst = true;
     for (SampleProdLink item : mSampleMaster.sampleProdLinks) {
-      if (!isFirst) {
-        sb.append(" or ");
-      }
+      sb.append(" or ");
       ids.add(item.prod_id);
       sb.append(" prodno =?");
-      isFirst = false;
     }
     String where =
         "( " + sb.toString() + ") and (uploaded_time is NULL  or update_time > uploaded_time)";
@@ -338,7 +336,20 @@ public class SampleMainFragment extends Fragment {
         .map((Func1<Pair<String, String[]>, List<TodoProd>>) stringPair -> new Select().from(
             TodoProd.class).where(stringPair.first, stringPair.second).execute())
         .flatMap(Observable::from)
-        .flatMap(todoProd -> todoProd.remoteSave2()).subscribeOn(Schedulers.io()).ignoreElements().cast(Object.class);
+        .flatMap(todoProd -> todoProd.remoteSave2()
+            .flatMap(spReturnRestSpResponse -> {
+              int returnCode = spReturnRestSpResponse.result.get(0).errCode;
+              String returnMessage =  spReturnRestSpResponse.result.get(0).errData;
+              if (returnCode == 1){
+                todoProd.uploaded_time = new Date();
+                todoProd.save();
+              }else {
+                return Observable.error(new Exception(returnMessage));
+              }
+
+              return Observable.just(spReturnRestSpResponse);
+            })
+        ).subscribeOn(Schedulers.io()).ignoreElements().cast(Object.class);
   }
 
   private Observable<Object> uploadSample(){

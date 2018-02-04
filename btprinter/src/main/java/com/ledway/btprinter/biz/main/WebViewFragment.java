@@ -16,6 +16,7 @@ import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 
 /**
@@ -26,7 +27,7 @@ public class WebViewFragment extends Fragment implements OnKeyPress {
   private static final String URL = "http://ledwayazure.cloudapp.net/mobile";
   @BindView(R.id.webView) WebView mWebView;
   @BindView(R.id.progressBar) ProgressBar mProgressBar;
-
+  private String param;
   public WebViewFragment() {
     setRetainInstance(true);
   }
@@ -69,7 +70,9 @@ public class WebViewFragment extends Fragment implements OnKeyPress {
               new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
           return true;
         } else {
-          return false;
+
+          view.loadUrl(url);
+          return true;
         }
       }
 
