@@ -7,14 +7,21 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Vibrator;
+import android.provider.MediaStore;
 import android.serialport.api.SerialPort;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -51,8 +58,15 @@ import com.ledway.scanmaster.network.SpGetMenuRequest;
 import com.ledway.scanmaster.network.SpResponse;
 import com.ledway.scanmaster.network.Sp_getBill_Request;
 import com.ledway.scanmaster.network.Sp_getDetail_Request;
+import com.ledway.scanmaster.utils.IOUtil;
 import com.ledway.scanmaster.utils.JsonUtils;
 import com.zkc.Service.CaptureService;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
@@ -69,9 +83,10 @@ import timber.log.Timber;
  */
 
 public class ScanMasterFragment extends Fragment {
-  final int GROUP_ID = 1001;
+  static final int REQUEST_TAKE_PHOTO = 3;
   private static final int REQUEST_GROUP = 1;
   private static final int REQUEST_BAR_CODE = 2;
+  final int GROUP_ID = 1001;
   @Inject Settings settings;
   @Inject IDGenerator mIDGenerator;
   @BindView(R2.id.txt_bill_no) EditText mTxtBill;
@@ -80,6 +95,7 @@ public class ScanMasterFragment extends Fragment {
   @BindView(R2.id.web_response) WebView mWebResponse;
   @BindView(R2.id.btn_scan) Button mBtnScan;
   @BindView(R2.id.btn_camera_scan_barcode) ImageView mPAIcon;
+  String mCurrentPhotoPath;
   private Vibrator vibrator;
   private CompositeSubscription mSubscriptions = new CompositeSubscription();
   private DBCommand dbCommand = new DBCommand();
@@ -87,104 +103,12 @@ public class ScanMasterFragment extends Fragment {
   private boolean mContinueScan;
   private EditText mCurrEdit;
   private BroadcastReceiver scanBroadcastReceiver;
-  private String mMode ="Check";
+  private String mMode = "Check";
   private MutableLiveData<RemoteMenu[]> menus = new MutableLiveData<>();
 
-  public ScanMasterFragment(){
+  public ScanMasterFragment() {
     setHasOptionsMenu(true);
   }
-  @Override public void onCreate(@Nullable Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    ((MApp) getActivity().getApplication()).getAppComponet().inject(this);
-    vibrator = (Vibrator) getActivity().getApplication().getSystemService(Service.VIBRATOR_SERVICE);
-    if(!TextUtils.isEmpty(settings.myTaxNo)){
-      mMode = "In";
-    }
-    loadMenu();
-    subscribeView();
-  }
-
-  private void subscribeView() {
-    menus.observe(this, remoteMenus -> getActivity().invalidateOptionsMenu());
-  }
-
-  private void loadMenu() {
-    SpGetMenuRequest request = new SpGetMenuRequest();
-    request.line= settings.line;
-    request.reader = settings.reader;
-    request.MyTaxNo = settings.myTaxNo;
-    request.pdaGuid = mIDGenerator.genID() +"~" + getLanguage();
-    MyNetWork.getServiceApi().spGetScanMasterMenu(request).subscribeOn(Schedulers.io()).subscribe(
-        new Subscriber<SpResponse>() {
-          @Override public void onCompleted() {
-
-          }
-
-          @Override public void onError(Throwable e) {
-
-          }
-
-          @Override public void onNext(SpResponse response) {
-            try {
-              RemoteMenu[] tempMenus =
-                  JsonUtils.Companion.fromJson(response.result[0].memotext, RemoteMenu[].class);
-              menus.postValue(tempMenus);
-            } catch (Exception e) {
-              e.printStackTrace();
-              Timber.e(e);
-            }
-          }
-        });
-  }
-
-  @Nullable @Override
-  public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.activity_scan_master_main, container, false);
-  }
-
-  @Override public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-    super.onViewCreated(view, savedInstanceState);
-    ButterKnife.bind(this, view);
-    mWebResponse.getSettings().setJavaScriptEnabled(false);
-    mTxtBarcode.requestFocus();
-    listenKeyCode();
-    receiveZkcCode();
-
-
-    mSubscriptions.add(Observable.merge(RxTextView.editorActionEvents(mTxtBarcode),
-        RxTextView.editorActionEvents(mTxtBill))
-        // .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(actionEvent -> {
-          onEditAction(actionEvent.view(), actionEvent.actionId(), actionEvent.keyEvent());
-        }));
-    Timber.v(mIDGenerator.genID());
-
-    settingChanged();
-    ScanMasterViewModel.getInstance().reader.observe(this, reader -> {
-      settings.setReader(reader);
-      settingChanged();
-    });
-  }
-
-  @Override public void onStart() {
-    super.onStart();
-    CaptureService.scanGpio.openPower();
-  }
-
-  @Override public void onDestroyView() {
-    super.onDestroyView();
-    mSubscriptions.clear();
-    closeScan();
-    getActivity().getApplication().unregisterReceiver(scanBroadcastReceiver);
-    getActivity().getApplication().unregisterReceiver(sysBroadcastReceiver);
-  }
-
-  private void closeScan() {
-    CaptureService.scanGpio.closeScan();
-    CaptureService.scanGpio.closePower();
-  }
-
 
   private void listenKeyCode() {
 
@@ -211,24 +135,6 @@ public class ScanMasterFragment extends Fragment {
     getActivity().getApplication().registerReceiver(sysBroadcastReceiver, screenStatusIF);
   }
 
-  private void hideInputMethod() {
-    if (mCurrEdit != null) {
-      InputMethodManager inputMethodManager =
-          (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
-      inputMethodManager.hideSoftInputFromWindow(mCurrEdit.getWindowToken(), 0);
-    }
-  }
-
-  private void settingChanged() {
-    String connectionStr =
-        String.format("jdbc:jtds:sqlserver://%s;DatabaseName=%s;charset=UTF8", settings.getServer(),
-            settings.getDb());
-    Timber.v(connectionStr);
-    dbCommand.setConnectionString(connectionStr);
-
-    mBtnScan.setText("PDA#" + settings.getLine() + " / " + settings.getReader());
-  }
-
   boolean onEditAction(TextView view, int actionId, KeyEvent keyEvent) {
     try {
       Timber.v("onEditAction");
@@ -244,38 +150,20 @@ public class ScanMasterFragment extends Fragment {
       Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
     }
     InputMethodManager inputMethodManager =
-        (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-    inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+    if(inputMethodManager != null) {
+      inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
     return true;
   }
 
-  private void queryBill() throws InvalidBarCodeException {
-    String billNo = mTxtBill.getText().toString();
-   // validBarCode(billNo);
-    mTxtBill.setEnabled(false);
-    mLoading.setVisibility(View.VISIBLE);
-    mWebResponse.setVisibility(View.GONE);
-    Sp_getBill_Request request = new Sp_getBill_Request();
-    request.billNo = billNo;
-    request.line= settings.line;
-    request.reader = settings.reader;
-    request.type = mMode;
-    request.MyTaxNo = settings.myTaxNo;
-    request.pdaGuid = mIDGenerator.genID() +"~" + getLanguage();
-    mSubscriptions.add(MyNetWork.getServiceApi().sp_getBill(request)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnUnsubscribe(() -> {
-              mTxtBill.setEnabled(true);
-              mLoading.setVisibility(View.GONE);
-              mWebResponse.setVisibility(View.VISIBLE);
-            })
-            .subscribe(this::showResponse, this::showWarning));
+  private void showResponse(SpResponse spResponse) {
+    showResponse(spResponse.result[0].memotext);
   }
 
   private void showResponse(String s) {
     Timber.v(s);
-    if(s != null) {
+    if (s != null) {
       mWebResponse.loadData(s, "text/html; charset=utf-8", "UTF-8");
       //mWebResponse.setBackgroundColor(Color.parseColor("#eeeeee"));
       alertWarning(s);
@@ -299,40 +187,6 @@ public class ScanMasterFragment extends Fragment {
           .create()
           .show();
     }
-  }
-
-  private void queryBarCode() throws InvalidBarCodeException {
-    String billNo = mTxtBill.getText().toString();
-    String barCode = mTxtBarcode.getText().toString();
-    //validBarCode(billNo);
-   // validBarCode(barCode);
-    mTxtBarcode.setEnabled(false);
-    mLoading.setVisibility(View.VISIBLE);
-    mWebResponse.setVisibility(View.GONE);
-    Timber.v("start_query");
-
-    Sp_getDetail_Request request = new Sp_getDetail_Request();
-    request.line = settings.line;
-    request.reader = settings.reader;
-    request.billNo = billNo;
-    request.detailNo = barCode;
-    request.MyTaxNo = settings.myTaxNo;
-    request.pdaGuid = mIDGenerator.genID() +"~" + getLanguage();
-    request.type = mMode;
-    mSubscriptions.add(MyNetWork.getServiceApi().sp_UpSampleDetail(request)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .doOnUnsubscribe(() -> {
-          mLoading.setVisibility(View.GONE);
-          mWebResponse.setVisibility(View.VISIBLE);
-          mTxtBarcode.setEnabled(true);
-          Timber.v("end_query");
-        })
-        .subscribe(this::showResponse, this::showWarning));
-  }
-
-  private void showResponse(SpResponse spResponse) {
-    showResponse(spResponse.result[0].memotext);
   }
 
   private void validBarCode(String barcode) throws InvalidBarCodeException {
@@ -374,6 +228,206 @@ public class ScanMasterFragment extends Fragment {
     getActivity().getApplication().registerReceiver(scanBroadcastReceiver, intentFilter);
   }
 
+  @OnFocusChange({ R2.id.txt_barcode, R2.id.txt_bill_no }) void onEditFocusChange(View view,
+      boolean hasFocus) {
+    if (hasFocus) {
+      mCurrEdit = (EditText) view;
+    }
+  }
+
+  @OnClick(R2.id.btn_scan) void onBtnScanClick() {
+    mContinueScan = true;
+    openScan();
+  }
+
+  protected void openScan() {
+    SerialPort.CleanBuffer();
+    CaptureService.scanGpio.openScan();
+  }
+
+  @OnClick(R2.id.btn_camera_scan_bill) void onBillCameraClick() {
+    mCurrEdit = mTxtBill;
+    mCurrEdit.requestFocus();
+    startActivityForResult(new Intent("android.intent.action.full.scanner"), REQUEST_BAR_CODE);
+  }
+
+  @OnClick(R2.id.btn_camera_scan_barcode) void onBarCodeCameraClick() {
+    mCurrEdit = mTxtBarcode;
+    mCurrEdit.requestFocus();
+    startActivityForResult(new Intent("android.intent.action.full.scanner"), REQUEST_BAR_CODE);
+  }
+
+  @OnClick(R2.id.btn_photo) void  onBtnPhotoClick(){
+    dispatchTakePictureIntent();
+  }
+
+  @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    switch (requestCode) {
+      case REQUEST_BAR_CODE: {
+        if (resultCode == Activity.RESULT_OK) {
+          String barCode = data.getStringExtra("barcode");
+          receiveCode(barCode);
+        }
+        break;
+      }
+      case REQUEST_GROUP: {
+        if (resultCode == Activity.RESULT_OK) {
+          String barCode = data.getStringExtra("barcode");
+          receiveGroup(barCode);
+        }
+        break;
+      }
+      case REQUEST_TAKE_PHOTO:{
+        if (resultCode == Activity.RESULT_OK) {
+          try {
+            queryBill(mCurrentPhotoPath);
+            mCurrentPhotoPath = null;
+          } catch (InvalidBarCodeException e) {
+            Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+          }
+        }
+        break;
+      }
+    }
+  }
+
+  @Override public void onCreate(@Nullable Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    ((MApp) getActivity().getApplication()).getAppComponet().inject(this);
+    vibrator = (Vibrator) getActivity().getApplication().getSystemService(Service.VIBRATOR_SERVICE);
+    if (!TextUtils.isEmpty(settings.myTaxNo)) {
+      mMode = "In";
+    }
+    loadMenu();
+    subscribeView();
+  }
+
+  private void subscribeView() {
+    menus.observe(this, remoteMenus -> getActivity().invalidateOptionsMenu());
+  }
+
+  private void loadMenu() {
+    SpGetMenuRequest request = new SpGetMenuRequest();
+    request.line = settings.line;
+    request.reader = settings.reader;
+    request.MyTaxNo = settings.myTaxNo;
+    request.pdaGuid = mIDGenerator.genID() + "~" + getLanguage();
+    MyNetWork.getServiceApi()
+        .spGetScanMasterMenu(request)
+        .subscribeOn(Schedulers.io())
+        .subscribe(new Subscriber<SpResponse>() {
+          @Override public void onCompleted() {
+
+          }
+
+          @Override public void onError(Throwable e) {
+
+          }
+
+          @Override public void onNext(SpResponse response) {
+            try {
+              RemoteMenu[] tempMenus =
+                  JsonUtils.Companion.fromJson(response.result[0].memotext, RemoteMenu[].class);
+              menus.postValue(tempMenus);
+            } catch (Exception e) {
+              e.printStackTrace();
+              Timber.e(e);
+            }
+          }
+        });
+  }
+
+  private String getLanguage() {
+    Locale locale = Locale.getDefault();
+    return locale.getLanguage() + "_" + locale.getCountry();
+  }
+
+  @Nullable @Override
+  public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+      @Nullable Bundle savedInstanceState) {
+    return inflater.inflate(R.layout.activity_scan_master_main, container, false);
+  }
+
+  @Override public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+    ButterKnife.bind(this, view);
+    mWebResponse.getSettings().setJavaScriptEnabled(false);
+    mTxtBarcode.requestFocus();
+    listenKeyCode();
+    receiveZkcCode();
+
+    mSubscriptions.add(Observable.merge(RxTextView.editorActionEvents(mTxtBarcode),
+        RxTextView.editorActionEvents(mTxtBill))
+        // .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(actionEvent -> {
+          onEditAction(actionEvent.view(), actionEvent.actionId(), actionEvent.keyEvent());
+        }));
+    Timber.v(mIDGenerator.genID());
+
+    settingChanged();
+    ScanMasterViewModel.getInstance().reader.observe(this, reader -> {
+      settings.setReader(reader);
+      settingChanged();
+    });
+  }
+
+  @Override public void onStart() {
+    super.onStart();
+    CaptureService.scanGpio.openPower();
+  }
+
+  @Override public void onDestroyView() {
+    super.onDestroyView();
+    mSubscriptions.clear();
+    closeScan();
+    getActivity().getApplication().unregisterReceiver(scanBroadcastReceiver);
+    getActivity().getApplication().unregisterReceiver(sysBroadcastReceiver);
+  }
+
+  private void closeScan() {
+    CaptureService.scanGpio.closeScan();
+    CaptureService.scanGpio.closePower();
+  }
+
+  @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    super.onCreateOptionsMenu(menu, inflater);
+    inflater.inflate(R.menu.menu_scan_master_main, menu);
+  }
+
+  @Override public void onPrepareOptionsMenu(Menu menu) {
+    super.onPrepareOptionsMenu(menu);
+    menu.findItem(R.id.action_label).setTitle(mMode);
+    menu.removeGroup(GROUP_ID);
+    int i = 0;
+    if (menus.getValue() != null) {
+      for (RemoteMenu item : menus.getValue()) {
+        menu.add(GROUP_ID, i++, i, item.menu_Label_Eng)
+            .setCheckable(true)
+            .setChecked(item.menu_Label_Eng.equals(mMode));
+      }
+    }
+    menu.setGroupCheckable(GROUP_ID, true, true);
+  }
+
+  @Override public boolean onOptionsItemSelected(MenuItem item) {
+    int id = item.getItemId();
+    if (id == R.id.action_set_group) {
+      startActivityForResult(new Intent("android.intent.action.full.scanner"), REQUEST_GROUP);
+    }
+    if (item.getGroupId() == GROUP_ID) {
+      item.setChecked(true);
+      int index = item.getItemId();
+      if (menus.getValue() != null) {
+        mMode = menus.getValue()[index].menu_Label_Eng;
+      }
+    }
+    if (getActivity() != null) {
+      getActivity().invalidateOptionsMenu();
+    }
+    return super.onOptionsItemSelected(item);
+  }
+
   private void receiveCode(String code) {
 
     hideInputMethod();
@@ -397,97 +451,88 @@ public class ScanMasterFragment extends Fragment {
     }
   }
 
-  protected void openScan() {
-    SerialPort.CleanBuffer();
-    CaptureService.scanGpio.openScan();
-  }
-
-  @OnFocusChange({ R2.id.txt_barcode, R2.id.txt_bill_no }) void onEditFocusChange(View view,
-      boolean hasFocus) {
-    if (hasFocus) {
-      mCurrEdit = (EditText) view;
+  private void hideInputMethod() {
+    if (mCurrEdit != null) {
+      InputMethodManager inputMethodManager =
+          (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
+      inputMethodManager.hideSoftInputFromWindow(mCurrEdit.getWindowToken(), 0);
     }
   }
 
-  @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-    super.onCreateOptionsMenu(menu, inflater);
-    inflater.inflate(R.menu.menu_scan_master_main, menu);
+  private void queryBill() throws InvalidBarCodeException {
+    queryBill(null);
   }
 
-  @Override public boolean onOptionsItemSelected(MenuItem item) {
-    int id = item.getItemId();
-   if (id == R.id.action_set_group){
-      startActivityForResult(new Intent("android.intent.action.full.scanner"), REQUEST_GROUP);
-    }
-    if(item.getGroupId() ==GROUP_ID) {
-      item.setChecked(true);
-      int index = item.getItemId();
-      if(menus.getValue() != null) {
-        mMode = menus.getValue()[index].menu_Label_Eng;
-      }
-    }
-    if(getActivity() != null) {
-      getActivity().invalidateOptionsMenu();
-    }
-    resetView();
-    return super.onOptionsItemSelected(item);
-  }
-
-  private void resetView() {
-    Drawable drawable = ContextCompat.getDrawable(getActivity(),
-        "Photo".equals(mMode) ? R.drawable.ic_camera_black_24dp : R.drawable.ic_qrcode_scan_black_24dp);
-    mPAIcon.setImageDrawable(drawable);
-  }
-
-  @Override public void onPrepareOptionsMenu(Menu menu) {
-    super.onPrepareOptionsMenu(menu);
-    menu.findItem(R.id.action_label).setTitle(mMode);
-    menu.removeGroup(GROUP_ID);
-    int i = 0;
-    if(menus.getValue() != null) {
-      for (RemoteMenu item : menus.getValue()) {
-        menu.add(GROUP_ID, i++, i , item.menu_Label_Eng).setCheckable(true).setChecked(item.menu_Label_Eng.equals(mMode));
-      }
-    }
-    menu.setGroupCheckable(GROUP_ID, true, true);
-  }
-
-  @OnClick(R2.id.btn_scan) void onBtnScanClick() {
-    mContinueScan = true;
-    openScan();
-  }
-
-  @OnClick(R2.id.btn_camera_scan_bill) void onBillCameraClick() {
-    mCurrEdit = mTxtBill;
-    mCurrEdit.requestFocus();
-    startActivityForResult(new Intent("android.intent.action.full.scanner"), REQUEST_BAR_CODE);
-
-  }
-
-  @OnClick(R2.id.btn_camera_scan_barcode) void onBarCodeCameraClick() {
-    mCurrEdit = mTxtBarcode;
-    mCurrEdit.requestFocus();
-    startActivityForResult(new Intent("android.intent.action.full.scanner"), REQUEST_BAR_CODE);
-  }
-
-  @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
-    super.onActivityResult(requestCode, resultCode, data);
-    switch (requestCode){
-      case REQUEST_BAR_CODE:{
-        if(resultCode == Activity.RESULT_OK){
-          String barCode = data.getStringExtra("barcode");
-          receiveCode(barCode);
+  private void queryBill(String photoPath) throws InvalidBarCodeException {
+    String billNo = mTxtBill.getText().toString();
+    // validBarCode(billNo);
+    mTxtBill.setEnabled(false);
+    mLoading.setVisibility(View.VISIBLE);
+    mWebResponse.setVisibility(View.GONE);
+    Sp_getBill_Request request = new Sp_getBill_Request();
+    request.billNo = billNo;
+    request.line = settings.line;
+    request.reader = settings.reader;
+    request.type = mMode;
+    request.MyTaxNo = settings.myTaxNo;
+    if(!TextUtils.isEmpty(photoPath)){
+      File photoFile = new File(mCurrentPhotoPath);
+      if(photoFile.exists()){
+        try {
+          Bitmap bitmap512 = IOUtil.scaleCrop(photoFile, 512);
+          request.graphic = IOUtil.bitmapToBase64(bitmap512, 70);
+          bitmap512.recycle();
+          Bitmap bitmap128 = IOUtil.scaleCrop(photoFile, 128);
+          request.graphic2 = IOUtil.bitmapToBase64(bitmap128, 70);
+          bitmap128.recycle();
+        } catch (FileNotFoundException e) {
+          e.printStackTrace();
         }
-        break;
-      }
-      case REQUEST_GROUP:{
-        if(resultCode == Activity.RESULT_OK) {
-          String barCode = data.getStringExtra("barcode");
-          receiveGroup(barCode);
-        }
-        break;
       }
     }
+
+    request.pdaGuid = mIDGenerator.genID() + "~" + getLanguage();
+    mSubscriptions.add(MyNetWork.getServiceApi()
+        .sp_getBill(request)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .doOnUnsubscribe(() -> {
+          mTxtBill.setEnabled(true);
+          mLoading.setVisibility(View.GONE);
+          mWebResponse.setVisibility(View.VISIBLE);
+        })
+        .subscribe(this::showResponse, this::showWarning));
+  }
+
+  private void queryBarCode() throws InvalidBarCodeException {
+    String billNo = mTxtBill.getText().toString();
+    String barCode = mTxtBarcode.getText().toString();
+    //validBarCode(billNo);
+    // validBarCode(barCode);
+    mTxtBarcode.setEnabled(false);
+    mLoading.setVisibility(View.VISIBLE);
+    mWebResponse.setVisibility(View.GONE);
+    Timber.v("start_query");
+
+    Sp_getDetail_Request request = new Sp_getDetail_Request();
+    request.line = settings.line;
+    request.reader = settings.reader;
+    request.billNo = billNo;
+    request.detailNo = barCode;
+    request.MyTaxNo = settings.myTaxNo;
+    request.pdaGuid = mIDGenerator.genID() + "~" + getLanguage();
+    request.type = mMode;
+    mSubscriptions.add(MyNetWork.getServiceApi()
+        .sp_UpSampleDetail(request)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .doOnUnsubscribe(() -> {
+          mLoading.setVisibility(View.GONE);
+          mWebResponse.setVisibility(View.VISIBLE);
+          mTxtBarcode.setEnabled(true);
+          Timber.v("end_query");
+        })
+        .subscribe(this::showResponse, this::showWarning));
   }
 
   private void receiveGroup(String barCode) {
@@ -496,32 +541,88 @@ public class ScanMasterFragment extends Fragment {
     progressDialog.show();
     GroupRequest request = new GroupRequest();
     request.macNo = getArguments().getString("macNo");
-    MyNetWork.getServiceApi().getGroup(barCode,request)
+    MyNetWork.getServiceApi()
+        .getGroup(barCode, request)
         .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread()).subscribe(new Subscriber<GroupResponse>() {
-      @Override public void onCompleted() {
-        progressDialog.dismiss();
-      }
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Subscriber<GroupResponse>() {
+          @Override public void onCompleted() {
+            progressDialog.dismiss();
+          }
 
-      @Override public void onError(Throwable e) {
-        progressDialog.dismiss();
-        Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
-      }
+          @Override public void onError(Throwable e) {
+            progressDialog.dismiss();
+            Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+          }
 
-      @Override public void onNext(GroupResponse groupResponse) {
-        Toast.makeText(getActivity(),R.string.group_success, Toast.LENGTH_LONG).show();
-        settings.setMyTaxNo(groupResponse.result[0].myTaxNo);
-        settings.setLine(groupResponse.result[0].line);
-        settingChanged();
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getString(R.string.app_name) + "(" + settings.myTaxNo +")");
-        mMode ="In";
-        getActivity().invalidateOptionsMenu();
-      }
-    });
+          @Override public void onNext(GroupResponse groupResponse) {
+            Toast.makeText(getActivity(), R.string.group_success, Toast.LENGTH_LONG).show();
+            settings.setMyTaxNo(groupResponse.result[0].myTaxNo);
+            settings.setLine(groupResponse.result[0].line);
+            settingChanged();
+            ((AppCompatActivity) getActivity()).getSupportActionBar()
+                .setTitle(getString(R.string.app_name) + "(" + settings.myTaxNo + ")");
+            mMode = "In";
+            getActivity().invalidateOptionsMenu();
+          }
+        });
   }
 
-  private String getLanguage(){
-    Locale locale = Locale.getDefault();
-    return locale.getLanguage() +"_" + locale.getCountry();
+  private void settingChanged() {
+    String connectionStr =
+        String.format("jdbc:jtds:sqlserver://%s;DatabaseName=%s;charset=UTF8", settings.getServer(),
+            settings.getDb());
+    Timber.v(connectionStr);
+    dbCommand.setConnectionString(connectionStr);
+
+    mBtnScan.setText("PDA#" + settings.getLine() + " / " + settings.getReader());
   }
+
+  private void dispatchTakePictureIntent() {
+    Context context = getActivity();
+    if(context == null) return;
+    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+    // Ensure that there's a camera activity to handle the intent
+    if (takePictureIntent.resolveActivity(context.getPackageManager()) != null) {
+      // Create the File where the photo should go
+      File photoFile = null;
+      try {
+        photoFile = createImageFile();
+      } catch (IOException ex) {
+        Timber.e(ex);
+      }
+      // Continue only if the File was successfully created
+      if (photoFile != null) {
+        Uri photoURI =
+            FileProvider.getUriForFile(context, "com.ledway.sales_edge.fileprovider", photoFile);
+        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+        List<ResolveInfo> resolvedIntentActivities =
+            context. getPackageManager().queryIntentActivities(takePictureIntent,
+                PackageManager.MATCH_DEFAULT_ONLY);
+        for (ResolveInfo resolvedIntentInfo : resolvedIntentActivities) {
+          String packageName = resolvedIntentInfo.activityInfo.packageName;
+          context.grantUriPermission(packageName, photoURI,
+              Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        }
+        startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+      }
+    }
+  }
+
+  private File createImageFile() throws IOException {
+    // Create an image file name
+    Context  context = getActivity();
+    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+    String imageFileName = "JPEG_" + timeStamp + "_";
+    File storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+    File image = File.createTempFile(imageFileName,  /* prefix */
+        ".jpg",         /* suffix */
+        storageDir      /* directory */);
+
+    // Save a file: path for use with ACTION_VIEW intents
+    mCurrentPhotoPath = image.getAbsolutePath();
+    return image;
+  }
+
+
 }

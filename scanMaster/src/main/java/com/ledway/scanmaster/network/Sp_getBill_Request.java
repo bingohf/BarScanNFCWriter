@@ -13,4 +13,7 @@ public class Sp_getBill_Request {
   public String billNo;
 
   public String pdaGuid;
+  public String graphic;
+  public String graphic2;
+
 }

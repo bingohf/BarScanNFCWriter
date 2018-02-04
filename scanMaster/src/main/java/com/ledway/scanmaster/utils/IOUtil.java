@@ -1,12 +1,9 @@
-package com.ledway.btprinter.utils;
+package com.ledway.scanmaster.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapRegionDecoder;
-import android.graphics.Matrix;
-import android.graphics.Rect;
-import com.example.android.common.logger.Log;
 import java.io.*;
+import timber.log.Timber;
 
 public class IOUtil {
 
@@ -92,8 +89,37 @@ public class IOUtil {
 
        } catch (IOException e) {
            e.printStackTrace();
-           Log.e("cropImage", e.getMessage(), e);
+           Timber.e(e);
        }
    }
+
+   public static Bitmap scaleCrop(File sourceImage, final int widthHeight) throws FileNotFoundException {
+       BitmapFactory.Options tmpOptions = new BitmapFactory.Options();
+       tmpOptions.inJustDecodeBounds = true;
+       BitmapFactory.decodeStream( new FileInputStream(sourceImage), null, tmpOptions);
+       int width = tmpOptions.outWidth;
+       int height = tmpOptions.outHeight;
+       int resizeWidth = Math.min(widthHeight, width);
+       int resizeHeight = Math.min(widthHeight, height);
+       float scaleWidth = ((float) resizeWidth) / width;
+       float scaleHeight = ((float) resizeHeight) / height;
+       float scale = Math.max(scaleWidth, scaleHeight);
+       Bitmap b= BitmapFactory.decodeFile(sourceImage.getAbsolutePath());
+       Bitmap out = Bitmap.createScaledBitmap(b,(int) (scale * width), (int)(scale *height), false);
+       int x = (out.getWidth() - resizeWidth) /2;
+       int y = (out.getHeight() - resizeHeight) /2;
+       Bitmap dstBmp = Bitmap.createBitmap(out, x, y, resizeWidth, resizeHeight);
+       //dstBmp.compress(Bitmap.CompressFormat.JPEG, 70, new FileOutputStream(sourceImage));
+       out.recycle();
+       return dstBmp;
+   }
+
+   public static String bitmapToBase64(Bitmap bitmap, final int quality){
+       ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+       bitmap.compress(Bitmap.CompressFormat.PNG, quality, byteArrayOutputStream);
+       byte[] byteArray = byteArrayOutputStream .toByteArray();
+       return android.util.Base64.encodeToString(byteArray, android.util.Base64.DEFAULT);
+   }
+
 
 }

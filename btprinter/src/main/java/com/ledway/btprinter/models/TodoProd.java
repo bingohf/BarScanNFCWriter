@@ -10,7 +10,7 @@ import com.ledway.btprinter.network.MyProjectApi;
 import com.ledway.btprinter.network.model.RestSpResponse;
 import com.ledway.btprinter.network.model.SpReturn;
 import com.ledway.btprinter.network.model.Sp_UpProduct_Request;
-import com.ledway.btprinter.utils.IOUtil;
+import com.ledway.scanmaster.utils.IOUtil;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;

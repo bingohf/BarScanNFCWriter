@@ -16,7 +16,7 @@ import com.ledway.btprinter.models.TodoProd;
 import com.ledway.btprinter.network.MyProjectApi;
 import com.ledway.btprinter.network.model.ProductReturn;
 import com.ledway.btprinter.network.model.RestDataSetResponse;
-import com.ledway.btprinter.utils.IOUtil;
+import com.ledway.scanmaster.utils.IOUtil;
 import com.ledway.btprinter.views.MImageView;
 import java.io.ByteArrayInputStream;
 import java.io.File;
