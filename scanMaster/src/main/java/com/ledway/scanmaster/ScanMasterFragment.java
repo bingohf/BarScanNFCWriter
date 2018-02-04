@@ -402,7 +402,10 @@ public class ScanMasterFragment extends Fragment {
     int i = 0;
     if (menus.getValue() != null) {
       for (RemoteMenu item : menus.getValue()) {
-        menu.add(GROUP_ID, i++, i, item.menu_Label_Eng)
+        if(TextUtils.isEmpty(item.menu_name)){
+          item.menu_name = item.menu_Label_Eng;
+        }
+        menu.add(GROUP_ID, i++, i, item.menu_name)
             .setCheckable(true)
             .setChecked(item.menu_Label_Eng.equals(mMode));
       }
@@ -475,6 +478,7 @@ public class ScanMasterFragment extends Fragment {
     request.reader = settings.reader;
     request.type = mMode;
     request.MyTaxNo = settings.myTaxNo;
+    Observable<SpResponse> apiOb = MyNetWork.getServiceApi().sp_getBill(request);
     if(!TextUtils.isEmpty(photoPath)){
       File photoFile = new File(mCurrentPhotoPath);
       if(photoFile.exists()){
@@ -485,6 +489,7 @@ public class ScanMasterFragment extends Fragment {
           Bitmap bitmap128 = IOUtil.scaleCrop(photoFile, 128);
           request.graphic2 = IOUtil.bitmapToBase64(bitmap128, 70);
           bitmap128.recycle();
+          apiOb = MyNetWork.getServiceApi().sp_getBill_photo(request);
         } catch (FileNotFoundException e) {
           e.printStackTrace();
         }
@@ -492,8 +497,7 @@ public class ScanMasterFragment extends Fragment {
     }
 
     request.pdaGuid = mIDGenerator.genID() + "~" + getLanguage();
-    mSubscriptions.add(MyNetWork.getServiceApi()
-        .sp_getBill(request)
+    mSubscriptions.add(apiOb
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .doOnUnsubscribe(() -> {

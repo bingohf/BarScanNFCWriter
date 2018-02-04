@@ -6,6 +6,7 @@ package com.ledway.scanmaster.network;
 
 public class RemoteMenu {
   public String menu_Label_Eng;
+  public String menu_name;
   public Dict[] dict;
   public static class Dict{
     public String CHINESE;

@@ -17,6 +17,9 @@ public interface ServiceApi {
   @POST("Sp/sp_getBill") Observable<SpResponse> sp_getBill(@Body
       Sp_getBill_Request request);
 
+  @POST("Sp/sp_getBill_Photo") Observable<SpResponse> sp_getBill_photo(@Body
+      Sp_getBill_Request request);
+
   @POST("Sp/sp_getDetail") Observable<SpResponse> sp_UpSampleDetail(@Body
       Sp_getDetail_Request request);
 
