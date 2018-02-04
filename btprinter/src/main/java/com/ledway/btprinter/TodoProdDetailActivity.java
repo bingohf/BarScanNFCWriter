@@ -28,7 +28,7 @@ import com.activeandroid.query.Select;
 import com.ledway.btprinter.models.TodoProd;
 import com.ledway.btprinter.network.model.RestSpResponse;
 import com.ledway.btprinter.network.model.SpReturn;
-import com.ledway.btprinter.utils.ContextUtils;
+import com.ledway.scanmaster.utils.ContextUtils;
 import com.ledway.scanmaster.utils.IOUtil;
 import com.ledway.btprinter.views.MImageView;
 import com.ledway.framework.FullScannerActivity;

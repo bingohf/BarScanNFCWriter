@@ -34,7 +34,7 @@ import com.ledway.btprinter.R;
 import com.ledway.btprinter.TodoProdDetailActivity;
 import com.ledway.scanmaster.model.Resource;
 import com.ledway.btprinter.models.TodoProd;
-import com.ledway.btprinter.utils.ContextUtils;
+import com.ledway.scanmaster.utils.ContextUtils;
 import com.ledway.framework.FullScannerActivity;
 import io.reactivex.disposables.CompositeDisposable;
 import java.util.ArrayList;

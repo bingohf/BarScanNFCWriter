@@ -1,9 +1,9 @@
-package com.ledway.btprinter.utils;
+package com.ledway.scanmaster.utils;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import com.ledway.btprinter.R;
+import com.ledway.scanmaster.R;
 import java.io.IOException;
 
 /**

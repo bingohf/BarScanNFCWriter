@@ -29,7 +29,7 @@ import com.ledway.btprinter.R;
 import com.ledway.btprinter.biz.sample.SampleActivity;
 import com.ledway.scanmaster.model.Resource;
 import com.ledway.btprinter.models.SampleMaster;
-import com.ledway.btprinter.utils.ContextUtils;
+import com.ledway.scanmaster.utils.ContextUtils;
 import io.reactivex.Single;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;

@@ -51,6 +51,7 @@ import com.ledway.scanmaster.data.Settings;
 import com.ledway.scanmaster.domain.InvalidBarCodeException;
 import com.ledway.scanmaster.interfaces.IDGenerator;
 import com.ledway.scanmaster.interfaces.MenuOpend;
+import com.ledway.scanmaster.model.Resource;
 import com.ledway.scanmaster.network.GroupRequest;
 import com.ledway.scanmaster.network.GroupResponse;
 import com.ledway.scanmaster.network.MyNetWork;
@@ -59,6 +60,7 @@ import com.ledway.scanmaster.network.SpGetMenuRequest;
 import com.ledway.scanmaster.network.SpResponse;
 import com.ledway.scanmaster.network.Sp_getBill_Request;
 import com.ledway.scanmaster.network.Sp_getDetail_Request;
+import com.ledway.scanmaster.utils.ContextUtils;
 import com.ledway.scanmaster.utils.IOUtil;
 import com.ledway.scanmaster.utils.JsonUtils;
 import com.zkc.Service.CaptureService;
@@ -106,7 +108,7 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
   private BroadcastReceiver scanBroadcastReceiver;
   private String mMode = "Check";
   private int mModeIndex = 0;
-  private MutableLiveData<RemoteMenu[]> menus = new MutableLiveData<>();
+  private MutableLiveData<Resource<RemoteMenu[]>> menus = new MutableLiveData<>();
 
   public ScanMasterFragment() {
     setHasOptionsMenu(true);
@@ -306,7 +308,20 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
   }
 
   private void subscribeView() {
-    menus.observe(this, remoteMenus -> getActivity().invalidateOptionsMenu());
+    menus.observe(this, remoteMenus -> {
+      if(getActivity() == null || remoteMenus == null){
+        return;
+      }
+      switch (remoteMenus.status){
+        case ERROR:{
+          Toast.makeText(getActivity(), remoteMenus.message, Toast.LENGTH_LONG).show();
+          break;
+        }
+        case SUCCESS:{
+          getActivity().invalidateOptionsMenu();
+        }
+      }
+    });
   }
 
   private void loadMenu() {
@@ -324,14 +339,14 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
           }
 
           @Override public void onError(Throwable e) {
-
+            menus.postValue(Resource.error(ContextUtils.getMessage(e), null));
           }
 
           @Override public void onNext(SpResponse response) {
             try {
               RemoteMenu[] tempMenus =
                   JsonUtils.Companion.fromJson(response.result[0].memotext, RemoteMenu[].class);
-              menus.postValue(tempMenus);
+              menus.postValue(Resource.success(tempMenus));
             } catch (Exception e) {
               e.printStackTrace();
               Timber.e(e);
@@ -402,8 +417,8 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
     menu.removeGroup(GROUP_ID);
     menu.findItem(R.id.action_label).setVisible(false);
     int i = 0;
-    if (menus.getValue() != null) {
-      for (RemoteMenu item : menus.getValue()) {
+    if (menus.getValue() != null && menus.getValue().data != null) {
+      for (RemoteMenu item : menus.getValue().data) {
         if(TextUtils.isEmpty(item.menu_name)){
           item.menu_name = item.menu_Label_Eng;
         }
@@ -431,8 +446,8 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
     if (item.getGroupId() == GROUP_ID) {
       item.setChecked(true);
       int index = item.getItemId();
-      if (menus.getValue() != null) {
-        mMode = menus.getValue()[index].menu_Label_Eng;
+      if (menus.getValue() != null && menus.getValue().data != null) {
+        mMode = menus.getValue().data[index].menu_Label_Eng;
       }
     }
     if (getActivity() != null) {
@@ -639,7 +654,7 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
   }
 
   @Override public void menuOpened() {
-    if(menus.getValue() == null) {
+    if(menus.getValue() == null || menus.getValue().data == null) {
       loadMenu();
     }
   }

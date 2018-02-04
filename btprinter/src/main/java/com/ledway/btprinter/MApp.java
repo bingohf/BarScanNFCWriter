@@ -1,7 +1,6 @@
 package com.ledway.btprinter;
 
 import android.app.Activity;
-import android.app.Application;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Environment;
@@ -10,7 +9,7 @@ import com.activeandroid.ActiveAndroid;
 import com.crashlytics.android.Crashlytics;
 import com.facebook.stetho.Stetho;
 import com.ledway.btprinter.models.SystemInfo;
-import com.ledway.btprinter.utils.ContextUtils;
+import com.ledway.scanmaster.utils.ContextUtils;
 import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
 import io.fabric.sdk.android.Fabric;

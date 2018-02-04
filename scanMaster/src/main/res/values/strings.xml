@@ -84,4 +84,5 @@
   <string name="group_success">Change group success</string>
   <string name="txt_return">Return</string>
   <string name="special">Special</string>
+  <string name="network_is_not_available">Network is not available</string>
 </resources>

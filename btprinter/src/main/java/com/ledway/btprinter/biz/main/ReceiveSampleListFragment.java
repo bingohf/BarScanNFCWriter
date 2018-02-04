@@ -36,7 +36,7 @@ import com.ledway.btprinter.network.MyProjectApi;
 import com.ledway.btprinter.network.model.ProductAppGetReturn;
 import com.ledway.btprinter.network.model.ProductReturn;
 import com.ledway.btprinter.network.model.RestDataSetResponse;
-import com.ledway.btprinter.utils.ContextUtils;
+import com.ledway.scanmaster.utils.ContextUtils;
 import com.ledway.scanmaster.utils.JsonUtils;
 import com.squareup.picasso.Picasso;
 import io.reactivex.disposables.CompositeDisposable;

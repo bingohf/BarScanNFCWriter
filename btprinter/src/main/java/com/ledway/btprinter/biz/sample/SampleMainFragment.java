@@ -33,7 +33,7 @@ import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.scanmaster.model.Resource;
 import com.ledway.btprinter.models.SampleMaster;
-import com.ledway.btprinter.utils.ContextUtils;
+import com.ledway.scanmaster.utils.ContextUtils;
 import com.ledway.scanmaster.utils.IOUtil;
 import com.ledway.framework.FullScannerActivity;
 import com.squareup.picasso.Picasso;
