@@ -38,6 +38,7 @@ import com.ledway.btprinter.network.ApkVersionResponse;
 import com.ledway.btprinter.network.MyProjectApi;
 import com.ledway.scanmaster.ScanMasterFragment;
 import com.ledway.scanmaster.ScanMasterViewModel;
+import com.ledway.scanmaster.interfaces.MenuOpend;
 import com.ledway.scanmaster.nfc.GNfc;
 import com.ledway.scanmaster.nfc.GNfcLoader;
 import com.zkc.Service.CaptureService;
@@ -300,5 +301,13 @@ public class MainActivity2 extends AppCompatActivity {
       }
     }
     return super.onKeyDown(keyCode, event);
+  }
+
+  @Override public boolean onMenuOpened(int featureId, Menu menu) {
+    Fragment currentFragment = fragments[mViewPager.getCurrentItem()];
+    if(currentFragment instanceof MenuOpend){
+      ((MenuOpend) currentFragment).menuOpened();
+    }
+    return super.onMenuOpened(featureId, menu);
   }
 }

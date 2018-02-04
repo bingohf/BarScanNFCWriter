@@ -31,7 +31,7 @@ import com.activeandroid.query.Select;
 import com.ledway.btprinter.BuildConfig;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
-import com.ledway.btprinter.models.Resource;
+import com.ledway.scanmaster.model.Resource;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.utils.ContextUtils;
 import com.ledway.scanmaster.utils.IOUtil;

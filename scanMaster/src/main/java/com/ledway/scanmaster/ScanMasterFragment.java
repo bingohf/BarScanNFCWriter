@@ -50,6 +50,7 @@ import com.ledway.scanmaster.data.DBCommand;
 import com.ledway.scanmaster.data.Settings;
 import com.ledway.scanmaster.domain.InvalidBarCodeException;
 import com.ledway.scanmaster.interfaces.IDGenerator;
+import com.ledway.scanmaster.interfaces.MenuOpend;
 import com.ledway.scanmaster.network.GroupRequest;
 import com.ledway.scanmaster.network.GroupResponse;
 import com.ledway.scanmaster.network.MyNetWork;
@@ -82,7 +83,7 @@ import timber.log.Timber;
  * Created by togb on 2018/1/6.
  */
 
-public class ScanMasterFragment extends Fragment {
+public class ScanMasterFragment extends Fragment implements MenuOpend {
   static final int REQUEST_TAKE_PHOTO = 3;
   private static final int REQUEST_GROUP = 1;
   private static final int REQUEST_BAR_CODE = 2;
@@ -637,5 +638,9 @@ public class ScanMasterFragment extends Fragment {
     return image;
   }
 
-
+  @Override public void menuOpened() {
+    if(menus.getValue() == null) {
+      loadMenu();
+    }
+  }
 }

@@ -27,7 +27,7 @@ import com.ledway.btprinter.AppConstants;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.biz.sample.SampleActivity;
-import com.ledway.btprinter.models.Resource;
+import com.ledway.scanmaster.model.Resource;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.utils.ContextUtils;
 import io.reactivex.Single;

@@ -1,4 +1,4 @@
-package com.ledway.btprinter.models;
+package com.ledway.scanmaster.model;
 
 /**
  * Created by togb on 2017/11/18.

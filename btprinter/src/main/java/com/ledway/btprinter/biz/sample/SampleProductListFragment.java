@@ -30,7 +30,7 @@ import com.ledway.btprinter.TodoProdDetailActivity;
 import com.ledway.btprinter.biz.ProductPickerActivity;
 import com.ledway.btprinter.biz.main.ProductListFragment;
 import com.ledway.btprinter.biz.main.SampleListAdapter2;
-import com.ledway.btprinter.models.Resource;
+import com.ledway.scanmaster.model.Resource;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.models.SampleProdLink;
 import com.ledway.btprinter.models.TodoProd;

@@ -30,7 +30,7 @@ import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.biz.sample.ReceivedSampleDetailActivity;
 import com.ledway.btprinter.models.ReceivedSample;
-import com.ledway.btprinter.models.Resource;
+import com.ledway.scanmaster.model.Resource;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.network.MyProjectApi;
 import com.ledway.btprinter.network.model.ProductAppGetReturn;
