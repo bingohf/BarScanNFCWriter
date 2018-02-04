@@ -18,6 +18,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
+import com.ledway.scanmaster.domain.TimeIDGenerator;
+import java.util.Locale;
+import timber.log.Timber;
 
 /**
  * Created by togb on 2017/12/16.
@@ -28,12 +31,21 @@ public class WebViewFragment extends Fragment implements OnKeyPress {
   @BindView(R.id.webView) WebView mWebView;
   @BindView(R.id.progressBar) ProgressBar mProgressBar;
   private String param;
+  private String pdaGuid;
+
   public WebViewFragment() {
     setRetainInstance(true);
   }
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    TimeIDGenerator timeIDGenerator = new TimeIDGenerator(getContext());
+    pdaGuid =timeIDGenerator.genID() + "~" + getLanguage();
+  }
+
+  private String getLanguage() {
+    Locale locale = Locale.getDefault();
+    return locale.getLanguage() + "_" + locale.getCountry();
   }
 
   @Nullable @Override
@@ -70,7 +82,15 @@ public class WebViewFragment extends Fragment implements OnKeyPress {
               new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
           return true;
         } else {
+          if(url != null && !url.contains("pdaGuid")){
+            if(url.contains("?")){
+              url += "&pdaGuid=" + pdaGuid;
+            }else {
+              url += "?pdaGuid=" + pdaGuid;
+            }
 
+          }
+          Timber.i(url);
           view.loadUrl(url);
           return true;
         }
@@ -104,7 +124,7 @@ public class WebViewFragment extends Fragment implements OnKeyPress {
   @Override
   public boolean onKeyDown(int keyCode, KeyEvent event) {
     if (event.getAction() == KeyEvent.ACTION_DOWN) {
-      if (keyCode == KeyEvent.KEYCODE_BACK) {
+      if (keyCode == KeyEvent.KEYCODE_BACK && mWebView != null) {
         if (mWebView.canGoBack()) {
           mWebView.goBack();
           return true;

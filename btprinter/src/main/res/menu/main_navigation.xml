@@ -24,7 +24,7 @@
       />
   <item
       android:id="@+id/action_receive_sample"
-      android:icon="@drawable/ic_barcode_scan_black_24dp"
+      android:icon="@drawable/ic_qrcode_scan_black_24dp"
       android:orderInCategory="3"
       android:title="@string/scan_master"
       />

@@ -2,6 +2,7 @@ package com.ledway.btprinter.biz.main;
 
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.arch.lifecycle.Lifecycle;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -289,8 +290,10 @@ public class MainActivity2 extends AppCompatActivity {
     if(event.getAction() == KeyEvent.ACTION_DOWN){
       if(keyCode == KeyEvent.KEYCODE_BACK){
         Fragment currentFragment = fragments[mViewPager.getCurrentItem()];
+
         boolean handled = false;
-        if(currentFragment instanceof OnKeyPress){
+        if(currentFragment instanceof OnKeyPress &&   currentFragment.getLifecycle().getCurrentState().isAtLeast(
+            Lifecycle.State.STARTED) ){
           handled =  ((OnKeyPress) currentFragment).onKeyDown(keyCode,event);
         }
         if(handled){
@@ -305,7 +308,8 @@ public class MainActivity2 extends AppCompatActivity {
 
   @Override public boolean onMenuOpened(int featureId, Menu menu) {
     Fragment currentFragment = fragments[mViewPager.getCurrentItem()];
-    if(currentFragment instanceof MenuOpend){
+    if(currentFragment instanceof MenuOpend &&   currentFragment.getLifecycle().getCurrentState().isAtLeast(
+        Lifecycle.State.STARTED)){
       ((MenuOpend) currentFragment).menuOpened();
     }
     return super.onMenuOpened(featureId, menu);
