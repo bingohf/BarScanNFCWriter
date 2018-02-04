@@ -104,6 +104,7 @@ public class ScanMasterFragment extends Fragment {
   private EditText mCurrEdit;
   private BroadcastReceiver scanBroadcastReceiver;
   private String mMode = "Check";
+  private int mModeIndex = 0;
   private MutableLiveData<RemoteMenu[]> menus = new MutableLiveData<>();
 
   public ScanMasterFragment() {
@@ -397,18 +398,26 @@ public class ScanMasterFragment extends Fragment {
 
   @Override public void onPrepareOptionsMenu(Menu menu) {
     super.onPrepareOptionsMenu(menu);
-    menu.findItem(R.id.action_label).setTitle(mMode);
     menu.removeGroup(GROUP_ID);
+    menu.findItem(R.id.action_label).setVisible(false);
     int i = 0;
     if (menus.getValue() != null) {
       for (RemoteMenu item : menus.getValue()) {
         if(TextUtils.isEmpty(item.menu_name)){
           item.menu_name = item.menu_Label_Eng;
         }
-        menu.add(GROUP_ID, i++, i, item.menu_name)
+        boolean isChecked = item.menu_Label_Eng.equals(mMode);
+        if(isChecked){
+          mModeIndex = i;
+          menu.findItem(R.id.action_label).setVisible(true);
+          menu.findItem(R.id.action_label).setTitle(item.menu_name);
+        }
+        menu.add(GROUP_ID, i, i, item.menu_name)
             .setCheckable(true)
-            .setChecked(item.menu_Label_Eng.equals(mMode));
+            .setChecked(isChecked);
+        ++i;
       }
+
     }
     menu.setGroupCheckable(GROUP_ID, true, true);
   }
