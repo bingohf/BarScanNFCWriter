@@ -2,6 +2,7 @@ package com.ledway.btprinter.biz.sample;
 
 import android.app.ProgressDialog;
 import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -36,8 +37,7 @@ import com.ledway.btprinter.R;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.models.SampleProdLink;
 import com.ledway.btprinter.models.TodoProd;
-import com.ledway.btprinter.network.model.RestSpResponse;
-import com.ledway.btprinter.network.model.SpReturn;
+import com.ledway.btprinter.network.MyProjectApi;
 import com.ledway.framework.FullScannerActivity;
 import com.ledway.scanmaster.model.Resource;
 import com.ledway.scanmaster.utils.ContextUtils;
@@ -48,6 +48,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Func1;
@@ -75,6 +82,8 @@ public class SampleMainFragment extends Fragment {
   private MutableLiveData<Resource> uploading = new MutableLiveData<>();
   private ProgressDialog mProgressDialog;
   private CompositeSubscription mSubscription = new CompositeSubscription();
+  private MutableLiveData<Resource<String>> orc = new MutableLiveData<>();
+
 
   public SampleMainFragment() {
     setHasOptionsMenu(true);
@@ -152,6 +161,7 @@ public class SampleMainFragment extends Fragment {
           if (f.exists()) {
             IOUtil.cropImage(f);
             mSampleMaster.image1 = mCurrentPhotoPath;
+            ocrImage(mCurrentPhotoPath);
             mSampleMaster.update_date = new Date();
             Picasso.with(mImgBusinssCard.getContext()).invalidate(f);
             Picasso.with(mImgBusinssCard.getContext()).load(f).into(mImgBusinssCard);
@@ -181,9 +191,89 @@ public class SampleMainFragment extends Fragment {
     }
   }
 
+  private void ocrImage(String fileName) {
+    orc.setValue(Resource.loading(null));
+    RequestBody requestBody =
+        RequestBody.create(MediaType.parse("application/octet-stream"), new File(fileName));
+    MultipartBody.Part part = MultipartBody.Part.create(requestBody);
+    MyProjectApi.getInstance()
+        .getDbService()
+        .ocr(
+            "https://eastasia.api.cognitive.microsoft.com/vision/v1.0/ocr?language=unk&detectOrientation =true",
+            part)
+        .subscribeOn(Schedulers.io())
+        .map(responseBody -> {
+          try {
+            StringBuilder sb = new StringBuilder();
+            JSONObject jsonObject = new JSONObject(responseBody.string());
+            parseOCR(sb, jsonObject);
+            return sb.toString();
+          } catch (JSONException| IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+          }
+        })
+        .subscribe(new Subscriber<String>() {
+          @Override public void onCompleted() {
+
+          }
+
+          @Override public void onError(Throwable e) {
+            orc.postValue(Resource.error(e.getMessage(), null));
+          }
+
+          @Override public void onNext(String s) {
+            orc.postValue(Resource.success(s));
+          }
+        });
+  }
+
+
+  private void parseOCR(StringBuilder sb, Object obj) throws JSONException {
+    if(obj instanceof  JSONArray){
+      for(int i =0;i < ((JSONArray) obj).length(); ++i){
+        JSONObject item = ((JSONArray) obj).getJSONObject(i);
+        parseOCR(sb, item);
+      }
+    }else if(obj instanceof  JSONObject){
+      if(((JSONObject) obj).has("text")){
+        String text = ((JSONObject) obj).getString("text");
+        if(!TextUtils.isEmpty(text)){
+          sb.append(text +" ");
+        }
+      }else if(((JSONObject) obj).has("lines")){
+        JSONArray lines  = ((JSONObject) obj).getJSONArray("lines");
+        parseOCR(sb, lines);
+      }else if(((JSONObject) obj).has("words")){
+        JSONArray words  = ((JSONObject) obj).getJSONArray("words");
+        parseOCR(sb, words);
+      } else if(((JSONObject) obj).has("regions")){
+        JSONArray regions = ((JSONObject) obj).getJSONArray("regions");
+        parseOCR(sb, regions);
+      }
+    }
+
+  }
+
+
+
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     mSampleMaster = getActivity() != null ? ((SampleActivity) getActivity()).mSampleMaster : null;
     super.onCreate(savedInstanceState);
+    orc.observe(this, stringResource -> {
+      switch (stringResource.status){
+        case LOADING:{
+          break;
+        }
+        case ERROR:{
+          break;
+        }
+        case SUCCESS:{
+          mEdtSpec.setText(stringResource.data);
+          break;
+        }
+      }
+    });
   }
 
   @Nullable @Override
@@ -336,23 +426,24 @@ public class SampleMainFragment extends Fragment {
         .map((Func1<Pair<String, String[]>, List<TodoProd>>) stringPair -> new Select().from(
             TodoProd.class).where(stringPair.first, stringPair.second).execute())
         .flatMap(Observable::from)
-        .flatMap(todoProd -> todoProd.remoteSave2()
-            .flatMap(spReturnRestSpResponse -> {
-              int returnCode = spReturnRestSpResponse.result.get(0).errCode;
-              String returnMessage =  spReturnRestSpResponse.result.get(0).errData;
-              if (returnCode == 1){
-                todoProd.uploaded_time = new Date();
-                todoProd.save();
-              }else {
-                return Observable.error(new Exception(returnMessage));
-              }
+        .flatMap(todoProd -> todoProd.remoteSave2().flatMap(spReturnRestSpResponse -> {
+          int returnCode = spReturnRestSpResponse.result.get(0).errCode;
+          String returnMessage = spReturnRestSpResponse.result.get(0).errData;
+          if (returnCode == 1) {
+            todoProd.uploaded_time = new Date();
+            todoProd.save();
+          } else {
+            return Observable.error(new Exception(returnMessage));
+          }
 
-              return Observable.just(spReturnRestSpResponse);
-            })
-        ).subscribeOn(Schedulers.io()).ignoreElements().cast(Object.class);
+          return Observable.just(spReturnRestSpResponse);
+        }))
+        .subscribeOn(Schedulers.io())
+        .ignoreElements()
+        .cast(Object.class);
   }
 
-  private Observable<Object> uploadSample(){
+  private Observable<Object> uploadSample() {
     return Observable.concat(Observable.just(mSampleMaster), Observable.defer(() -> {
       List<SampleMaster> data = new Select().from(SampleMaster.class)
           .where("isDirty =? and guid <>?", true, mSampleMaster.guid)
@@ -363,6 +454,8 @@ public class SampleMainFragment extends Fragment {
         .filter(sampleMaster -> !sampleMaster.isUploaded())
         .doOnSubscribe(() -> uploading.postValue(Resource.loading(null)))
         .concatMap(sampleMaster -> sampleMaster.remoteSave())
-        .subscribeOn(Schedulers.io()).ignoreElements().cast(Object.class);
+        .subscribeOn(Schedulers.io())
+        .ignoreElements()
+        .cast(Object.class);
   }
 }

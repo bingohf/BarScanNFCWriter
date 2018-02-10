@@ -10,11 +10,18 @@ import com.ledway.btprinter.network.model.Sp_UpSampleDetail_Request;
 import com.ledway.btprinter.network.model.Sp_UpSampleDetail_Return;
 import com.ledway.btprinter.network.model.Sp_UpSample_v3_Request;
 import com.ledway.btprinter.network.model.TotalUserReturn;
+
+import okhttp3.MultipartBody;
+import okhttp3.ResponseBody;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Headers;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+import retrofit2.http.Url;
 import rx.Observable;
 
 /**
@@ -41,5 +48,12 @@ public interface DBService {
   @POST("Sp/sp_UpProduct") Observable<RestSpResponse<SpReturn>> sp_UpProduct(@Body
       Sp_UpProduct_Request request);
 
+
+  @Multipart
+  @POST
+  @Headers({
+          "Ocp-Apim-Subscription-Key: 7fcab5a19fc84fd9be1cd00dccc41dff"
+  })
+  Observable<ResponseBody> ocr(@Url String url, @Part MultipartBody.Part filePart);
 
 }
