@@ -289,10 +289,10 @@ public class MainActivity2 extends AppCompatActivity {
   @Override public boolean onKeyDown(int keyCode, KeyEvent event) {
     if(event.getAction() == KeyEvent.ACTION_DOWN){
       if(keyCode == KeyEvent.KEYCODE_BACK){
-        Fragment currentFragment = fragments[mViewPager.getCurrentItem()];
+        Fragment currentFragment = getCurrentFragment();
 
         boolean handled = false;
-        if(currentFragment instanceof OnKeyPress &&   currentFragment.getLifecycle().getCurrentState().isAtLeast(
+        if(currentFragment != null && currentFragment instanceof OnKeyPress &&   currentFragment.getLifecycle().getCurrentState().isAtLeast(
             Lifecycle.State.STARTED) ){
           handled =  ((OnKeyPress) currentFragment).onKeyDown(keyCode,event);
         }
@@ -307,11 +307,18 @@ public class MainActivity2 extends AppCompatActivity {
   }
 
   @Override public boolean onMenuOpened(int featureId, Menu menu) {
-    Fragment currentFragment = fragments[mViewPager.getCurrentItem()];
-    if(currentFragment instanceof MenuOpend &&   currentFragment.getLifecycle().getCurrentState().isAtLeast(
+    Fragment currentFragment = getCurrentFragment();
+    if(currentFragment != null &&currentFragment instanceof MenuOpend &&   currentFragment.getLifecycle().getCurrentState().isAtLeast(
         Lifecycle.State.STARTED)){
       ((MenuOpend) currentFragment).menuOpened();
     }
     return super.onMenuOpened(featureId, menu);
   }
+
+
+  private Fragment getCurrentFragment(){
+    Fragment page = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.viewPager + ":" + mViewPager.getCurrentItem());
+    return  page;
+  }
+
 }
