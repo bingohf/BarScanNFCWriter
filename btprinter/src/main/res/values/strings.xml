@@ -77,4 +77,5 @@
   <string name="scan_master">Scan Master</string>
   <string name="received">Received</string>
   <string name="are_you_sure_to_exit">Are you sure to exit</string>
+  <string name="hint_clear_business_card_hint_first">Please clear business card memo</string>
 </resources>

@@ -61,11 +61,19 @@
           android:layout_weight="1"
           android:layout_height="wrap_content"
           />
-      <ImageView
+      <ImageButton
           android:id="@+id/icon_scan_barcode"
           android:src="@drawable/ic_qrcode_scan_black_24dp"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
+          />
+      <ImageButton
+          android:id="@+id/btn_ocr"
+          android:layout_marginStart="6dp"
+          android:src="@drawable/ic_ocr"
+          android:scaleType="fitCenter"
+          android:layout_height="44dp"
+          android:layout_width="44dp"
           />
     </LinearLayout>
   </LinearLayout>

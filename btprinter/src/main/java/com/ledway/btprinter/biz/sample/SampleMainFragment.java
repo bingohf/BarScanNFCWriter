@@ -76,6 +76,7 @@ public class SampleMainFragment extends Fragment {
   @BindView(R.id.edt_spec) EditText mEdtSpec;
   @BindView(R.id.img_business_card) ImageView mImgBusinssCard;
   @BindView(R.id.txt_hint_business_card) TextView mTxtHintBusinessCard;
+  @BindView(R.id.btn_ocr) View mOCRVIew;
   private Unbinder unbinder;
   private SampleMaster mSampleMaster;
   private String mCurrentPhotoPath;
@@ -161,7 +162,6 @@ public class SampleMainFragment extends Fragment {
           if (f.exists()) {
             IOUtil.cropImage(f);
             mSampleMaster.image1 = mCurrentPhotoPath;
-            ocrImage(mCurrentPhotoPath);
             mSampleMaster.update_date = new Date();
             Picasso.with(mImgBusinssCard.getContext()).invalidate(f);
             Picasso.with(mImgBusinssCard.getContext()).load(f).into(mImgBusinssCard);
@@ -260,20 +260,7 @@ public class SampleMainFragment extends Fragment {
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     mSampleMaster = getActivity() != null ? ((SampleActivity) getActivity()).mSampleMaster : null;
     super.onCreate(savedInstanceState);
-    orc.observe(this, stringResource -> {
-      switch (stringResource.status){
-        case LOADING:{
-          break;
-        }
-        case ERROR:{
-          break;
-        }
-        case SUCCESS:{
-          mEdtSpec.setText(stringResource.data);
-          break;
-        }
-      }
-    });
+    initView();
   }
 
   @Nullable @Override
@@ -293,7 +280,6 @@ public class SampleMainFragment extends Fragment {
     if (mSampleMaster.desc != null) {
       mEdtSpec.setText(mSampleMaster.desc);
     }
-    initView();
     super.onViewCreated(view, savedInstanceState);
   }
 
@@ -311,6 +297,24 @@ public class SampleMainFragment extends Fragment {
         case ERROR: {
           stopLoading();
           Toast.makeText(getContext(), resource.message, Toast.LENGTH_LONG).show();
+        }
+      }
+    });
+    orc.observe(this, stringResource -> {
+      switch (stringResource.status){
+        case LOADING:{
+          showLoading();
+          break;
+        }
+        case ERROR:{
+          stopLoading();
+          Toast.makeText(getContext(), stringResource.message, Toast.LENGTH_LONG).show();
+          break;
+        }
+        case SUCCESS:{
+          mEdtSpec.setText(stringResource.data);
+          stopLoading();
+          break;
         }
       }
     });
@@ -409,6 +413,19 @@ public class SampleMainFragment extends Fragment {
       getActivity().startActivity(intent);
     }
   }
+
+  @OnClick(R.id.btn_ocr) void onBtnOCRClick(){
+    if(!mEdtSpec.getText().toString().trim().isEmpty()){
+      Toast.makeText(getContext(), R.string.hint_clear_business_card_hint_first, Toast.LENGTH_SHORT).show();
+      return;
+    }
+    if(mSampleMaster.image1 == null) {
+      Toast.makeText(getContext(), R.string.no_image, Toast.LENGTH_SHORT).show();
+      return;
+    }
+    ocrImage(mSampleMaster.image1);
+  }
+
 
   private Observable<Object> uploadProduct() {
     StringBuilder sb = new StringBuilder();

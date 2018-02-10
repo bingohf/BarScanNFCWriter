@@ -14,8 +14,8 @@ android {
     applicationId "com.ledway.sales_edge"
     minSdkVersion 17
     targetSdkVersion 21
-    versionCode 72
-    versionName "7.2"
+    versionCode 74
+    versionName "7.4"
   }
   signingConfigs{
     relase_signing_config{
