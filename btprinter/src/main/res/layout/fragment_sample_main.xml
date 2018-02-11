@@ -2,18 +2,18 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:fillViewport="true"
+    android:orientation="vertical"
     >
   <LinearLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:orientation="vertical"
-      android:gravity="center_horizontal"
       android:divider="@drawable/divider"
-      android:showDividers="middle|end"
       android:dividerPadding="10dp"
+      android:gravity="center_horizontal"
+      android:orientation="vertical"
       android:padding="16dp"
+      android:showDividers="middle|end"
       >
 
     <FrameLayout
@@ -27,10 +27,10 @@
           android:layout_height="match_parent"
           />
       <TextView
-          android:gravity="center"
           android:id="@+id/txt_hint_business_card"
           android:layout_width="match_parent"
           android:layout_height="match_parent"
+          android:gravity="center"
           android:text="@string/business_hint"
           />
     </FrameLayout>
@@ -42,38 +42,44 @@
         >
       <TextView
           android:id="@+id/txt_share_to"
-          android:text="xxxxxxx"
-          android:gravity="center"
           android:layout_width="match_parent"
           android:layout_height="match_parent"
+          android:gravity="center"
+          android:text="xxxxxxx"
           />
     </FrameLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:gravity="center_vertical"
+        android:orientation="horizontal"
         >
       <EditText
           android:id="@+id/edt_spec"
           android:layout_width="0dp"
+          android:layout_height="match_parent"
+          android:scrollbars="vertical"
           android:layout_weight="1"
-          android:layout_height="wrap_content"
           />
-      <ImageButton
-          android:id="@+id/icon_scan_barcode"
-          android:src="@drawable/ic_qrcode_scan_black_24dp"
+      <LinearLayout
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          />
-      <ImageButton
-          android:id="@+id/btn_ocr"
-          android:layout_marginStart="6dp"
-          android:src="@drawable/ic_ocr24"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          />
+          android:orientation="vertical"
+          >
+        <ImageButton
+            android:id="@+id/icon_scan_barcode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_qrcode_scan_black_24dp"
+            />
+        <ImageButton
+            android:id="@+id/btn_ocr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_ocr24"
+            />
+      </LinearLayout>
     </LinearLayout>
   </LinearLayout>
 </ScrollView>
