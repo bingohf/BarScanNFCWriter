@@ -290,7 +290,11 @@ public class SampleMainFragment extends Fragment {
           showLoading();
           break;
         }
-        case SUCCESS: {
+
+
+
+
+                    case SUCCESS: {
           stopLoading();
           break;
         }

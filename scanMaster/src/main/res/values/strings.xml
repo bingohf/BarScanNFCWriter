@@ -48,8 +48,8 @@
 
 
   <string name="action_settings">Set</string>
-  <string name="barcode.hint">Scan  PA Barcode</string>
-  <string name="billno.hint">Scan Bill or Stowage</string>
+  <string name="barcode.hint">PA QRCode</string>
+  <string name="billno.hint">Stowage/Bill/Help</string>
   <string name="nfc.hint">請將IC放到感應區</string>
   <string name="write_to_mifare">寫入IC卡</string>
   <string name="device_no_nfc">妳的設備不支持NFC</string>
