@@ -84,7 +84,7 @@
   <string name="In">In</string>
   <string name="txt_return">Return</string>
   <string name="special">Special</string>
-  <string name="barcode.hint">Scan  PA Barcode</string>
-  <string name="billno.hint">Scan Bill or Stowage</string>
+  <string name="barcode.hint">PA QRCode</string>
+  <string name="billno.hint">Stowage/Bill/Help</string>
   <string name="barcode_invalid">invalid Barcode, Retry again</string>
 </resources>
