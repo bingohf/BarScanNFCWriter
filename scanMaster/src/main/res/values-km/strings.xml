@@ -25,18 +25,17 @@
   <string name="cancel_button">Cancel</string>
 
 
-
-  <string name="setting.line.title">Line(####)</string>
-  <string name="setting.server.title">Server</string>
-  <string name="setting.autoupload.title">自動上傳(Auto Upload)</string>
-  <string name="setting.type.title">Type</string>
-  <string name="empty"/>
-  <string name="invalid_barcode">條碼不全(Barcode Error)</string>
-  <string name="app_version">App Version</string>
-
+  <string name = "setting.line.title"> បន្ទាត់ (####) </string>
+  <string name = "setting.server.title"> ម៉ាស៊ីនមេ </string>
+  <string name = "setting.autoupload.title"> ផ្ទុកស្វ័យប្រវត្តិ </string>
+  <string name = "setting.type.title"> វាយ </string>
+  <string name = "empty" />
+  <string name = "invalid_barcode"> Error Barcode </string>
+  <string name = "app_version"> កំណែកម្មវិធី </string>
 
 
-  <string name="wait_a_moment">wait a moment</string>
+
+  <string name = "wait_a_moment"> រង់ចាំមួយភ្លែត </string>
 
 
 
@@ -47,42 +46,41 @@
   <string name="setting.reader.title">Reader</string>
 
 
-  <string name="nfc.hint">請將IC放到感應區</string>
-  <string name="write_to_mifare">寫入IC卡</string>
-  <string name="device_no_nfc">妳的設備不支持NFC</string>
-  <string name="device_nfc_disabled">請到系統設置裏開啟NFC</string>
-  <string name="no_card_found">請將IC卡放到感應區</string>
-  <string name="check_nfc_card">請檢查NFC功能是否正常，並將IC卡貼到感應區</string>
-  <string name="auth_fail_card">無法識別該卡</string>
-  <string name="scan.btn">PDA掃描器 (Scan)</string>
-  <string name="had_to_mifare">此條碼已經錄入</string>
-  <string name="ok">確認(OK)</string>
-  <string name="cancel">取消(Cancel)</string>
-  <string name="upload">上傳(Upload)</string>
-  <string name="invalid_setting">本機設置信息不完整</string>
-  <string name="goto_setting">進入設置</string>
-  <string name="setting">設置</string>
-  <string name="uploading">正在上傳(uploading)</string>
-  <string name="ledway">威虹Scan Master</string>
-
-  <string name="digits">0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-#/~.$</string>
-  <string name="password">Password</string>
-  <string name="invalid_password">Invalid password</string>
-  <string name="action_settings">Set</string>
-
-  <string name="exit">ចេញ</string>
-  <string name="yes">បាទ</string>
-  <string name="no">ទេ</string>
-  <string name="warning">ព្រមាន</string>
-  <string name="exit_confirm">បញ្ជាក់ការចាកចេញ ?</string>
-  <string name="scan_group">ផ្លាស់ប្តូរក្រុមអាជីវកម្ម</string>
-  <string name="group_success">ផ្លាស់ប្តូរក្រុមអាជីវកម្មបានបញ្ចប់</string>
-  <string name="in">ចូលក្នុងឃ្លាំង</string>
-  <string name="out">ដឹកជញ្ជូន</string>
-  <string name="txt_return">ត្រឡប់ការដឹកជញ្ជូន</string>
-  <string name="special">មុខងារពិសេស</string>
-  <string name="check">ទូទៅ</string>
-  <string name="barcode.hint">ស្កេនលេខកូដរបាំង PA</string>
-  <string name="billno.hint">វិភាគរកកន្លែងផ្ទុកឬលេខដឹកជញ្ជូន</string>
-  <string name="barcode_invalid">កូដផលិតផលមិនត្រឹមត្រូវសូមព្យាយាមម្តងទៀត</string>
+  <string name = "action_settings"> កំណត់ </string>
+  <string name = "barcode.hint">2.ស្កេនកូដ QR </string>
+  <string name = "billno.hint">1.ផ្ទុក / លេខលំដាប់ / ជំនួយ </string>
+  <string name = "nfc.hint"> សូមដាក់ IC ទៅកន្លែងចាប់អារម្មណ៍ </string>
+  <string name = "write_to_mifare"> សរសេរ IC card </string>
+  <string name = "device_no_nfc"> ឧបករណ៍របស់អ្នកមិនគាំទ្រ NFC </string> ទេ
+  <string name = "device_nfc_disabled"> សូមចូលទៅកាន់ការកំណត់ប្រព័ន្ធដើម្បីបើក NFC </string>
+  <string name = "no_card_found"> ​​ដាក់កាត IC នៅក្នុងតំបន់ចាប់អារម្មណ៍ </string>
+  <string name = "auth_fail_card"> កាតដែលមិនបានទទួលស្គាល់ </string>
+  <string name = "exit"> ចេញពី </string>
+  <string name = "exit_confirm"> យល់ព្រមចេញ? </string>
+  <string name = "yes"> បាទ / ចាស </string>
+  <string name = "no"> ទេ </string>
+  <string name = "barcode_invalid"> មិនត្រឹមត្រូវទេសូមពិនិត្យឡើងវិញ </string>
+  <string name = "scan.btn"> PDA ម៉ាស៊ីនស្កេន </string>
+  <string name = "has_to_mifare"> កូដនេះត្រូវបានបញ្ចូល។ </string>
+  <string name = "ok"> OK </string>
+  <string name = "cancel"> បោះបង់ </string>
+  <string name = "upload"> ផ្ទុកឡើង </string>
+  <string name = "invalid_setting"> ការកំណត់ព័ត៌មានមិនពេញលេញ </string>
+  <string name = "goto_setting"> ទៅកាន់ការកំណត់ </string>
+  <string name = "setting"> ការកំណត់ </string>
+  <string name = "uploading"> uploading </string>
+  <string name = "warning"> ព្រមាន </string>
+  <string name = "ledway"> Weihong Scan Master </string>
+  <string name = "password"> ពាក្យសម្ងាត់ </string>
+  <string name = "invalid_password"> ពាក្យសម្ងាត់មិនត្រឹមត្រូវ </string>
+  <string name = "digits">0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-#/~.</string>
+  <string name = "in"> In </string>
+  <string name = "out"> ក្រៅ </string>
+  <string name = "check"> ពិនិត្យមើល </string>
+  <string name = "scan_group"> អ្នកប្រើចូលក្រុម </string>
+  <string name = "In"> In </string>
+  <string name = "group_success"> ជោគជ័យអ្នកប្រើក្រុមចុះឈ្មោះចូល </string>
+  <string name = "txt_return"> ត្រឡប់ទៅ </string>
+  <string name = "special"> ពិសេស </string>
+  <string name = "network_is_not_available"> ការតភ្ជាប់អ៊ីនធឺណិត </string>
 </resources>

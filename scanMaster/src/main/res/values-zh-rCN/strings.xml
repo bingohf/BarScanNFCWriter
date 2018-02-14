@@ -1,0 +1,88 @@
+﻿<resources>
+  <string name="app_name">Scan Master</string>
+  <string name="main_activity_name">威虹资讯RFID工票查询</string>
+  <string name="barcode">Barcode</string>
+  <string name="barcode.help">C1610550030 or Tag the RFID Card with the same contents</string>
+  <string name="scanner_activity">ZXing Scanner - Full Activity</string>
+  <string name="scanner_fragment_activity">ZXing Scanner - Full Fragment Activity</string>
+  <string name="simple_scanner_activity">ZXing Scanner - Simple Activity</string>
+  <string name="simple_scanner_fragment_activity">ZXing Scanner - Simple Fragment Activity</string>
+  <string name="full_screen_scanner_fragment_activity">ZXing Scanner - Full Screen Fragment Activity</string>
+  <string name="simple_activity_sample">Simple Activity Sample</string>
+  <string name="simple_fragment_sample">Simple Fragment Sample</string>
+  <string name="activity_sample">Full Activity Sample</string>
+  <string name="fragment_sample">Full Fragment Sample</string>
+  <string name="full_screen_sample">Full Screen Fragment Sample</string>
+  <string name="toggle_flash">Flash</string>
+  <string name="flash_on">Flash [ON]</string>
+  <string name="flash_off">Flash [OFF]</string>
+  <string name="auto_focus_on">Auto Focus [ON]</string>
+  <string name="auto_focus_off">Auto Focus [OFF]</string>
+  <string name="formats">Formats</string>
+  <string name="choose_formats">Choose Formats</string>
+  <string name="select_camera">Select a Camera</string>
+  <string name="ok_button">OK</string>
+  <string name="cancel_button">Cancel</string>
+
+
+
+  <string name="setting.line.title">Line(####)</string>
+  <string name="setting.server.title">Server</string>
+  <string name="setting.autoupload.title">自动上传(Auto Upload)</string>
+  <string name="setting.type.title">Type</string>
+  <string name="empty"/>
+  <string name="invalid_barcode">条码不全(Barcode Error)</string>
+  <string name="app_version">App Version</string>
+
+
+
+  <string name="wait_a_moment">wait a moment</string>
+
+
+
+  <string name="company">威虹资讯股份有限公司版权所有</string>
+  <string name="company.tel">服务电话: +886222799889</string>
+  <string name="company_short">威虹资讯</string>
+  <string name="setting.db.title">DB</string>
+  <string name="setting.reader.title">Reader</string>
+
+
+  <string name="action_settings">Set</string>
+  <string name="barcode.hint">2.扫描二维码</string>
+  <string name="billno.hint">1.储位/单号/Help</string>
+  <string name="nfc.hint">请将IC放到感应区</string>
+  <string name="write_to_mifare">写入IC卡</string>
+  <string name="device_no_nfc">妳的设备不支持NFC</string>
+  <string name="device_nfc_disabled">请到系统设置里开启NFC</string>
+  <string name="no_card_found">​​请将IC卡放到感应区</string>
+  <string name="check_nfc_card">请检查NFC功能是否正常，并将IC卡贴到感应区</string>
+  <string name="auth_fail_card">无法识别该卡</string>
+  <string name="exit">退出(Exit)</string>
+  <string name="exit_confirm">确定退出(Exit)？ </string>
+  <string name="yes">是(Yes)</string>
+  <string name="no">否(No)</string>
+  <string name="barcode_invalid">条码不正确，请重新扫码</string>
+  <string name="scan.btn">PDA扫描器 (Scan)</string>
+  <string name="had_to_mifare">此条码已经录​​入</string>
+  <string name="ok">确认(OK)</string>
+  <string name="cancel">取消(Cancel)</string>
+  <string name="upload">上传(Upload)</string>
+  <string name="invalid_setting">本机设置信息不完整</string>
+  <string name="goto_setting">进入设置</string>
+  <string name="setting">设置</string>
+  <string name="uploading">正在上传(uploading)</string>
+  <string name="warning">Warning</string>
+  <string name="ledway">威虹Scan Master</string>
+  <string name="password">Password</string>
+  <string name="invalid_password">Invalid password</string>
+  <string name="digits">0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-#/~.</string>
+  <string name="in">In</string>
+  <string name="out">Out</string>
+  <string name="check">Check</string>
+  <string name="scan_group">登入集团用户</string>
+  <string name="In">In</string>
+  <string name="group_success">登入集团用户成功</string>
+  <string name="txt_return">Return</string>
+  <string name="special">Special</string>
+  <string name="network_is_not_available">网路不通</string>
+</resources>

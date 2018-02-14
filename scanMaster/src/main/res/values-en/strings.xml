@@ -1,90 +1,88 @@
 ﻿<resources>
-  <string name="app_name">Scan Master</string>
-  <string name="main_activity_name">威虹資訊RFID工票查詢</string>
-  <string name="barcode">Barcode</string>
-  <string name="barcode.help">C1610550030 or Tag the RFID Card with the same contents</string>
-  <string name="scanner_activity">ZXing Scanner - Full Activity</string>
-  <string name="scanner_fragment_activity">ZXing Scanner - Full Fragment Activity</string>
-  <string name="simple_scanner_activity">ZXing Scanner - Simple Activity</string>
-  <string name="simple_scanner_fragment_activity">ZXing Scanner - Simple Fragment Activity</string>
-  <string name="full_screen_scanner_fragment_activity">ZXing Scanner - Full Screen Fragment Activity</string>
-  <string name="simple_activity_sample">Simple Activity Sample</string>
-  <string name="simple_fragment_sample">Simple Fragment Sample</string>
-  <string name="activity_sample">Full Activity Sample</string>
-  <string name="fragment_sample">Full Fragment Sample</string>
-  <string name="full_screen_sample">Full Screen Fragment Sample</string>
-  <string name="toggle_flash">Flash</string>
-  <string name="flash_on">Flash [ON]</string>
-  <string name="flash_off">Flash [OFF]</string>
-  <string name="auto_focus_on">Auto Focus [ON]</string>
-  <string name="auto_focus_off">Auto Focus [OFF]</string>
-  <string name="formats">Formats</string>
-  <string name="choose_formats">Choose Formats</string>
-  <string name="select_camera">Select a Camera</string>
-  <string name="ok_button">OK</string>
-  <string name="cancel_button">Cancel</string>
+  <string name = "app_name"> Scan Master </string>
+  <string name = "main_activity_name"> Weihong information RFID tickets query </string>
+  <string name = "barcode"> Barcode </string>
+  <string name = "barcode.help"> C1610550030 or Tag the RFID Card with the same contents </string>
+  <string name = "scanner_activity"> ZXing Scanner - Full Activity </string>
+  <string name = "scanner_fragment_activity"> ZXing Scanner - Full Fragment Activity </string>
+  <string name = "simple_scanner_activity"> ZXing Scanner - Simple Activity </string>
+  <string name = "simple_scanner_fragment_activity"> ZXing Scanner - Simple Fragment Activity </string>
+  <string name = "full_screen_scanner_fragment_activity"> ZXing Scanner - Full Screen Fragment Activity </string>
+  <string name = "simple_activity_sample"> Simple Activity Sample </string>
+  <string name = "simple_fragment_sample"> Simple Fragment Sample </string>
+  <string name = "activity_sample"> Full Activity Sample </string>
+  <string name = "fragment_sample"> Full Fragment Sample </string>
+  <string name = "full_screen_sample"> Full Screen Fragment Sample </string>
+  <string name = "toggle_flash"> Flash </string>
+  <string name = "flash_on"> Flash [ON] </string>
+  <string name = "flash_off"> Flash [OFF] </string>
+  <string name = "auto_focus_on"> Auto Focus [ON] </string>
+  <string name = "auto_focus_off"> Auto Focus [OFF] </string>
+  <string name = "formats"> Formats </string>
+  <string name = "choose_formats"> Choose Formats </string>
+  <string name = "select_camera"> Select a Camera </string>
+  <string name = "ok_button"> OK </string>
+  <string name = "cancel_button"> Cancel </string>
 
 
 
-  <string name="setting.line.title">Line(####)</string>
-  <string name="setting.server.title">Server</string>
-  <string name="setting.autoupload.title">自動上傳(Auto Upload)</string>
-  <string name="setting.type.title">Type</string>
-  <string name="empty"/>
-  <string name="invalid_barcode">條碼不全(Barcode Error)</string>
-  <string name="app_version">App Version</string>
+  <string name = "setting.line.title"> Line (####) </string>
+  <string name = "setting.server.title"> Server </string>
+  <string name = "setting.autoupload.title"> Auto Upload </string>
+  <string name = "setting.type.title"> Type </string>
+  <string name = "empty" />
+  <string name = "invalid_barcode"> Barcode Error </string>
+  <string name = "app_version"> App Version </string>
 
 
 
-  <string name="wait_a_moment">wait a moment</string>
+  <string name = "wait_a_moment"> wait a moment </string>
 
 
 
-  <string name="company">威虹資訊股份有限公司版權所有</string>
-  <string name="company.tel">服務電話: +886222799889</string>
-  <string name="company_short">威虹資訊</string>
-  <string name="setting.db.title">DB</string>
-  <string name="setting.reader.title">Reader</string>
+  <string name = "company"> Weihong Information Co., Ltd. all rights reserved </string>
+  <string name = "company.tel"> Service Tel: +886222799889 </string>
+  <string name = "company_short"> Weihong Information </string>
+  <string name = "setting.db.title"> DB </string>
+  <string name = "setting.reader.title"> Reader </string>
 
 
-  <string name="nfc.hint">請將IC放到感應區</string>
-  <string name="write_to_mifare">寫入IC卡</string>
-  <string name="device_no_nfc">妳的設備不支持NFC</string>
-  <string name="device_nfc_disabled">請到系統設置裏開啟NFC</string>
-  <string name="no_card_found">請將IC卡放到感應區</string>
-  <string name="check_nfc_card">請檢查NFC功能是否正常，並將IC卡貼到感應區</string>
-  <string name="auth_fail_card">無法識別該卡</string>
-  <string name="scan.btn">PDA掃描器 (Scan)</string>
-  <string name="had_to_mifare">此條碼已經錄入</string>
-  <string name="ok">確認(OK)</string>
-  <string name="cancel">取消(Cancel)</string>
-  <string name="upload">上傳(Upload)</string>
-  <string name="invalid_setting">本機設置信息不完整</string>
-  <string name="goto_setting">進入設置</string>
-  <string name="setting">設置</string>
-  <string name="uploading">正在上傳(uploading)</string>
-  <string name="ledway">威虹Scan Master</string>
-
-  <string name="digits">0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-#/~.$</string>
-  <string name="password">Password</string>
-  <string name="invalid_password">Invalid password</string>
-  <string name="action_settings">Set</string>
-
-
-  <string name="exit">Exit</string>
-  <string name="yes">Yes</string>
-  <string name="no">No</string>
-  <string name="warning">Warning</string>
-  <string name="exit_confirm">Confirm to Exit?</string>
-  <string name="scan_group">Change Group</string>
-  <string name="group_success">Change group success</string>
-  <string name="in">In</string>
-  <string name="out">Out</string>
-  <string name="check">Check</string>
-  <string name="In">In</string>
-  <string name="txt_return">Return</string>
-  <string name="special">Special</string>
-  <string name="barcode.hint">PA QRCode</string>
-  <string name="billno.hint">Stowage/Bill/Help</string>
-  <string name="barcode_invalid">invalid Barcode, Retry again</string>
+  <string name = "action_settings"> Set </string>
+  <string name = "barcode.hint">2.Scan QRcode </string>
+  <string name = "billno.hint">1.storage/shipping#/Help </string>
+  <string name = "nfc.hint"> Please put the IC into the sensing area </string>
+  <string name = "write_to_mifare"> write IC card </string>
+  <string name = "device_no_nfc"> Your device does not support NFC </string>
+  <string name = "device_nfc_disabled"> Please go to the system settings to open NFC </string>
+  <string name = "no_card_found"> ​​Put the IC card in the sensing area </string>
+  <string name = "check_nfc_card"> Please check if the NFC function is normal and paste the IC card into the sensor area </string>
+  <string name = "auth_fail_card"> Unrecognized card </string>
+  <string name = "exit"> Exit </string>
+  <string name = "exit_confirm"> OK Exit? </string>
+  <string name = "yes"> Yes </string>
+  <string name = "no"> No (</string>)
+  <string name = "barcode_invalid"> barcode is incorrect, please re-scan </string>
+  <string name = "scan.btn"> PDA Scanner </string>
+  <string name = "had_to_mifare"> This barcode has been entered </string>
+  <string name = "ok"> OK </string>
+  <string name = "cancel"> Cancel </string>
+  <string name = "upload"> Upload </string>
+  <string name = "invalid_setting"> Incomplete setting information </string>
+  <string name = "goto_setting"> Go to Settings </string>
+  <string name = "setting"> setting </string>
+  <string name = "uploading"> uploading </string>
+  <string name = "warning"> Warning </string>
+  <string name = "ledway"> Weihong Scan Master </string>
+  <string name = "password"> Password </string>
+  <string name = "invalid_password"> Invalid password </string>
+  <string name = "digits">0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-#/~.</string>
+  <string name = "in"> In </string>
+  <string name = "out"> Out </string>
+  <string name = "check"> Check </string>
+  <string name = "scan_group"> login group user </string>
+  <string name = "In"> In </string>
+  <string name = "group_success"> login group user success </string>
+  <string name = "txt_return"> Return </string>
+  <string name = "special"> Special </string>
+  <string name = "network_is_not_available"> Internet not available </string>
 </resources>

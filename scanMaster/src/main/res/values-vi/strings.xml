@@ -1,89 +1,88 @@
 ﻿<resources>
-  <string name="app_name">Scan Master</string>
-  <string name="main_activity_name">威虹資訊RFID工票查詢</string>
-  <string name="barcode">Barcode</string>
-  <string name="barcode.help">C1610550030 or Tag the RFID Card with the same contents</string>
-  <string name="scanner_activity">ZXing Scanner - Full Activity</string>
-  <string name="scanner_fragment_activity">ZXing Scanner - Full Fragment Activity</string>
-  <string name="simple_scanner_activity">ZXing Scanner - Simple Activity</string>
-  <string name="simple_scanner_fragment_activity">ZXing Scanner - Simple Fragment Activity</string>
-  <string name="full_screen_scanner_fragment_activity">ZXing Scanner - Full Screen Fragment Activity</string>
-  <string name="simple_activity_sample">Simple Activity Sample</string>
-  <string name="simple_fragment_sample">Simple Fragment Sample</string>
-  <string name="activity_sample">Full Activity Sample</string>
-  <string name="fragment_sample">Full Fragment Sample</string>
-  <string name="full_screen_sample">Full Screen Fragment Sample</string>
-  <string name="toggle_flash">Flash</string>
-  <string name="flash_on">Flash [ON]</string>
-  <string name="flash_off">Flash [OFF]</string>
-  <string name="auto_focus_on">Auto Focus [ON]</string>
-  <string name="auto_focus_off">Auto Focus [OFF]</string>
-  <string name="formats">Formats</string>
-  <string name="choose_formats">Choose Formats</string>
-  <string name="select_camera">Select a Camera</string>
-  <string name="ok_button">OK</string>
-  <string name="cancel_button">Cancel</string>
+  <string name = "app_name"> Scan Master </string>
+  <string name = "main_activity_name"> Weihong thông tin tìm kiếm vé RFID </string>
+  <string name = "barcode"> Mã vạch </string>
+  <string name = "barcode.help"> C1610550030 hoặc Gắn thẻ RFID với cùng nội dung </string>
+  <string name = "scanner_activity"> Máy quét ZXing - Hoạt động toàn bộ </string>
+  <string name = "scanner_fragment_activity"> ZXing Scanner - Hoạt động phân mảnh toàn bộ </string>
+  <string name = "simple_scanner_activity"> ZXing Scanner - Hoạt động đơn giản </string>
+  <string name = "simple_scanner_fragment_activity"> Scanner ZXing - Simple Hoạt động Fragment </string>
+  <string name = "full_screen_scanner_fragment_activity"> Scanner ZXing - Full Screen Fragment Hoạt động </string>
+  <string name = "simple_activity_sample"> Mẫu hoạt động đơn giản </string>
+  <string name = "simple_fragment_sample"> mẫu phân mảnh đơn giản </string>
+  <string name = "activity_sample"> Mẫu hoạt động đầy đủ </string>
+  <string name = "fragment_sample"> mẫu phân mảnh đầy đủ </string>
+  <string name = "full_screen_sample"> Mẫu phân mảnh toàn màn hình </string>
+  <string name = "toggle_flash"> Flash </string>
+  <string name = "flash_on"> Flash [ON] </string>
+  <string name = "flash_off"> Flash [T OFFT] </string>
+  <string name = "auto_focus_on"> Tự động lấy nét [ON] </string>
+  <string name = "auto_focus_off"> Tự động lấy nét [OFF] </string>
+  <string name = "formats"> Định dạng </string>
+  <string name = "choose_formats"> Chọn định dạng </string>
+  <string name = "select_camera"> Chọn một Camera </string>
+  <string name = "ok_button"> OK </string>
+  <string name = "cancel_button"> Hủy </string>
 
 
 
-  <string name="setting.line.title">Line(####)</string>
-  <string name="setting.server.title">Server</string>
-  <string name="setting.autoupload.title">自動上傳(Auto Upload)</string>
-  <string name="setting.type.title">Type</string>
-  <string name="empty"/>
-  <string name="invalid_barcode">條碼不全(Barcode Error)</string>
-  <string name="app_version">App Version</string>
+  <string name = "setting.line.title"> Dòng (####) </string>
+  <string name = "setting.server.title"> Máy chủ </string>
+  <string name = "setting.autoupload.title"> Tự động tải lên </string>
+  <string name = "setting.type.title"> Kiểu </string>
+  <string name = "empty" />
+  <string name = "invalid_barcode"> Lỗi mã vạch </string>
+  <string name = "app_version"> Phiên bản ứng dụng </string>
 
 
 
-  <string name="wait_a_moment">wait a moment</string>
+  <string name = "wait_a_moment"> đợi một chút </string>
 
 
 
-  <string name="company">威虹資訊股份有限公司版權所有</string>
-  <string name="company.tel">服務電話: +886222799889</string>
-  <string name="company_short">威虹資訊</string>
-  <string name="setting.db.title">DB</string>
-  <string name="setting.reader.title">Reader</string>
+  <string name = "company"> Thông tin về Công ty Weihong Ltd. tất cả các quyền được bảo lưu </string>
+  <string name = "company.tel"> Dịch vụ ĐT: +886222799889 </string>
+  <string name = "company_short"> thông tin của Weihong </string>
+  <string name = "setting.db.title"> DB </string>
+  <string name = "setting.reader.title"> Reader </string>
 
 
-  <string name="nfc.hint">請將IC放到感應區</string>
-  <string name="write_to_mifare">寫入IC卡</string>
-  <string name="device_no_nfc">妳的設備不支持NFC</string>
-  <string name="device_nfc_disabled">請到系統設置裏開啟NFC</string>
-  <string name="no_card_found">請將IC卡放到感應區</string>
-  <string name="check_nfc_card">請檢查NFC功能是否正常，並將IC卡貼到感應區</string>
-  <string name="auth_fail_card">無法識別該卡</string>
-  <string name="scan.btn">PDA掃描器 (Scan)</string>
-  <string name="had_to_mifare">此條碼已經錄入</string>
-  <string name="ok">確認(OK)</string>
-  <string name="cancel">取消(Cancel)</string>
-  <string name="upload">上傳(Upload)</string>
-  <string name="invalid_setting">本機設置信息不完整</string>
-  <string name="goto_setting">進入設置</string>
-  <string name="setting">設置</string>
-  <string name="uploading">正在上傳(uploading)</string>
-  <string name="ledway">威虹Scan Master</string>
-
-  <string name="digits">0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-#/~.$</string>
-  <string name="password">Password</string>
-  <string name="invalid_password">Invalid password</string>
-  <string name="action_settings">Set</string>
-
-
-  <string name="exit">Lối thoát</string>
-  <string name="yes">Vâng</string>
-  <string name="no">Không</string>
-  <string name="warning">Cảnh báo</string>
-  <string name="exit_confirm">Xác nhận lối ra?</string>
-  <string name="scan_group">Thay đổi nhóm doanh nghiệp</string>
-  <string name="group_success">Thay đổi nhóm doanh nghiệp đã hoàn thành</string>
-  <string name="in">Vào kho</string>
-  <string name="out">Đang chuyển hàng</string>
-  <string name="txt_return">Vận chuyển trở lại</string>
-  <string name="special">Chức năng đặc biệt</string>
-  <string name="check">Chung</string>
-  <string name="barcode.hint">Quét mã vạch PA</string>
-  <string name="billno.hint">Quét số liệu lưu trữ hoặc vận chuyển</string>
-  <string name="barcode_invalid">Mã vạch không hợp lệ, vui lòng thử lại</string>
+  <string name = "action_settings"> Đặt </string>
+  <string name = "barcode.hint">2.Quét mã QR </string>
+  <string name = "billno.hint">1.lưu trữ/số thứ tự/Help </string>
+  <string name = "nfc.hint"> Hãy đặt IC vào vùng cảm biến </string>
+  <string name = "write_to_mifare"> viết thẻ IC </string>
+  <string name = "device_no_nfc"> Thiết bị của bạn không hỗ trợ NFC </string>
+  <string name = "device_nfc_disabled"> Hãy đi tới cài đặt hệ thống để mở NFC </string>
+  <string name = "no_card_found"> ​​Đặt thẻ IC vào vùng cảm biến </string>
+  <string name = "check_nfc_card"> Kiểm tra NFC chức năng là bình thường, và thẻ IC gắn liền với các khu vực cảm biến </string>
+  <string name = "auth_fail_card"> Thẻ không nhận dạng được </string>
+  <string name = "exit"> Thoát </string>
+  <string name = "exit_confirm"> OK Thoát? </string>
+  <string name = "yes"> Có </string>
+  <string name = "no"> Không (</string>)
+  <string name = "barcode_invalid"> mã vạch không chính xác, vui lòng quét lại </string>
+  <string name = "scan.btn"> Máy quét PDA </string>
+  <string name = "had_to_mifare"> Mã vạch này đã được nhập </string>
+  <string name = "ok"> OK </string>
+  <string name = "cancel"> Hủy </string>
+  <string name = "upload"> Tải lên </string>
+  <string name = "invalid_setting"> Thông tin cài đặt không đầy đủ </string>
+  <string name = "goto_setting"> Vào Cài đặt </string>
+  <string name = "setting"> thiết lập </string>
+  <string name = "uploading"> tải lên </string>
+  <string name = "warning"> Cảnh báo </string>
+  <string name = "ledway"> Weihong Scan Master </string>
+  <string name = "password"> Mật khẩu </string>
+  <string name = "invalid_password"> Mật khẩu không hợp lệ </string>
+  <string name = "digits"> 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ -. # / ~ </string>
+  <string name = "in"> Trong </string>
+  <string name = "out"> Out </string>
+  <string name = "check"> Kiểm tra </string>
+  <string name = "scan_group"> người dùng nhóm đăng nhập </string>
+  <string name = "In"> Trong </string>
+  <string name = "group_success"> đăng nhập nhóm người dùng thành công </string>
+  <string name = "txt_return"> Return </string>
+  <string name = "special"> Đặc biệt </string>
+  <string name = "network_is_not_available"> kết nối Internet </string>
 </resources>

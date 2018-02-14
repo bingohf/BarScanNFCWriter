@@ -1,89 +1,87 @@
 ﻿<resources>
-  <string name="app_name">Scan Master</string>
-  <string name="main_activity_name">威虹資訊RFID工票查詢</string>
-  <string name="barcode">Barcode</string>
-  <string name="barcode.help">C1610550030 or Tag the RFID Card with the same contents</string>
-  <string name="scanner_activity">ZXing Scanner - Full Activity</string>
-  <string name="scanner_fragment_activity">ZXing Scanner - Full Fragment Activity</string>
-  <string name="simple_scanner_activity">ZXing Scanner - Simple Activity</string>
-  <string name="simple_scanner_fragment_activity">ZXing Scanner - Simple Fragment Activity</string>
-  <string name="full_screen_scanner_fragment_activity">ZXing Scanner - Full Screen Fragment Activity</string>
-  <string name="simple_activity_sample">Simple Activity Sample</string>
-  <string name="simple_fragment_sample">Simple Fragment Sample</string>
-  <string name="activity_sample">Full Activity Sample</string>
-  <string name="fragment_sample">Full Fragment Sample</string>
-  <string name="full_screen_sample">Full Screen Fragment Sample</string>
-  <string name="toggle_flash">Flash</string>
-  <string name="flash_on">Flash [ON]</string>
-  <string name="flash_off">Flash [OFF]</string>
-  <string name="auto_focus_on">Auto Focus [ON]</string>
-  <string name="auto_focus_off">Auto Focus [OFF]</string>
-  <string name="formats">Formats</string>
-  <string name="choose_formats">Choose Formats</string>
-  <string name="select_camera">Select a Camera</string>
-  <string name="ok_button">OK</string>
-  <string name="cancel_button">Cancel</string>
+  <string name = "app_name"> 스캔 마스터 </string>
+  <string name = "main_activity_name"> Weihong 정보 RFID 티켓 쿼리 </string>
+  <string name = "barcode"> 바코드 </string>
+  <string name = "barcode.help"> C1610550030 또는 동일한 내용의 RFID 카드에 태그 달기 </string>
+  <string name = "scanner_activity"> ZXing 스캐너 - 전체 활동 </string>
+  <string name = "scanner_fragment_activity"> ZXing 스캐너 - 전체 조각 활동 </string>
+  <string name = "simple_scanner_activity"> ZXing 스캐너 - 간단한 활동 </string>
+  <string name = "simple_scanner_fragment_activity"> ZXing 스캐너 - 단순 단편 작업 </string>
+  <string name = "full_screen_scanner_fragment_activity"> ZXing 스캐너 - 전체 화면 조각 활동 </string>
+  <string name = "simple_activity_sample"> 간단한 활동 샘플 </string>
+  <string name = "simple_fragment_sample"> 단순 단편 샘플 </string>
+  <string name = "activity_sample"> 전체 활동 샘플 </string>
+  <string name = "fragment_sample"> 전체 조각 샘플 </string>
+  <string name = "full_screen_sample"> 전체 화면 단편 샘플 </string>
+  <string name = "toggle_flash"> 플래시 </string>
+  <string name = "flash_on"> 플래시 [켜기] </string>
+  <string name = "flash_off"> 플래시 [끄기] </string>
+  <string name = "auto_focus_on"> 자동 초점 [ON] </string>
+  <string name = "auto_focus_off"> 자동 초점 [OFF] </string>
+  <string name = "formats"> 형식 </string>
+  <string name = "choose_formats"> 형식 선택 </string>
+  <string name = "select_camera"> 카메라 선택 </string>
+  <string name = "ok_button"> 확인 </string>
+  <string name = "cancel_button"> 취소 </string>
 
 
 
-  <string name="setting.line.title">Line(####)</string>
-  <string name="setting.server.title">Server</string>
-  <string name="setting.autoupload.title">自動上傳(Auto Upload)</string>
-  <string name="setting.type.title">Type</string>
-  <string name="empty"/>
-  <string name="invalid_barcode">條碼不全(Barcode Error)</string>
-  <string name="app_version">App Version</string>
+  <string name = "setting.line.title"> 선 (####) </string>
+  <string name = "setting.server.title"> 서버 </string>
+  <string name = "setting.autoupload.title"> 자동 업로드 </string>
+  <string name = "setting.type.title"> 유형 </string>
+  <string name = "empty"/>
+  <string name = "invalid_barcode"> 바코드 오류 </string>
+  <string name = "app_version"> 앱 버전 </string>
 
 
 
-  <string name="wait_a_moment">wait a moment</string>
+  <string name = "wait_a_moment"> 잠시 기다려주십시오. </string>
 
 
 
-  <string name="company">威虹資訊股份有限公司版權所有</string>
-  <string name="company.tel">服務電話: +886222799889</string>
-  <string name="company_short">威虹資訊</string>
-  <string name="setting.db.title">DB</string>
-  <string name="setting.reader.title">Reader</string>
+  <string name = "company.tel"> 서비스 전화 : +886222799889 </string>
+  <string name = "company_short"> 웨이 정보 (Weihong Information) </string>
+  <string name = "setting.db.title"> DB </string>
+  <string name = "setting.reader.title"> 리더 </string>
 
 
-  <string name="nfc.hint">請將IC放到感應區</string>
-  <string name="write_to_mifare">寫入IC卡</string>
-  <string name="device_no_nfc">妳的設備不支持NFC</string>
-  <string name="device_nfc_disabled">請到系統設置裏開啟NFC</string>
-  <string name="no_card_found">請將IC卡放到感應區</string>
-  <string name="check_nfc_card">請檢查NFC功能是否正常，並將IC卡貼到感應區</string>
-  <string name="auth_fail_card">無法識別該卡</string>
-  <string name="scan.btn">PDA掃描器 (Scan)</string>
-  <string name="had_to_mifare">此條碼已經錄入</string>
-  <string name="ok">確認(OK)</string>
-  <string name="cancel">取消(Cancel)</string>
-  <string name="upload">上傳(Upload)</string>
-  <string name="invalid_setting">本機設置信息不完整</string>
-  <string name="goto_setting">進入設置</string>
-  <string name="setting">設置</string>
-  <string name="uploading">正在上傳(uploading)</string>
-  <string name="ledway">威虹Scan Master</string>
-
-  <string name="digits">0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-#/~.$</string>
-  <string name="password">Password</string>
-  <string name="invalid_password">Invalid password</string>
-  <string name="action_settings">Set</string>
-
-
-  <string name="exit">출구</string>
-  <string name="yes">예</string>
-  <string name="no">아니</string>
-  <string name="warning">경고</string>
-  <string name="exit_confirm">이탈 확인?</string>
-  <string name="scan_group">비즈니스 그룹 변경</string>
-  <string name="group_success">완료된 비즈니스 그룹 변경</string>
-  <string name="in">창고에</string>
-  <string name="out">배송</string>
-  <string name="txt_return">반품 배송비</string>
-  <string name="special">특수 기능</string>
-  <string name="check">일반</string>
-  <string name="barcode.hint">PA 바코드 스캔</string>
-  <string name="billno.hint">저장소 또는 배송 번호 스캔</string>
-  <string name="barcode_invalid">바코드가 잘못되었습니다.다시 시도하십시오.</string>
+  <string name = "action_settings"> 설정 </string>
+  <string name = "barcode.hint">2.QR 코드 스캔 </string>
+  <string name = "billno.hint">1.보관/주문 번호/Help</string>
+  <string name = "nfc.hint"> IC를 감지 영역에 놓으십시오. </string>
+  <string name = "write_to_mifare"> IC 카드에 쓰기 </string>
+  <string name = "device_no_nfc"> 귀하의 장치가 NFC를 지원하지 않습니다 </string>
+  <string name = "device_nfc_disabled"> NFC를 열려면 시스템 설정으로 이동하십시오. </string>
+  <string name = "no_card_found"> ​​IC 카드를 감지 영역에 놓습니다. </string>
+  <string name = "check_nfc_card"> NFC 기능이 정상인지 확인하고 IC 카드를 센서 영역에 붙여 넣으십시오. </string>
+  <string name = "auth_fail_card"> 인식 할 수없는 카드 </string>
+  <string name = "exit"> 종료 </string>
+  <string name = "exit_confirm"> 확인을 클릭하십시오. </string>
+  <string name = "yes"> 예 </string>
+  <string name = "no"> 아니요 (</string>)
+  <string name = "barcode_invalid"> 바코드가 잘못되었습니다. 다시 스캔하십시오. </string>
+  <string name = "scan.btn"> PDA 스캐너 </string>
+  <string name = "had_to_mifare">이 바코드가 입력되었습니다. </string>
+  <string name = "ok"> 확인 </string>
+  <string name = "cancel"> 취소 </string>
+  <string name = "upload"> 업로드 </string>
+  <string name = "invalid_setting"> 불완전한 </string> 설정 정보
+  <string name = "goto_setting"> 설정으로 이동 </string>
+  <string name = "setting"> 설정 </string>
+  <string name = "uploading"> 업로드 </string>
+  <string name = "warning"> 경고 </string>
+  <string name = "ledway"> Weihong 스캔 마스터 </string>
+  <string name = "password"> 암호 </string>
+  <string name = "invalid_password"> 비밀번호가 잘못되었습니다. </string>
+  <string name = "digits">0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-#/~.</string>
+  <string name = "in"> </string>
+  <string name = "out"> 출력 </string>
+  <string name = "check"> 확인 </string>
+  <string name = "scan_group"> 로그인 그룹 사용자 </string>
+  <string name = "In"> </string>
+  <string name = "group_success"> 로그인 그룹 사용자 성공 </string>
+  <string name = "txt_return"> 리턴 </string>
+  <string name = "special"> 특별 </string>
+  <string name = "network_is_not_available"> 인터넷 연결 </string>
 </resources>

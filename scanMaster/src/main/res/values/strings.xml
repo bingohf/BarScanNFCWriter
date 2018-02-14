@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
   <string name="app_name">Scan Master</string>
   <string name="main_activity_name">威虹資訊RFID工票查詢</string>
   <string name="barcode">Barcode</string>
@@ -48,8 +48,8 @@
 
 
   <string name="action_settings">Set</string>
-  <string name="barcode.hint">PA QRCode</string>
-  <string name="billno.hint">Stowage/Bill/Help</string>
+  <string name="barcode.hint">2.掃描二維碼</string>
+  <string name="billno.hint">1.儲位/單號/Help</string>
   <string name="nfc.hint">請將IC放到感應區</string>
   <string name="write_to_mifare">寫入IC卡</string>
   <string name="device_no_nfc">妳的設備不支持NFC</string>
@@ -62,7 +62,7 @@
   <string name="yes">是(Yes)</string>
   <string name="no">否(No)</string>
   <string name="barcode_invalid">條碼不正確，請重新掃碼</string>
-  <string name="scan.btn">PDA掃描器 (Scan)</string>
+  <string name="scan.btn">PDA掃描器(Scan)</string>
   <string name="had_to_mifare">此條碼已經錄入</string>
   <string name="ok">確認(OK)</string>
   <string name="cancel">取消(Cancel)</string>
@@ -79,10 +79,10 @@
   <string name="in">In</string>
   <string name="out">Out</string>
   <string name="check">Check</string>
-  <string name="scan_group">Change Group</string>
+  <string name="scan_group">登入集團用戶</string>
   <string name="In">In</string>
-  <string name="group_success">Change group success</string>
+  <string name="group_success">登入集團用戶成功</string>
   <string name="txt_return">Return</string>
   <string name="special">Special</string>
-  <string name="network_is_not_available">Network is not available</string>
+  <string name="network_is_not_available">網路不通</string>
 </resources>
