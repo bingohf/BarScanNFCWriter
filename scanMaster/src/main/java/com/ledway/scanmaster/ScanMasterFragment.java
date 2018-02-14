@@ -387,6 +387,15 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
       settings.setReader(reader);
       settingChanged();
     });
+
+    if(savedInstanceState == null) {
+      try {
+        queryBill(null, "Hello");
+      } catch (InvalidBarCodeException e) {
+        e.printStackTrace();
+        Timber.e(e);
+      }
+    }
   }
 
   @Override public void onStart() {
@@ -490,8 +499,10 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
   private void queryBill() throws InvalidBarCodeException {
     queryBill(null);
   }
-
   private void queryBill(String photoPath) throws InvalidBarCodeException {
+    queryBill(null, mMode);
+  }
+  private void queryBill(String photoPath, String type) throws InvalidBarCodeException {
     String billNo = mTxtBill.getText().toString();
     // validBarCode(billNo);
     mTxtBill.setEnabled(false);
@@ -501,7 +512,7 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
     request.billNo = billNo;
     request.line = settings.line;
     request.reader = settings.reader;
-    request.type = mMode;
+    request.type = type;
     request.MyTaxNo = settings.myTaxNo;
     Observable<SpResponse> apiOb = MyNetWork.getServiceApi().sp_getBill(request);
     if(!TextUtils.isEmpty(photoPath)){
@@ -595,6 +606,16 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
             getActivity().invalidateOptionsMenu();
           }
         });
+  }
+
+  @Override public void onSaveInstanceState(@NonNull Bundle outState) {
+    super.onSaveInstanceState(outState);
+    mWebResponse.saveState(outState);
+  }
+
+  @Override public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+    super.onViewStateRestored(savedInstanceState);
+    mWebResponse.restoreState(savedInstanceState);
   }
 
   private void settingChanged() {

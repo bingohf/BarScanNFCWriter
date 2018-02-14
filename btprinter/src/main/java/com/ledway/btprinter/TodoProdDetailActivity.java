@@ -2,6 +2,7 @@ package com.ledway.btprinter;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.arch.lifecycle.MutableLiveData;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -28,6 +29,9 @@ import com.activeandroid.query.Select;
 import com.ledway.btprinter.models.TodoProd;
 import com.ledway.btprinter.network.model.RestSpResponse;
 import com.ledway.btprinter.network.model.SpReturn;
+import com.ledway.scanmaster.model.OCRData;
+import com.ledway.scanmaster.model.Resource;
+import com.ledway.scanmaster.utils.BizUtils;
 import com.ledway.scanmaster.utils.ContextUtils;
 import com.ledway.scanmaster.utils.IOUtil;
 import com.ledway.btprinter.views.MImageView;
@@ -40,6 +44,15 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.List;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import org.json.JSONException;
+import org.json.JSONObject;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -57,6 +70,10 @@ public class TodoProdDetailActivity extends AppCompatActivity {
   @BindView(R.id.txt_hint) TextView mTxtHint;
   @BindView(R.id.txt_spec) EditText mEdtSpec;
   @BindView(R.id.img_qrcode) ImageView mImgQrCode;
+  private String mMyTaxNo;
+  private MutableLiveData<Resource<OCRData>> orc = new MutableLiveData<>();
+  private ProgressDialog mProgressDialog;
+
   @Override public boolean onCreateOptionsMenu(Menu menu) {
     getMenuInflater().inflate(R.menu.todo_prod_menu, menu);
     return true;
@@ -122,6 +139,30 @@ public class TodoProdDetailActivity extends AppCompatActivity {
       @Override public void onFocusChange(View v, boolean hasFocus) {
         if (!hasFocus){
           mTodoProd.spec_desc = mEdtSpec.getText().toString();
+        }
+      }
+    });
+
+    mMyTaxNo = BizUtils.getMyTaxNo(this);
+
+    orc.observe(this, ocrData -> {
+      switch (ocrData.status) {
+        case LOADING: {
+          showLoading();
+          break;
+        }
+        case ERROR: {
+          stopLoading();
+          Toast.makeText(this, ocrData.message, Toast.LENGTH_LONG).show();
+          break;
+        }
+        case SUCCESS: {
+          mEdtSpec.setText(ocrData.data.text);
+          Toast.makeText(this,
+              getString(R.string.ocr_count_limit, ocrData.data.count, ocrData.data.limit),
+              Toast.LENGTH_LONG).show();
+          stopLoading();
+          break;
         }
       }
     });
@@ -287,4 +328,70 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     return mTodoProd.prodNo.replaceAll("[\\*\\/\\\\\\?]","_");
   }
 
+
+  @OnClick(R.id.btn_ocr) void onBtnOCRClick() {
+    if (!mEdtSpec.getText().toString().trim().isEmpty()) {
+      Toast.makeText(this, R.string.hint_clear_description, Toast.LENGTH_SHORT)
+          .show();
+      return;
+    }
+    if (mTodoProd.image1 == null) {
+      Toast.makeText(this, R.string.no_image, Toast.LENGTH_SHORT).show();
+      return;
+    }
+    ocrImage(mTodoProd.image1);
+  }
+
+  private void ocrImage(String fileName) {
+    orc.setValue(Resource.loading(null));
+    OkHttpClient client = new OkHttpClient();
+    RequestBody requestBody =
+        RequestBody.create(MediaType.parse("application/octet-stream"), new File(fileName));
+
+    Request request = new Request.Builder().url("http://ledwayazure.cloudapp.net/ma/ledwayocr.aspx")
+        .addHeader("UserName", mMyTaxNo)
+        .addHeader("PassWord", "8887#@Ledway")
+        .post(requestBody)
+        .build();
+
+    client.newCall(request).enqueue(new Callback() {
+      @Override public void onFailure(Call call, IOException e) {
+        orc.postValue(Resource.error(e.getMessage(), null));
+      }
+
+      @Override public void onResponse(Call call, Response response) throws IOException {
+        try {
+          JSONObject jsonObject = new JSONObject(response.body().string());
+          if(jsonObject.getInt("returnCode") <0){
+            orc.postValue(Resource.error(jsonObject.getString("returnInfo"), null));
+          }
+          JSONObject json = new JSONObject(jsonObject.getString("data"));
+          int count = json.getInt("OCRCount");
+          int limit = json.getInt("OCRLimit");
+          String text = json.getString("OCRInfo");
+          OCRData ocrData = new OCRData();
+          ocrData.count = count;
+          ocrData.limit = limit;
+          ocrData.text = text;
+          orc.postValue(Resource.success(ocrData));
+        } catch (JSONException | IOException e) {
+          e.printStackTrace();
+          orc.postValue(Resource.error(e.getMessage(), null));
+        }
+      }
+    });
+  }
+
+  private void showLoading() {
+    mProgressDialog = ProgressDialog.show(this, getString(R.string.upload),
+        getString(R.string.wait_a_moment), false);
+    mProgressDialog.setOnDismissListener(dialogInterface -> mProgressDialog = null);
+  }
+
+  private void stopLoading() {
+    if (mProgressDialog != null) {
+      mProgressDialog.dismiss();
+      mProgressDialog = null;
+    }
+  }
 }

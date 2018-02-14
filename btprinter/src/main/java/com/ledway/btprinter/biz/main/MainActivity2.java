@@ -15,6 +15,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -122,7 +123,7 @@ public class MainActivity2 extends AppCompatActivity {
 
   private void initView() {
     ButterKnife.bind(this);
-    mViewPager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
+    mViewPager.setAdapter(new FragmentStatePagerAdapter(getSupportFragmentManager()) {
       @Override public Fragment getItem(int position) {
         return fragments[position];
       }

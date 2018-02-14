@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import com.ledway.scanmaster.AppConstants;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by togb on 2018/2/14.
@@ -29,7 +30,11 @@ public class BizUtils {
       String mDeviceName = Build.MODEL;
       SimpleDateFormat mSimpleDateFormater = new SimpleDateFormat(DATA_FORMAT);
       String temp = String.format(ID_FORMAT,  mDeviceId,mDeviceName, mSimpleDateFormater.format(new Date()));
-      return temp;
+      return temp+ "~" + getLanguage();
     }
+  }
+  static String getLanguage() {
+    Locale locale = Locale.getDefault();
+    return locale.getLanguage() + "_" + locale.getCountry();
   }
 }
