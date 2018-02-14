@@ -15,6 +15,7 @@ import okhttp3.MultipartBody;
 import okhttp3.ResponseBody;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
@@ -51,9 +52,9 @@ public interface DBService {
 
   @Multipart
   @POST
-  @Headers({
-          "Ocp-Apim-Subscription-Key: 7fcab5a19fc84fd9be1cd00dccc41dff"
-  })
-  Observable<ResponseBody> ocr(@Url String url, @Part MultipartBody.Part filePart);
+
+  Observable<ResponseBody> ocr(@Url String url,@Header("Content-Type") String content_type,
+      @Header("Password") String password,
+      @Header("UserName") String userName, @Part MultipartBody.Part filePart);
 
 }

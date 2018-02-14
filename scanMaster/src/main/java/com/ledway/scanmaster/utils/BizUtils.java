@@ -28,7 +28,8 @@ public class BizUtils {
           Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
       String mDeviceName = Build.MODEL;
       SimpleDateFormat mSimpleDateFormater = new SimpleDateFormat(DATA_FORMAT);
-      return String.format(ID_FORMAT,  mDeviceId,mDeviceName, mSimpleDateFormater.format(new Date()));
+      String temp = String.format(ID_FORMAT,  mDeviceId,mDeviceName, mSimpleDateFormater.format(new Date()));
+      return temp;
     }
   }
 }

@@ -2,7 +2,6 @@ package com.ledway.btprinter.biz.sample;
 
 import android.app.ProgressDialog;
 import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.Observer;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -37,26 +36,32 @@ import com.ledway.btprinter.R;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.models.SampleProdLink;
 import com.ledway.btprinter.models.TodoProd;
-import com.ledway.btprinter.network.MyProjectApi;
 import com.ledway.framework.FullScannerActivity;
+import com.ledway.scanmaster.model.OCRData;
 import com.ledway.scanmaster.model.Resource;
+import com.ledway.scanmaster.utils.BizUtils;
 import com.ledway.scanmaster.utils.ContextUtils;
 import com.ledway.scanmaster.utils.IOUtil;
 import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.io.IOException;
+import java.sql.CallableStatement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.MediaType;
-import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
+import okhttp3.Response;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import rx.Observable;
 import rx.Subscriber;
+import rx.functions.Func0;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -83,8 +88,8 @@ public class SampleMainFragment extends Fragment {
   private MutableLiveData<Resource> uploading = new MutableLiveData<>();
   private ProgressDialog mProgressDialog;
   private CompositeSubscription mSubscription = new CompositeSubscription();
-  private MutableLiveData<Resource<String>> orc = new MutableLiveData<>();
-
+  private MutableLiveData<Resource<OCRData>> orc = new MutableLiveData<>();
+  private String mMyTaxNo;
 
   public SampleMainFragment() {
     setHasOptionsMenu(true);
@@ -191,76 +196,11 @@ public class SampleMainFragment extends Fragment {
     }
   }
 
-  private void ocrImage(String fileName) {
-    orc.setValue(Resource.loading(null));
-    RequestBody requestBody =
-        RequestBody.create(MediaType.parse("application/octet-stream"), new File(fileName));
-    MultipartBody.Part part = MultipartBody.Part.create(requestBody);
-    MyProjectApi.getInstance()
-        .getDbService()
-        .ocr(
-            "https://eastasia.api.cognitive.microsoft.com/vision/v1.0/ocr?language=unk&detectOrientation =true",
-            part)
-        .subscribeOn(Schedulers.io())
-        .map(responseBody -> {
-          try {
-            StringBuilder sb = new StringBuilder();
-            JSONObject jsonObject = new JSONObject(responseBody.string());
-            parseOCR(sb, jsonObject);
-            return sb.toString();
-          } catch (JSONException| IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-          }
-        })
-        .subscribe(new Subscriber<String>() {
-          @Override public void onCompleted() {
-
-          }
-
-          @Override public void onError(Throwable e) {
-            orc.postValue(Resource.error(e.getMessage(), null));
-          }
-
-          @Override public void onNext(String s) {
-            orc.postValue(Resource.success(s));
-          }
-        });
-  }
-
-
-  private void parseOCR(StringBuilder sb, Object obj) throws JSONException {
-    if(obj instanceof  JSONArray){
-      for(int i =0;i < ((JSONArray) obj).length(); ++i){
-        JSONObject item = ((JSONArray) obj).getJSONObject(i);
-        parseOCR(sb, item);
-      }
-    }else if(obj instanceof  JSONObject){
-      if(((JSONObject) obj).has("text")){
-        String text = ((JSONObject) obj).getString("text");
-        if(!TextUtils.isEmpty(text)){
-          sb.append(text +" ");
-        }
-      }else if(((JSONObject) obj).has("lines")){
-        JSONArray lines  = ((JSONObject) obj).getJSONArray("lines");
-        parseOCR(sb, lines);
-      }else if(((JSONObject) obj).has("words")){
-        JSONArray words  = ((JSONObject) obj).getJSONArray("words");
-        parseOCR(sb, words);
-      } else if(((JSONObject) obj).has("regions")){
-        JSONArray regions = ((JSONObject) obj).getJSONArray("regions");
-        parseOCR(sb, regions);
-      }
-    }
-
-  }
-
-
-
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     mSampleMaster = getActivity() != null ? ((SampleActivity) getActivity()).mSampleMaster : null;
     super.onCreate(savedInstanceState);
     initView();
+    mMyTaxNo = BizUtils.getMyTaxNo(getContext());
   }
 
   @Nullable @Override
@@ -281,60 +221,6 @@ public class SampleMainFragment extends Fragment {
       mEdtSpec.setText(mSampleMaster.desc);
     }
     super.onViewCreated(view, savedInstanceState);
-  }
-
-  private void initView() {
-    uploading.observe(this, resource -> {
-      switch (resource.status) {
-        case LOADING: {
-          showLoading();
-          break;
-        }
-
-
-
-
-                    case SUCCESS: {
-          stopLoading();
-          break;
-        }
-        case ERROR: {
-          stopLoading();
-          Toast.makeText(getContext(), resource.message, Toast.LENGTH_LONG).show();
-        }
-      }
-    });
-    orc.observe(this, stringResource -> {
-      switch (stringResource.status){
-        case LOADING:{
-          showLoading();
-          break;
-        }
-        case ERROR:{
-          stopLoading();
-          Toast.makeText(getContext(), stringResource.message, Toast.LENGTH_LONG).show();
-          break;
-        }
-        case SUCCESS:{
-          mEdtSpec.setText(stringResource.data);
-          stopLoading();
-          break;
-        }
-      }
-    });
-  }
-
-  private void showLoading() {
-    mProgressDialog = ProgressDialog.show(getActivity(), getString(R.string.upload),
-        getString(R.string.wait_a_moment), false);
-    mProgressDialog.setOnDismissListener(dialogInterface -> mProgressDialog = null);
-  }
-
-  private void stopLoading() {
-    if (mProgressDialog != null) {
-      mProgressDialog.dismiss();
-      mProgressDialog = null;
-    }
   }
 
   @Override public void onDestroyView() {
@@ -386,6 +272,59 @@ public class SampleMainFragment extends Fragment {
     return super.onOptionsItemSelected(item);
   }
 
+  private void initView() {
+    uploading.observe(this, resource -> {
+      switch (resource.status) {
+        case LOADING: {
+          showLoading();
+          break;
+        }
+        case SUCCESS: {
+          stopLoading();
+          break;
+        }
+        case ERROR: {
+          stopLoading();
+          Toast.makeText(getContext(), resource.message, Toast.LENGTH_LONG).show();
+        }
+      }
+    });
+    orc.observe(this, ocrData -> {
+      switch (ocrData.status) {
+        case LOADING: {
+          showLoading();
+          break;
+        }
+        case ERROR: {
+          stopLoading();
+          Toast.makeText(getContext(), ocrData.message, Toast.LENGTH_LONG).show();
+          break;
+        }
+        case SUCCESS: {
+          mEdtSpec.setText(ocrData.data.text);
+          Toast.makeText(getContext(),
+              getString(R.string.ocr_count_limit, ocrData.data.count, ocrData.data.limit),
+              Toast.LENGTH_LONG).show();
+          stopLoading();
+          break;
+        }
+      }
+    });
+  }
+
+  private void showLoading() {
+    mProgressDialog = ProgressDialog.show(getActivity(), getString(R.string.upload),
+        getString(R.string.wait_a_moment), false);
+    mProgressDialog.setOnDismissListener(dialogInterface -> mProgressDialog = null);
+  }
+
+  private void stopLoading() {
+    if (mProgressDialog != null) {
+      mProgressDialog.dismiss();
+      mProgressDialog = null;
+    }
+  }
+
   private void uploadAll() {
     mSampleMaster.isDirty = true;
 
@@ -406,30 +345,6 @@ public class SampleMainFragment extends Fragment {
           }
         }));
   }
-
-  @OnClick(R.id.img_business_card) void onImgBusinessCardClick() {
-    if (mSampleMaster.image1 == null) {
-      startTakePhoto();
-    } else {
-      Intent intent = new Intent();
-      intent.setAction(Intent.ACTION_VIEW);
-      intent.setDataAndType(Uri.parse("file://" + mSampleMaster.image1), "image/*");
-      getActivity().startActivity(intent);
-    }
-  }
-
-  @OnClick(R.id.btn_ocr) void onBtnOCRClick(){
-    if(!mEdtSpec.getText().toString().trim().isEmpty()){
-      Toast.makeText(getContext(), R.string.hint_clear_business_card_hint_first, Toast.LENGTH_SHORT).show();
-      return;
-    }
-    if(mSampleMaster.image1 == null) {
-      Toast.makeText(getContext(), R.string.no_image, Toast.LENGTH_SHORT).show();
-      return;
-    }
-    ocrImage(mSampleMaster.image1);
-  }
-
 
   private Observable<Object> uploadProduct() {
     StringBuilder sb = new StringBuilder();
@@ -478,5 +393,145 @@ public class SampleMainFragment extends Fragment {
         .subscribeOn(Schedulers.io())
         .ignoreElements()
         .cast(Object.class);
+  }
+
+  private void parseOCR(StringBuilder sb, Object obj) throws JSONException {
+    if (obj instanceof JSONArray) {
+      for (int i = 0; i < ((JSONArray) obj).length(); ++i) {
+        JSONObject item = ((JSONArray) obj).getJSONObject(i);
+        parseOCR(sb, item);
+      }
+    } else if (obj instanceof JSONObject) {
+      if (((JSONObject) obj).has("text")) {
+        String text = ((JSONObject) obj).getString("text");
+        if (!TextUtils.isEmpty(text)) {
+          sb.append(text + " ");
+        }
+      } else if (((JSONObject) obj).has("lines")) {
+        JSONArray lines = ((JSONObject) obj).getJSONArray("lines");
+        parseOCR(sb, lines);
+      } else if (((JSONObject) obj).has("words")) {
+        JSONArray words = ((JSONObject) obj).getJSONArray("words");
+        parseOCR(sb, words);
+      } else if (((JSONObject) obj).has("regions")) {
+        JSONArray regions = ((JSONObject) obj).getJSONArray("regions");
+        parseOCR(sb, regions);
+      }
+    }
+  }
+
+  @OnClick(R.id.img_business_card) void onImgBusinessCardClick() {
+    if (mSampleMaster.image1 == null) {
+      startTakePhoto();
+    } else {
+      Intent intent = new Intent();
+      intent.setAction(Intent.ACTION_VIEW);
+      intent.setDataAndType(Uri.parse("file://" + mSampleMaster.image1), "image/*");
+      getActivity().startActivity(intent);
+    }
+  }
+
+  @OnClick(R.id.btn_ocr) void onBtnOCRClick() {
+    if (!mEdtSpec.getText().toString().trim().isEmpty()) {
+      Toast.makeText(getContext(), R.string.hint_clear_business_card_hint_first, Toast.LENGTH_SHORT)
+          .show();
+      return;
+    }
+    if (mSampleMaster.image1 == null) {
+      Toast.makeText(getContext(), R.string.no_image, Toast.LENGTH_SHORT).show();
+      return;
+    }
+    ocrImage(mSampleMaster.image1);
+  }
+
+  private void ocrImage(String fileName) {
+    orc.setValue(Resource.loading(null));
+    OkHttpClient client = new OkHttpClient();
+    RequestBody requestBody =
+        RequestBody.create(MediaType.parse("application/octet-stream"), new File(fileName));
+
+    Request request = new Request.Builder().url("http://ledwayazure.cloudapp.net/ma/ledwayocr.aspx")
+        .addHeader("UserName", mMyTaxNo)
+        .addHeader("PassWord", "8887#@Ledway")
+        .post(requestBody)
+        .build();
+
+    client.newCall(request).enqueue(new Callback() {
+      @Override public void onFailure(Call call, IOException e) {
+        orc.postValue(Resource.error(e.getMessage(), null));
+      }
+
+      @Override public void onResponse(Call call, Response response) throws IOException {
+        try {
+          JSONObject jsonObject = new JSONObject(response.body().string());
+          if(jsonObject.getInt("returnCode") <0){
+            orc.postValue(Resource.error(jsonObject.getString("returnInfo"), null));
+          }
+          JSONObject json = new JSONObject(jsonObject.getString("data"));
+          int count = json.getInt("OCRCount");
+          int limit = json.getInt("OCRLimit");
+          String text = json.getString("OCRInfo");
+          OCRData ocrData = new OCRData();
+          ocrData.count = count;
+          ocrData.limit = limit;
+          ocrData.text = text;
+          orc.postValue(Resource.success(ocrData));
+        } catch (JSONException| IOException e) {
+          e.printStackTrace();
+          orc.postValue(Resource.error(e.getMessage(), null));
+        }
+      }
+    });
+
+
+
+    /*MultipartBody.Part part = MultipartBody.Part.create(requestBody);
+    MyProjectApi.getInstance()
+        .getDbService()
+        .ocr(
+            "http://116.238.76.101:20082/WebLabelPub2015/Ledwayocr.aspx",
+            "application/octet-stream",
+            "8887#@Ledway",
+            mMyTaxNo,
+            part)
+        .subscribeOn(Schedulers.io())
+        .map(responseBody -> {
+          try {
+            StringBuilder sb = new StringBuilder();
+            JSONObject jsonObject = new JSONObject(responseBody.string());
+            if(jsonObject.getInt("returnCode") <0){
+              throw new RuntimeException(new Exception(jsonObject.getString("returnInfo")));
+            }
+            return new JSONObject(jsonObject.getString("data"));
+          } catch (JSONException| IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+          }
+        })
+        .subscribe(new Subscriber<JSONObject>() {
+          @Override public void onCompleted() {
+
+          }
+
+          @Override public void onError(Throwable e) {
+            orc.postValue(Resource.error(e.getMessage(), null));
+          }
+
+          @Override public void onNext(JSONObject json) {
+            try {
+              int count = json.getInt("OCRCount");
+              int limit = json.getInt("OCRLimit");
+              String text = json.getString("OCRInfo");
+              OCRData ocrData = new OCRData();
+              ocrData.count = count;
+              ocrData.limit = limit;
+              ocrData.text = text;
+              orc.postValue(Resource.success(ocrData));
+            } catch (JSONException e) {
+              e.printStackTrace();
+              orc.postValue(Resource.error(e.getMessage(), null));
+            }
+          }
+        });*/
   }
 }
