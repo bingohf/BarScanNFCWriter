@@ -59,7 +59,7 @@
   <string name = "exit"> ออก </string>
   <string name = "exit_confirm"> ตกลงใช่หรือไม่? </string>
   <string name = "yes"> ใช่ </string>
-  <string name = "no"> ไม่มี (</string>)
+  <string name = "no"> ไม่มี </string>
   <string name = "barcode_invalid"> บาร์โค้ดไม่ถูกต้องโปรดสแกนใหม่ </string>
   <string name = "scan.btn"> PDA Scanner </string>
   <string name = "had_to_mifare"> บาร์โค้ดนี้ได้รับการป้อน </string>

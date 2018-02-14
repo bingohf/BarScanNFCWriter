@@ -60,7 +60,7 @@
   <string name = "exit"> Exit </string>
   <string name = "exit_confirm"> OK Exit? </string>
   <string name = "yes"> Yes </string>
-  <string name = "no"> No (</string>)
+  <string name = "no"> No </string>
   <string name = "barcode_invalid"> barcode is incorrect, please re-scan </string>
   <string name = "scan.btn"> PDA Scanner </string>
   <string name = "had_to_mifare"> This barcode has been entered </string>

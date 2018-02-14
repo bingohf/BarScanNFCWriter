@@ -60,7 +60,7 @@
   <string name = "exit"> Thoát </string>
   <string name = "exit_confirm"> OK Thoát? </string>
   <string name = "yes"> Có </string>
-  <string name = "no"> Không (</string>)
+  <string name = "no"> Không </string>
   <string name = "barcode_invalid"> mã vạch không chính xác, vui lòng quét lại </string>
   <string name = "scan.btn"> Máy quét PDA </string>
   <string name = "had_to_mifare"> Mã vạch này đã được nhập </string>
