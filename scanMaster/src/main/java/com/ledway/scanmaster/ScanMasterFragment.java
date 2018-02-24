@@ -183,6 +183,9 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
         vv[i * 2] = 300;
         vv[i * 2 + 1] = 100;
       }
+      if(vibratorLen == 3 && mCurrEdit != null){
+        mCurrEdit.setText("");
+      }
       vibrator.vibrate(vv, -1);
       AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
       builder.setTitle(R.string.warning)
