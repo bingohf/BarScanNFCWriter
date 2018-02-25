@@ -302,9 +302,10 @@ public class SampleMainFragment extends Fragment {
         }
         case SUCCESS: {
           mEdtSpec.setText(ocrData.data.text);
-          Toast.makeText(getContext(),
-              getString(R.string.ocr_count_limit, ocrData.data.count, ocrData.data.limit),
-              Toast.LENGTH_LONG).show();
+          if(ocrData.data.count <=100) {
+            Toast.makeText(getContext(),
+                getString(R.string.ocr_count_limit, ocrData.data.count, ocrData.data.limit), Toast.LENGTH_LONG).show();
+          }
           stopLoading();
           break;
         }

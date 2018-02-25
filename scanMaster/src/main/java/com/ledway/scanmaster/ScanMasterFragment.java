@@ -502,9 +502,11 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
   private void queryBill() throws InvalidBarCodeException {
     queryBill(null);
   }
+
   private void queryBill(String photoPath) throws InvalidBarCodeException {
-    queryBill(null, mMode);
+    queryBill(photoPath, mMode);
   }
+
   private void queryBill(String photoPath, String type) throws InvalidBarCodeException {
     String billNo = mTxtBill.getText().toString();
     // validBarCode(billNo);
