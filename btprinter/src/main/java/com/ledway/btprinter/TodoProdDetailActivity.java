@@ -158,7 +158,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
         }
         case SUCCESS: {
           mEdtSpec.setText(ocrData.data.text);
-          if(ocrData.data.count <=100) {
+          if(ocrData.data.limit - ocrData.data.count <=100) {
             Toast.makeText(this, getString(R.string.ocr_count_limit, ocrData.data.count, ocrData.data.limit),
                 Toast.LENGTH_LONG).show();
           }

@@ -13,6 +13,7 @@ import com.zkc.Service.CaptureService;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import java.util.concurrent.TimeUnit;
 
 public class SerialPort {
 
@@ -40,7 +41,7 @@ public class SerialPort {
 			os.writeBytes(command + "\n");
 			os.writeBytes("exit\n");
 			os.flush();
-			process.waitFor();
+			waitFor(process,800, TimeUnit.MILLISECONDS);
 		} catch (Exception e) {
 			Log.d("*** DEBUG ***", "ROOT REE" + e.getMessage());
 			return false;
@@ -54,6 +55,26 @@ public class SerialPort {
 			}
 		}
 		return true;
+	}
+
+	public boolean waitFor(Process process,long timeout, TimeUnit unit)
+			throws InterruptedException
+	{
+		long startTime = System.nanoTime();
+		long rem = unit.toNanos(timeout);
+
+		do {
+			try {
+				process.exitValue();
+				return true;
+			} catch(IllegalThreadStateException ex) {
+				if (rem > 0)
+					Thread.sleep(
+							Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 100));
+			}
+			rem = unit.toNanos(timeout) - (System.nanoTime() - startTime);
+		} while (rem > 0);
+		return false;
 	}
 
 	public boolean open(String device, int baudrate) {
