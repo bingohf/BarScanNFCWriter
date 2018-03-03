@@ -78,6 +78,6 @@
   <string name="received">Received</string>
   <string name="are_you_sure_to_exit">Are you sure to exit</string>
   <string name="hint_clear_business_card_hint_first">Please clear business card memo</string>
-  <string name="sxocr_count_limit">OCR has been used %1$d time(s) (Limit:%2$d) </string>
+  <string name="ocr_count_limit">OCR has been used %1$d time(s) (Limit:%2$d) </string>
   <string name="hint_clear_description">Please clear description</string>
 </resources>

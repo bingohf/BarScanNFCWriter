@@ -1,22 +1,30 @@
 package com.ledway.btprinter.biz.main;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.scanmaster.domain.TimeIDGenerator;
 import java.util.Locale;
@@ -32,6 +40,16 @@ public class WebViewFragment extends Fragment implements OnKeyPress {
   @BindView(R.id.progressBar) ProgressBar mProgressBar;
   private String param;
   private String pdaGuid;
+  private String mLastUrl;
+  private BroadcastReceiver mNetworkChange = new BroadcastReceiver() {
+    @Override public void onReceive(Context context, Intent intent) {
+      if (mWebView != null) {
+        if (!mWebView.getUrl().startsWith("http")) {
+          //  mWebView.loadUrl(URL);
+        }
+      }
+    }
+  };
 
   public WebViewFragment() {
     setRetainInstance(true);
@@ -40,7 +58,10 @@ public class WebViewFragment extends Fragment implements OnKeyPress {
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     TimeIDGenerator timeIDGenerator = new TimeIDGenerator(getContext());
-    pdaGuid =timeIDGenerator.genID() + "~" + getLanguage();
+    pdaGuid = timeIDGenerator.genID() + "~" + getLanguage();
+    IntentFilter intentFilter = new IntentFilter();
+    intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+    getContext().registerReceiver(mNetworkChange, intentFilter);
   }
 
   private String getLanguage() {
@@ -76,19 +97,25 @@ public class WebViewFragment extends Fragment implements OnKeyPress {
     });
 
     mWebView.setWebViewClient(new WebViewClient() {
+
+
       @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        if (url != null && url.endsWith("pdf")) {
-          view.getContext().startActivity(
-              new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+        if (url.contains("retry")) {
+          if(TextUtils.isEmpty(mLastUrl)){
+            mLastUrl = URL;
+          }
+          view.loadUrl(mLastUrl);
+          return true;
+        } else if (url != null && url.endsWith("pdf")) {
+          view.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
           return true;
         } else {
-          if(url != null && !url.contains("pdaGuid")){
-            if(url.contains("?")){
+          if (url != null && !url.contains("pdaGuid")) {
+            if (url.contains("?")) {
               url += "&pdaGuid=" + pdaGuid;
-            }else {
+            } else {
               url += "?pdaGuid=" + pdaGuid;
             }
-
           }
           Timber.i(url);
           view.loadUrl(url);
@@ -99,17 +126,34 @@ public class WebViewFragment extends Fragment implements OnKeyPress {
       @Override public void onPageFinished(WebView view, String url) {
         mProgressBar.setVisibility(View.GONE);
       }
+
+      @Override public void onReceivedError(WebView view, int errorCode, String description,
+          String failingUrl) {
+        mProgressBar.setVisibility(View.GONE);
+        if (errorCode == ERROR_HOST_LOOKUP
+            || errorCode == ERROR_CONNECT
+            || errorCode == ERROR_TIMEOUT) {
+          view.loadUrl("about:blank"); // 避免出现默认的错误界面
+          view.loadUrl("file:///android_asset/error.html");
+          mLastUrl = failingUrl;
+        }
+      }
+
+      @RequiresApi(api = Build.VERSION_CODES.M) @Override
+      public void onReceivedError(WebView view, WebResourceRequest request,
+          WebResourceError error) {
+        onReceivedError(view, error.getErrorCode(), error.getDescription().toString(),
+            request.getUrl().toString());
+        // super.onReceivedError(view, request, error);
+      }
     });
+
     //super.onViewCreated(view, savedInstanceState);
   }
 
   @Override public void onSaveInstanceState(@NonNull Bundle outState) {
     super.onSaveInstanceState(outState);
     mWebView.saveState(outState);
-  }
-
-  @Override public void onDestroyView() {
-    super.onDestroyView();
   }
 
   @Override public void onPause() {
@@ -120,9 +164,16 @@ public class WebViewFragment extends Fragment implements OnKeyPress {
     super.onStop();
   }
 
+  @Override public void onDestroyView() {
+    super.onDestroyView();
+  }
 
-  @Override
-  public boolean onKeyDown(int keyCode, KeyEvent event) {
+  @Override public void onDestroy() {
+    super.onDestroy();
+    getContext().unregisterReceiver(mNetworkChange);
+  }
+
+  @Override public boolean onKeyDown(int keyCode, KeyEvent event) {
     if (event.getAction() == KeyEvent.ACTION_DOWN) {
       if (keyCode == KeyEvent.KEYCODE_BACK && mWebView != null) {
         if (mWebView.canGoBack()) {
