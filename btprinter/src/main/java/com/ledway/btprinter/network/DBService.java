@@ -12,6 +12,7 @@ import com.ledway.btprinter.network.model.Sp_UpSample_v3_Request;
 import com.ledway.btprinter.network.model.TotalUserReturn;
 
 import okhttp3.MultipartBody;
+import okhttp3.Response;
 import okhttp3.ResponseBody;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -44,6 +45,8 @@ public interface DBService {
       Sp_UpSampleDetail_Request request);
 
   @GET("sql/{sql}") Observable<RestDataSetResponse<TotalUserReturn>> queryTotalUser(@Path("sql") String sql);
+
+  @GET("sql/{sql}") Observable<ResponseBody> customQuery(@Path("sql") String sql);
 
 
   @POST("Sp/sp_UpProduct") Observable<RestSpResponse<SpReturn>> sp_UpProduct(@Body

@@ -5,6 +5,7 @@ import com.google.gson.JsonDeserializer
 import com.google.gson.JsonPrimitive
 import com.google.gson.JsonSerializer
 import java.lang.reflect.Modifier
+import java.lang.reflect.Type
 import java.util.*
 
 class JsonUtils {
@@ -21,6 +22,10 @@ class JsonUtils {
 
     fun <T> fromJson(json: String, cls: Class<T>): T {
       return sGson.fromJson(json, cls)
+    }
+
+    fun <T> fromJson(json: String, typeOfT: Type): T {
+      return sGson.fromJson(json, typeOfT)
     }
 
     fun toJson(any: Any): String {

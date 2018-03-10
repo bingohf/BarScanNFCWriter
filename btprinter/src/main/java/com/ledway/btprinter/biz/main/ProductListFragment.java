@@ -15,6 +15,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -29,18 +30,33 @@ import butterknife.Unbinder;
 import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.gson.reflect.TypeToken;
 import com.gturedi.views.StatefulLayout;
+import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.TodoProdDetailActivity;
-import com.ledway.scanmaster.model.Resource;
 import com.ledway.btprinter.models.TodoProd;
-import com.ledway.scanmaster.utils.ContextUtils;
+import com.ledway.btprinter.network.MyProjectApi;
+import com.ledway.btprinter.network.model.GroupProduct;
+import com.ledway.btprinter.network.model.RemoteGroupProduct;
+import com.ledway.btprinter.network.model.RestDataSetResponse;
 import com.ledway.framework.FullScannerActivity;
+import com.ledway.scanmaster.model.Resource;
+import com.ledway.scanmaster.utils.BizUtils;
+import com.ledway.scanmaster.utils.ContextUtils;
+import com.ledway.scanmaster.utils.JsonUtils;
 import io.reactivex.disposables.CompositeDisposable;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import rx.Observable;
 import rx.Subscriber;
+import rx.schedulers.Schedulers;
 
 public class ProductListFragment extends Fragment {
   public static final String DATA_PRODUCTS = "data_products";
@@ -54,9 +70,12 @@ public class ProductListFragment extends Fragment {
   private SampleListAdapter2 mSampleListAdapter;
   private MutableLiveData<Resource<List<SampleListAdapter2.ItemData>>> dataResource =
       new MutableLiveData<>();
+  private MutableLiveData<Resource<List<String>>> showRooms = new MutableLiveData<>();
+  private MutableLiveData<Resource> syncProducts = new MutableLiveData<>();
   private ArrayList<String> mDefaultSelected;
 
   private boolean inSelectMode = false;
+  private MaterialDialog progress;
 
   public ProductListFragment() {
     setRetainInstance(true);
@@ -92,7 +111,7 @@ public class ProductListFragment extends Fragment {
       inSelectMode = getArguments().getBoolean("select", false);
       mDefaultSelected = getArguments().getStringArrayList(DATA_PRODUCTS);
     }
-    if(mDefaultSelected == null){
+    if (mDefaultSelected == null) {
       mDefaultSelected = new ArrayList<>();
     }
     mSampleListAdapter = new SampleListAdapter2(getContext());
@@ -101,31 +120,37 @@ public class ProductListFragment extends Fragment {
         .subscribe(prodno -> startActivityForResult(
             new Intent(getActivity(), TodoProdDetailActivity.class).putExtra("prod_no",
                 (String) prodno), REQUEST_TODO_PRODUCT)));
-    mDisposables.add(mSampleListAdapter.getmLongClickSubject()
-        .subscribe(view -> {
-          PopupMenu popup = new PopupMenu(getActivity(), (View)view);
+    mDisposables.add(mSampleListAdapter.getmLongClickSubject().subscribe(view -> {
+      PopupMenu popup = new PopupMenu(getActivity(), (View) view);
 
-          // This activity implements OnMenuItemClickListener
-          popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override public boolean onMenuItemClick(MenuItem menuItem) {
-              int index = (int) ((View) view).getTag();
-              String prodNo = (String) mSampleListAdapter.get(index).hold;
-              removeProduct(prodNo);
-              return false;
-            }
-          });
-          popup.inflate(R.menu.menu_product_delete);
-          popup.show();
+      // This activity implements OnMenuItemClickListener
+      popup.setOnMenuItemClickListener(menuItem -> {
+        if (menuItem.getItemId() == R.id.action_delete) {
+          int index = (int) ((View) view).getTag();
+          String prodNo = (String) mSampleListAdapter.get(index).hold;
+          removeProduct(prodNo);
+        } else if (menuItem.getItemId() == R.id.action_delete_all) {
+          removeAllProduct();
+        }
+        return false;
+      });
+      popup.inflate(R.menu.menu_product_delete);
 
-        }));
-
+      popup.show();
+    }));
 
     mDisposables.add(mSampleListAdapter.getCheckObservable().subscribe(o -> titleChange()));
     loadData();
+    initView();
   }
 
   private void removeProduct(String prodNo) {
-    new Delete().from(TodoProd.class).where("prodno=?",prodNo).execute();
+    new Delete().from(TodoProd.class).where("prodno=?", prodNo).execute();
+    loadData();
+  }
+
+  private void removeAllProduct() {
+    new Delete().from(TodoProd.class).execute();
     loadData();
   }
 
@@ -152,33 +177,6 @@ public class ProductListFragment extends Fragment {
         new DividerItemDecoration(getActivity(), layoutManager.getOrientation());
     mListView.addItemDecoration(dividerItemDecoration);
     mSwipeRefresh.setEnabled(false);
-    initView();
-  }
-
-  private void initView() {
-    dataResource.observe(this, resource -> {
-      switch (resource.status) {
-        case LOADING: {
-          mSwipeRefresh.setRefreshing(true);
-          break;
-        }
-        case ERROR: {
-          mSwipeRefresh.setRefreshing(false);
-          Toast.makeText(getContext(), resource.message, Toast.LENGTH_LONG).show();
-          break;
-        }
-        case SUCCESS: {
-          mSwipeRefresh.setRefreshing(false);
-          mSampleListAdapter.setData(resource.data);
-          mSampleListAdapter.notifyDataSetChanged();
-          if (resource.data.isEmpty()) {
-            mStatefulLayout.showEmpty();
-          } else {
-            mStatefulLayout.showContent();
-          }
-        }
-      }
-    });
   }
 
   @Override public void onDestroyView() {
@@ -208,34 +206,244 @@ public class ProductListFragment extends Fragment {
         scanBarCode();
         break;
       }
-      case R.id.action_key:{
-        new MaterialDialog.Builder(getActivity())
-            .title(R.string.input_product_number)
+      case R.id.action_key: {
+        new MaterialDialog.Builder(getActivity()).title(R.string.input_product_number)
             .inputType(InputType.TYPE_CLASS_TEXT)
             .input(R.string.input_hint_product_no, 0, (dialog, input) -> {
-              if(!TextUtils.isEmpty(input)){
+              if (!TextUtils.isEmpty(input)) {
                 receiveQrCode(input.toString());
               }
-            }).show();
+            })
+            .show();
         break;
       }
       case R.id.action_done: {
         ArrayList<String> selected = new ArrayList<>();
         SampleListAdapter2.ItemData[] selectedViewItem = mSampleListAdapter.getSelection();
-        for( SampleListAdapter2.ItemData viewItem:selectedViewItem){
+        for (SampleListAdapter2.ItemData viewItem : selectedViewItem) {
           selected.add((String) viewItem.hold);
         }
-        getActivity().setResult(Activity.RESULT_OK, new Intent().putStringArrayListExtra("selected",selected));
+        getActivity().setResult(Activity.RESULT_OK,
+            new Intent().putStringArrayListExtra("selected", selected));
         getActivity().finish();
+        break;
+      }
+      case R.id.action_download_from_group: {
+        loadGroupProduct();
         break;
       }
     }
     return true;
   }
 
+  private void loadGroupProduct() {
+    String myTaxNo = BizUtils.getMyTaxNo(getActivity());
+    myTaxNo = "3036A";
+    MyProjectApi.getInstance()
+        .getDbService()
+        .customQuery("select * from view_GroupShowName where mytaxno ='" + myTaxNo + "'")
+        .doOnSubscribe(() -> showRooms.postValue(Resource.loading(null)))
+        .map(responseBody -> {
+          try {
+            String json = responseBody.string();
+            Type listType = new TypeToken<RestDataSetResponse<GroupProduct>>() {
+            }.getType();
+            RestDataSetResponse<GroupProduct> response =
+                JsonUtils.Companion.fromJson(json, listType);
+            return response.result.get(0);
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+          return null;
+        })
+        .flatMap(Observable::from)
+        .map(groupProduct -> groupProduct.showname)
+        .toList()
+        .subscribeOn(Schedulers.io())
+        .subscribe(new Subscriber<List<String>>() {
+          @Override public void onCompleted() {
+
+          }
+
+          @Override public void onError(Throwable e) {
+            showRooms.postValue(Resource.error(ContextUtils.getMessage(e), null));
+          }
+
+          @Override public void onNext(List<String> strings) {
+            //     strings = Arrays.asList("1","2");
+            showRooms.postValue(Resource.success(strings));
+          }
+        });
+  }
+
   private void scanBarCode() {
     startActivityForResult(new Intent(getActivity(), FullScannerActivity.class),
         RESULT_CAMERA_QR_CODE);
+  }
+
+  private void initView() {
+    dataResource.observe(this, resource -> {
+      switch (resource.status) {
+        case LOADING: {
+          mSwipeRefresh.setRefreshing(true);
+          break;
+        }
+        case ERROR: {
+          mSwipeRefresh.setRefreshing(false);
+          Toast.makeText(getContext(), resource.message, Toast.LENGTH_LONG).show();
+          break;
+        }
+        case SUCCESS: {
+          mSwipeRefresh.setRefreshing(false);
+          mSampleListAdapter.setData(resource.data);
+          mSampleListAdapter.notifyDataSetChanged();
+          if (resource.data.isEmpty()) {
+            mStatefulLayout.showEmpty();
+          } else {
+            mStatefulLayout.showContent();
+          }
+        }
+      }
+    });
+
+    showRooms.observe(this, listResource -> {
+      switch (listResource.status) {
+        case LOADING: {
+          showLoading();
+          break;
+        }
+        case ERROR: {
+          hideLoading();
+          Toast.makeText(getActivity(), listResource.message, Toast.LENGTH_LONG).show();
+          break;
+        }
+        case SUCCESS: {
+          hideLoading();
+          new MaterialDialog.Builder(getActivity()).title(R.string.show_room)
+              .items(listResource.data)
+              .alwaysCallSingleChoiceCallback()
+              .itemsCallbackSingleChoice(-1, new MaterialDialog.ListCallbackSingleChoice() {
+                @Override public boolean onSelection(MaterialDialog dialog, View view, int which,
+                    CharSequence text) {
+                  dialog.setSelectedIndex(which);
+                  syncProduct(text.toString());
+                  return false;
+                }
+              })
+              .show();
+          break;
+        }
+      }
+    });
+
+    syncProducts.observe(this, resource -> {
+      switch (resource.status) {
+        case LOADING: {
+          showLoading();
+          break;
+        }
+        case ERROR: {
+          Toast.makeText(getActivity(), resource.message, Toast.LENGTH_LONG).show();
+          hideLoading();
+          break;
+        }
+        case SUCCESS: {
+          hideLoading();
+          loadData();
+          break;
+        }
+      }
+    });
+  }
+
+  private void showLoading() {
+    hideLoading();
+    progress = new MaterialDialog.Builder(getActivity()).progress(true, 100).show();
+  }
+
+  private void hideLoading() {
+    if (progress != null) {
+      progress.dismiss();
+      progress = null;
+    }
+  }
+
+  private void syncProduct(String room) {
+    String myTaxNo = BizUtils.getMyTaxNo(getActivity());
+    myTaxNo = "3036A";
+
+    MyProjectApi.getInstance()
+        .getDbService()
+        .customQuery("select * from view_GroupShowList where mytaxno ='"
+            + myTaxNo
+            + "' and showname ='"
+            + room
+            + "'")
+        .doOnSubscribe(() -> syncProducts.postValue(Resource.loading(null)))
+        .map(responseBody -> {
+          try {
+            String json = responseBody.string();
+            Type listType = new TypeToken<RestDataSetResponse<RemoteGroupProduct>>() {
+            }.getType();
+            RestDataSetResponse<RemoteGroupProduct> response =
+                JsonUtils.Companion.fromJson(json, listType);
+            return response.result.get(0);
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+          return null;
+        })
+        .flatMap(Observable::from)
+        .doOnNext(remoteGroupProduct -> {
+          new Delete().from(TodoProd.class).where("prodno =?", remoteGroupProduct.prodno).execute();
+          TodoProd todoProd = new TodoProd();
+          todoProd.prodNo = remoteGroupProduct.prodno;
+          todoProd.spec_desc = remoteGroupProduct.specdesc;
+          todoProd.update_time = remoteGroupProduct.updateDate;
+          todoProd.uploaded_time = remoteGroupProduct.updateDate;
+          todoProd.create_time = remoteGroupProduct.updateDate;
+          String file1Path =
+              MApp.getApplication().getPicPath() + "/product_" + todoProd.prodNo + "_type1.jpg";
+          String file2Path =
+              MApp.getApplication().getPicPath() + "/product_" + todoProd.prodNo + "_type2.jpg";
+          if (!TextUtils.isEmpty(remoteGroupProduct.graphic)) {
+            byte[] data = Base64.decode(remoteGroupProduct.graphic, Base64.DEFAULT);
+            try (OutputStream stream = new FileOutputStream(new File(file1Path))) {
+              stream.write(data);
+              todoProd.image1 = file1Path;
+            } catch (FileNotFoundException e) {
+              e.printStackTrace();
+            } catch (IOException e) {
+              e.printStackTrace();
+            }
+          }
+          if (!TextUtils.isEmpty(remoteGroupProduct.graphic2)) {
+            byte[] data = Base64.decode(remoteGroupProduct.graphic2, Base64.DEFAULT);
+            try (OutputStream stream = new FileOutputStream(new File(file2Path))) {
+              stream.write(data);
+              todoProd.image2 = file2Path;
+            } catch (FileNotFoundException e) {
+              e.printStackTrace();
+            } catch (IOException e) {
+              e.printStackTrace();
+            }
+          }
+          todoProd.save();
+        })
+        .subscribeOn(Schedulers.io())
+        .subscribe(new Subscriber<RemoteGroupProduct>() {
+          @Override public void onCompleted() {
+
+          }
+
+          @Override public void onError(Throwable e) {
+            syncProducts.postValue(Resource.error(ContextUtils.getMessage(e), null));
+          }
+
+          @Override public void onNext(RemoteGroupProduct remoteGroupProduct) {
+            syncProducts.postValue(Resource.success(null));
+          }
+        });
   }
 
   private void loadData() {

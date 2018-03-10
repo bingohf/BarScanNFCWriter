@@ -24,6 +24,13 @@
       />
 
   <item
+      android:id="@+id/action_download_from_group"
+      android:icon="@drawable/ic_account_multiple"
+      android:title="@string/download_from_group"
+      app:showAsAction="never"
+      />
+
+  <item
       android:id="@+id/action_add"
       android:icon="@drawable/ic_add_white_24dp"
       android:title="Create Sample"

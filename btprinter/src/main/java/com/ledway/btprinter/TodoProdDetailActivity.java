@@ -29,13 +29,13 @@ import com.activeandroid.query.Select;
 import com.ledway.btprinter.models.TodoProd;
 import com.ledway.btprinter.network.model.RestSpResponse;
 import com.ledway.btprinter.network.model.SpReturn;
+import com.ledway.btprinter.views.MImageView;
+import com.ledway.framework.FullScannerActivity;
 import com.ledway.scanmaster.model.OCRData;
 import com.ledway.scanmaster.model.Resource;
 import com.ledway.scanmaster.utils.BizUtils;
 import com.ledway.scanmaster.utils.ContextUtils;
 import com.ledway.scanmaster.utils.IOUtil;
-import com.ledway.btprinter.views.MImageView;
-import com.ledway.framework.FullScannerActivity;
 import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -63,13 +63,12 @@ import rx.schedulers.Schedulers;
 public class TodoProdDetailActivity extends AppCompatActivity {
   private static final int REQUEST_TAKE_IMAGE = 1;
   private static final int RESULT_CAMERA_QR_CODE = 2;
-
-  private TodoProd mTodoProd ;
-  private String mCurrentPhotoPath;
   @BindView(R.id.image) MImageView mImageView;
   @BindView(R.id.txt_hint) TextView mTxtHint;
   @BindView(R.id.txt_spec) EditText mEdtSpec;
   @BindView(R.id.img_qrcode) ImageView mImgQrCode;
+  private TodoProd mTodoProd;
+  private String mCurrentPhotoPath;
   private String mMyTaxNo;
   private MutableLiveData<Resource<OCRData>> orc = new MutableLiveData<>();
   private ProgressDialog mProgressDialog;
@@ -79,13 +78,18 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     return true;
   }
 
+  @Override public boolean onPrepareOptionsMenu(Menu menu) {
+    //menu.findItem(R.id.action_re_upload).setVisible(mTodoProd.image1 != null && mTodoProd.image1.length > 0);
+    return true;
+  }
+
   @Override public boolean onOptionsItemSelected(MenuItem item) {
-    switch (item.getItemId()){
-      case R.id.action_re_take_photo:{
+    switch (item.getItemId()) {
+      case R.id.action_re_take_photo: {
         startTakePhoto(1);
         break;
       }
-      case R.id.action_re_upload:{
+      case R.id.action_re_upload: {
         upload();
         break;
       }
@@ -93,19 +97,78 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     return true;
   }
 
+  private void upload() {
+    mTodoProd.spec_desc = mEdtSpec.getText().toString();
+    mTodoProd.save();
+    final ProgressDialog progressDialog =
+        ProgressDialog.show(this, getString(R.string.upload), getString(R.string.wait_a_moment),
+            true);
+    mTodoProd.remoteSave2()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Subscriber<RestSpResponse<SpReturn>>() {
+          @Override public void onCompleted() {
+            progressDialog.dismiss();
+          }
 
-  @Override public void onBackPressed() {
-    if(mTodoProd.update_time.getTime() != mTodoProd.create_time.getTime()) {
-      mTodoProd.save();
-    }
-    super.onBackPressed();
+          @Override public void onError(Throwable e) {
+            progressDialog.dismiss();
+            Toast.makeText(TodoProdDetailActivity.this, ContextUtils.getMessage(e),
+                Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+          }
+
+          @Override public void onNext(RestSpResponse<SpReturn> spReturnRestSpResponse) {
+            int returnCode = spReturnRestSpResponse.result.get(0).errCode;
+            String returnMessage = spReturnRestSpResponse.result.get(0).errData;
+            if (!TextUtils.isEmpty(returnMessage)) {
+              Toast.makeText(TodoProdDetailActivity.this, returnMessage, Toast.LENGTH_LONG).show();
+            }
+            if (returnCode == 1) {
+              mTodoProd.uploaded_time = new Date();
+              mTodoProd.save();
+            }
+            invalidateOptionsMenu();
+          }
+        });
   }
 
-  @Override protected void onDestroy() {
-    super.onDestroy();
+  private void startTakePhoto(int type) {
+    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+    if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+      File photoFile = null;
+      try {
+        photoFile = new File(MApp.getApplication().getPicPath()
+            + "/"
+            + getProdNoFileName()
+            + "_type_"
+            + type
+            + ".jpeg");
+        mCurrentPhotoPath = photoFile.getAbsolutePath();
+        photoFile.createNewFile();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      if (photoFile != null) {
+        Uri photoURI = FileProvider.getUriForFile(TodoProdDetailActivity.this,
+            BuildConfig.APPLICATION_ID + ".fileprovider", photoFile);
+        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+        List<ResolveInfo> resolvedIntentActivities =
+            getPackageManager().queryIntentActivities(takePictureIntent,
+                PackageManager.MATCH_DEFAULT_ONLY);
+        for (ResolveInfo resolvedIntentInfo : resolvedIntentActivities) {
+          String packageName = resolvedIntentInfo.activityInfo.packageName;
 
-    mTodoProd.image1 = null;
-    mTodoProd.image2 = null;
+          grantUriPermission(packageName, photoURI,
+              Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        }
+        startActivityForResult(takePictureIntent, type);
+      }
+    }
+  }
+
+  private String getProdNoFileName() {
+    return mTodoProd.prodNo.replaceAll("[\\*\\/\\\\\\?]", "_");
   }
 
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -117,15 +180,15 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     //mTodoProd.queryAllField();
     getSupportActionBar().setTitle(mTodoProd.prodNo);
     mEdtSpec.setText(mTodoProd.spec_desc);
-    if (TextUtils.isEmpty(mTodoProd.image1)){
+    if (TextUtils.isEmpty(mTodoProd.image1)) {
       mTxtHint.setVisibility(View.VISIBLE);
       mImageView.setVisibility(View.GONE);
-    }else{
+    } else {
       mImageView.setVisibility(View.VISIBLE);
       mTxtHint.setVisibility(View.GONE);
 
       //Bitmap bitmap =  IOUtil.loadImage(mTodoProd.image1, 800,800);
-      if(new File(mTodoProd.image1).exists()) {
+      if (new File(mTodoProd.image1).exists()) {
         Picasso.with(this).load(new File(mTodoProd.image1)).into(mImageView);
       }
       mImageView.setImagePath(mTodoProd.image1);
@@ -137,7 +200,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     });
     mEdtSpec.setOnFocusChangeListener(new View.OnFocusChangeListener() {
       @Override public void onFocusChange(View v, boolean hasFocus) {
-        if (!hasFocus){
+        if (!hasFocus) {
           mTodoProd.spec_desc = mEdtSpec.getText().toString();
         }
       }
@@ -158,8 +221,9 @@ public class TodoProdDetailActivity extends AppCompatActivity {
         }
         case SUCCESS: {
           mEdtSpec.setText(ocrData.data.text);
-          if(ocrData.data.limit - ocrData.data.count <=100) {
-            Toast.makeText(this, getString(R.string.ocr_count_limit, ocrData.data.count, ocrData.data.limit),
+          if (ocrData.data.limit - ocrData.data.count <= 100) {
+            Toast.makeText(this,
+                getString(R.string.ocr_count_limit, ocrData.data.count, ocrData.data.limit),
                 Toast.LENGTH_LONG).show();
           }
           stopLoading();
@@ -172,30 +236,26 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     startActivityForResult(takePicture, REQUEST_TAKE_IMAGE);//zero can be replaced with any action code*/
   }
 
-  @OnTextChanged(R.id.txt_spec) void onTextSpecChange(){
-    if(!mEdtSpec.getText().toString().equals(mTodoProd.spec_desc)){
-      mTodoProd.update_time = new Date();
-    }
-    mTodoProd.spec_desc = mEdtSpec.getText().toString();
-  }
+  @Override protected void onDestroy() {
+    super.onDestroy();
 
-  @OnClick(R.id.img_qrcode) void onImgQrCodeClick(){
-    startActivityForResult(new Intent(this, FullScannerActivity.class),
-        RESULT_CAMERA_QR_CODE);
+    mTodoProd.image1 = null;
+    mTodoProd.image2 = null;
   }
 
   private void loadTodoProd() {
     String prodno = getIntent().getStringExtra("prod_no");
-    if(TextUtils.isEmpty(prodno)) {
+    if (TextUtils.isEmpty(prodno)) {
       mTodoProd = (TodoProd) MApp.getApplication().getSession().getValue("current_todo_prod");
-    }else {
+    } else {
       mTodoProd = loadTodoProd(prodno);
     }
   }
 
   private TodoProd loadTodoProd(String prodno) {
-    List<TodoProd> todoProds = new Select().from(TodoProd.class).where("prodno =?", prodno).execute();
-    if (todoProds.size() > 0){
+    List<TodoProd> todoProds =
+        new Select().from(TodoProd.class).where("prodno =?", prodno).execute();
+    if (todoProds.size() > 0) {
       return todoProds.get(0);
     }
     TodoProd todoProd = new TodoProd();
@@ -205,30 +265,60 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     return todoProd;
   }
 
+  private void showLoading() {
+    mProgressDialog =
+        ProgressDialog.show(this, getString(R.string.upload), getString(R.string.wait_a_moment),
+            false);
+    mProgressDialog.setOnDismissListener(dialogInterface -> mProgressDialog = null);
+  }
+
+  private void stopLoading() {
+    if (mProgressDialog != null) {
+      mProgressDialog.dismiss();
+      mProgressDialog = null;
+    }
+  }
+
+  @OnTextChanged(R.id.txt_spec) void onTextSpecChange() {
+    if (!mEdtSpec.getText().toString().equals(mTodoProd.spec_desc)) {
+      mTodoProd.update_time = new Date();
+    }
+    mTodoProd.spec_desc = mEdtSpec.getText().toString();
+  }
+
+  @OnClick(R.id.img_qrcode) void onImgQrCodeClick() {
+    startActivityForResult(new Intent(this, FullScannerActivity.class), RESULT_CAMERA_QR_CODE);
+  }
+
   @Override protected void onActivityResult(final int requestCode, int resultCode, Intent data) {
-    switch (requestCode){
-      case RESULT_CAMERA_QR_CODE:{
-        if(resultCode == Activity.RESULT_OK) {
+    switch (requestCode) {
+      case RESULT_CAMERA_QR_CODE: {
+        if (resultCode == Activity.RESULT_OK) {
           String qrcode = data.getStringExtra("barcode");
           mEdtSpec.setText(qrcode);
         }
         break;
       }
-      case REQUEST_TAKE_IMAGE:{
-        if (RESULT_OK ==  resultCode){
+      case REQUEST_TAKE_IMAGE: {
+        if (RESULT_OK == resultCode) {
           File f = new File(mCurrentPhotoPath);
-          if (f.exists()){
-            if (f.length() < 1){
+          if (f.exists()) {
+            if (f.length() < 1) {
               f.delete();
             }
           }
-          if (f.exists()){
+          if (f.exists()) {
             mTodoProd.image1 = mCurrentPhotoPath;
             IOUtil.cropImage(new File(mCurrentPhotoPath));
             Picasso.with(this).invalidate(new File(mCurrentPhotoPath));
             Bitmap bitmap = IOUtil.loadImage(mCurrentPhotoPath, 800, 800);
-            File file2 = new File(MApp.getApplication().getPicPath() + "/" + getProdNoFileName() + "_type_" + 2 +".jpeg");
-            if (!file2.exists()){
+            File file2 = new File(MApp.getApplication().getPicPath()
+                + "/"
+                + getProdNoFileName()
+                + "_type_"
+                + 2
+                + ".jpeg");
+            if (!file2.exists()) {
               try {
                 file2.createNewFile();
               } catch (IOException e) {
@@ -238,8 +328,8 @@ public class TodoProdDetailActivity extends AppCompatActivity {
             try {
               OutputStream outputStream = new FileOutputStream(file2);
               float rate = 110f / bitmap.getWidth();
-              Bitmap resized = Bitmap.createScaledBitmap(bitmap, 110,
-                  (int) (rate * bitmap.getHeight()), true);
+              Bitmap resized =
+                  Bitmap.createScaledBitmap(bitmap, 110, (int) (rate * bitmap.getHeight()), true);
               resized.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
               mTodoProd.image2 = file2.getAbsolutePath();
             } catch (FileNotFoundException e) {
@@ -252,7 +342,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
             mTodoProd.update_time = new Date();
             mTodoProd.save();
           }
-       //   upload();
+          //   upload();
 
         }
         break;
@@ -260,80 +350,18 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     }
   }
 
-  @Override public boolean onPrepareOptionsMenu(Menu menu) {
-    //menu.findItem(R.id.action_re_upload).setVisible(mTodoProd.image1 != null && mTodoProd.image1.length > 0);
-    return true;
-  }
-
-  private void upload(){
-    mTodoProd.spec_desc = mEdtSpec.getText().toString();
-    mTodoProd.save();
-    final ProgressDialog progressDialog = ProgressDialog.show(this, getString(R.string.upload), getString(R.string.wait_a_moment), true);
-    mTodoProd.remoteSave2().subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Subscriber<RestSpResponse<SpReturn>>() {
-          @Override public void onCompleted() {
-            progressDialog.dismiss();
-          }
-
-          @Override public void onError(Throwable e) {
-            progressDialog.dismiss();
-            Toast.makeText(TodoProdDetailActivity.this, ContextUtils.getMessage(e), Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-          }
-
-          @Override public void onNext(RestSpResponse<SpReturn> spReturnRestSpResponse) {
-            int returnCode = spReturnRestSpResponse.result.get(0).errCode;
-            String returnMessage =  spReturnRestSpResponse.result.get(0).errData;
-            if (!TextUtils.isEmpty(returnMessage)){
-              Toast.makeText(TodoProdDetailActivity.this, returnMessage, Toast.LENGTH_LONG).show();
-            }
-            if (returnCode == 1){
-              mTodoProd.uploaded_time = new Date();
-              mTodoProd.save();
-            }
-            invalidateOptionsMenu();
-          }
-        });
-  }
-
-
-  private void startTakePhoto(int type){
-    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-    if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-      File photoFile = null;
-      try {
-        photoFile =
-            new File(MApp.getApplication().getPicPath() + "/" + getProdNoFileName() + "_type_" + type +".jpeg");
-        mCurrentPhotoPath =  photoFile.getAbsolutePath();
-        photoFile.createNewFile();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-      if (photoFile != null) {
-        Uri photoURI =
-            FileProvider.getUriForFile(TodoProdDetailActivity.this, BuildConfig.APPLICATION_ID+".fileprovider", photoFile);
-        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-        List<ResolveInfo> resolvedIntentActivities = getPackageManager().queryIntentActivities(takePictureIntent, PackageManager.MATCH_DEFAULT_ONLY);
-        for (ResolveInfo resolvedIntentInfo : resolvedIntentActivities) {
-          String packageName = resolvedIntentInfo.activityInfo.packageName;
-
-          grantUriPermission(packageName, photoURI, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        }
-        startActivityForResult(takePictureIntent, type);
-      }
+  @Override public void onBackPressed() {
+    if (mTodoProd.update_time != null
+        && mTodoProd.create_time != null
+        && mTodoProd.update_time.getTime() != mTodoProd.create_time.getTime()) {
+      mTodoProd.save();
     }
+    super.onBackPressed();
   }
-
-  private String getProdNoFileName(){
-    return mTodoProd.prodNo.replaceAll("[\\*\\/\\\\\\?]","_");
-  }
-
 
   @OnClick(R.id.btn_ocr) void onBtnOCRClick() {
     if (!mEdtSpec.getText().toString().trim().isEmpty()) {
-      Toast.makeText(this, R.string.hint_clear_description, Toast.LENGTH_SHORT)
-          .show();
+      Toast.makeText(this, R.string.hint_clear_description, Toast.LENGTH_SHORT).show();
       return;
     }
     if (mTodoProd.image1 == null) {
@@ -363,7 +391,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
       @Override public void onResponse(Call call, Response response) throws IOException {
         try {
           JSONObject jsonObject = new JSONObject(response.body().string());
-          if(jsonObject.getInt("returnCode") <0){
+          if (jsonObject.getInt("returnCode") < 0) {
             orc.postValue(Resource.error(jsonObject.getString("returnInfo"), null));
           }
           JSONObject json = new JSONObject(jsonObject.getString("data"));
@@ -381,18 +409,5 @@ public class TodoProdDetailActivity extends AppCompatActivity {
         }
       }
     });
-  }
-
-  private void showLoading() {
-    mProgressDialog = ProgressDialog.show(this, getString(R.string.upload),
-        getString(R.string.wait_a_moment), false);
-    mProgressDialog.setOnDismissListener(dialogInterface -> mProgressDialog = null);
-  }
-
-  private void stopLoading() {
-    if (mProgressDialog != null) {
-      mProgressDialog.dismiss();
-      mProgressDialog = null;
-    }
   }
 }

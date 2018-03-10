@@ -80,4 +80,7 @@
   <string name="hint_clear_business_card_hint_first">Please clear business card memo</string>
   <string name="ocr_count_limit">OCR has been used %1$d time(s) (Limit:%2$d) </string>
   <string name="hint_clear_description">Please clear description</string>
+  <string name="delete_all">Delete All</string>
+  <string name="download_from_group">Download Group Product</string>
+  <string name="show_room">Show room</string>
 </resources>
