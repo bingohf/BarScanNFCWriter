@@ -1,6 +1,8 @@
 package com.ledway.btprinter.biz.main;
 
 import android.app.Activity;
+import android.arch.lifecycle.Lifecycle;
+import android.arch.lifecycle.LifecycleRegistry;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Intent;
 import android.os.Bundle;
@@ -142,7 +144,8 @@ public class ProductListFragment extends Fragment {
 
     mDisposables.add(mSampleListAdapter.getCheckObservable().subscribe(o -> titleChange()));
     loadData();
-
+    ((LifecycleRegistry)getLifecycle()).handleLifecycleEvent(Lifecycle.Event.ON_CREATE);
+    initView();
   }
 
   private void removeProduct(String prodNo) {
@@ -178,7 +181,7 @@ public class ProductListFragment extends Fragment {
         new DividerItemDecoration(getActivity(), layoutManager.getOrientation());
     mListView.addItemDecoration(dividerItemDecoration);
     mSwipeRefresh.setEnabled(false);
-    initView();
+
 
   }
 

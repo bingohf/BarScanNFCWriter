@@ -43,7 +43,7 @@ public class ShareAppFragment extends PagerFragment {
 
   @Override public void onStart() {
     super.onStart();
-    getQrCode("http://www.ledway.com.tw/uploads/sales_edge.apk", 300)
+/*    getQrCode("http://www.ledway.com.tw/uploads/sales_edge.apk", 300)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
@@ -51,7 +51,7 @@ public class ShareAppFragment extends PagerFragment {
           @Override public void call(Bitmap bitmap) {
             mImageView.setImageBitmap(bitmap);
           }
-        });
+        });*/
   }
 
   private Observable<Bitmap> getQrCode(final String qrCode, final int size) {
