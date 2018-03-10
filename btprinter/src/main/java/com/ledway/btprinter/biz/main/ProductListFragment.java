@@ -57,6 +57,7 @@ import java.util.List;
 import rx.Observable;
 import rx.Subscriber;
 import rx.schedulers.Schedulers;
+import timber.log.Timber;
 
 public class ProductListFragment extends Fragment {
   public static final String DATA_PRODUCTS = "data_products";
@@ -141,7 +142,7 @@ public class ProductListFragment extends Fragment {
 
     mDisposables.add(mSampleListAdapter.getCheckObservable().subscribe(o -> titleChange()));
     loadData();
-    initView();
+
   }
 
   private void removeProduct(String prodNo) {
@@ -177,6 +178,8 @@ public class ProductListFragment extends Fragment {
         new DividerItemDecoration(getActivity(), layoutManager.getOrientation());
     mListView.addItemDecoration(dividerItemDecoration);
     mSwipeRefresh.setEnabled(false);
+    initView();
+
   }
 
   @Override public void onDestroyView() {
@@ -238,7 +241,7 @@ public class ProductListFragment extends Fragment {
 
   private void loadGroupProduct() {
     String myTaxNo = BizUtils.getMyTaxNo(getActivity());
-    myTaxNo = "3036A";
+    //myTaxNo = "3036A";
     MyProjectApi.getInstance()
         .getDbService()
         .customQuery("select * from view_GroupShowName where mytaxno ='" + myTaxNo + "'")
@@ -307,6 +310,7 @@ public class ProductListFragment extends Fragment {
     });
 
     showRooms.observe(this, listResource -> {
+      if(listResource == null) return;
       switch (listResource.status) {
         case LOADING: {
           showLoading();
@@ -319,24 +323,24 @@ public class ProductListFragment extends Fragment {
         }
         case SUCCESS: {
           hideLoading();
+
           new MaterialDialog.Builder(getActivity()).title(R.string.show_room)
               .items(listResource.data)
               .alwaysCallSingleChoiceCallback()
-              .itemsCallbackSingleChoice(-1, new MaterialDialog.ListCallbackSingleChoice() {
-                @Override public boolean onSelection(MaterialDialog dialog, View view, int which,
-                    CharSequence text) {
-                  dialog.setSelectedIndex(which);
-                  syncProduct(text.toString());
-                  return false;
-                }
+              .itemsCallbackSingleChoice(-1, (dialog, view, which, text) -> {
+                dialog.setSelectedIndex(which);
+                syncProduct(text.toString());
+                return false;
               })
               .show();
           break;
         }
       }
+      showRooms.postValue(null);
     });
 
     syncProducts.observe(this, resource -> {
+      Timber.d("syncProducts");
       switch (resource.status) {
         case LOADING: {
           showLoading();
@@ -370,7 +374,7 @@ public class ProductListFragment extends Fragment {
 
   private void syncProduct(String room) {
     String myTaxNo = BizUtils.getMyTaxNo(getActivity());
-    myTaxNo = "3036A";
+   // myTaxNo = "3036A";
 
     MyProjectApi.getInstance()
         .getDbService()

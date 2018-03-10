@@ -44,9 +44,7 @@ public class WebViewFragment extends Fragment implements OnKeyPress {
   private BroadcastReceiver mNetworkChange = new BroadcastReceiver() {
     @Override public void onReceive(Context context, Intent intent) {
       if (mWebView != null) {
-        if (!mWebView.getUrl().startsWith("http")) {
-          //  mWebView.loadUrl(URL);
-        }
+
       }
     }
   };
