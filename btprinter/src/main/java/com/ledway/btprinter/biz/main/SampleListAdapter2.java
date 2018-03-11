@@ -44,8 +44,12 @@ public class SampleListAdapter2 extends RecyclerView.Adapter<SampleListAdapter2.
     view.setOnLongClickListener(this);
     SampleViewHolder hold = new SampleViewHolder(view);
     hold.checkBox.setOnCheckedChangeListener(
-        (compoundButton, b) -> {mData.get(hold.position).isChecked = b;
-          mCheckSubject.onNext(hold.position);
+        (compoundButton, b) -> {
+          if(hold.position >-1) {
+            mData.get(hold.position).isChecked = b;
+          }
+            mCheckSubject.onNext(hold.position);
+
         });
     return hold;
   }
@@ -142,7 +146,7 @@ public class SampleListAdapter2 extends RecyclerView.Adapter<SampleListAdapter2.
     @BindView(R.id.txt_timestamp) TextView txtTimestamp;
     @BindView(R.id.img_synced) View imgSynced;
     @BindView(R.id.checkbox) CheckBox checkBox;
-    public int position;
+    public int position = -1;
     public SampleViewHolder(View itemView) {
       super(itemView);
       ButterKnife.bind(this, itemView);
