@@ -325,7 +325,7 @@ public class ProductListFragment extends Fragment {
         case SUCCESS: {
           hideLoading();
 
-          new MaterialDialog.Builder(getActivity()).title(R.string.show_room)
+          new MaterialDialog.Builder(getActivity()).title(R.string.exhibition)
               .items(listResource.data)
               .alwaysCallSingleChoiceCallback()
               .itemsCallbackSingleChoice(-1, (dialog, view, which, text) -> {
