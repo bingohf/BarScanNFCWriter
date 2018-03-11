@@ -25,12 +25,12 @@ public class SampleActivity extends AppCompatActivity {
 
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    String guid = getIntent().getStringExtra("guid");
+    loadSampleMaster(guid);
     setContentView(R.layout.activity_sample);
 
     ButterKnife.bind(this);
 
-    String guid = getIntent().getStringExtra("guid");
-    loadSampleMaster(guid);
     String sampleLabel = "NA";
     if(!TextUtils.isEmpty(mSampleMaster.desc)){
       sampleLabel = mSampleMaster.desc;
