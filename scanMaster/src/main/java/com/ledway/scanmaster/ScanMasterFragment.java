@@ -519,6 +519,7 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
     request.reader = settings.reader;
     request.type = type;
     request.MyTaxNo = settings.myTaxNo;
+    request.pdaGuid = mIDGenerator.genID() + "~" + getLanguage();
     Observable<SpResponse> apiOb = MyNetWork.getServiceApi().sp_getBill(request);
     if(!TextUtils.isEmpty(photoPath)){
       File photoFile = new File(mCurrentPhotoPath);
@@ -537,7 +538,7 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
       }
     }
 
-    request.pdaGuid = mIDGenerator.genID() + "~" + getLanguage();
+
     mSubscriptions.add(apiOb
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
