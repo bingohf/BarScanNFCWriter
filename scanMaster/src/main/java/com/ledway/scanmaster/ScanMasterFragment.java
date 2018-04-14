@@ -209,6 +209,7 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
   }
 
   private void showWarning(String message) {
+    if(message == null) message = "";
     Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
     alertWarning(message);
   }
