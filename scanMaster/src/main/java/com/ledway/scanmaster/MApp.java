@@ -3,7 +3,6 @@ package com.ledway.scanmaster;
 import android.app.Application;
 import android.content.Intent;
 import com.ledway.scanmaster.utils.LogDebugTree;
-import com.zkc.Service.CaptureService;
 import timber.log.Timber;
 
 /**
@@ -30,9 +29,8 @@ public class MApp extends Application {
   }
 
   private void startScanService() {
-    Intent newIntent = new Intent(this, CaptureService.class);
-    //newIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    startService(newIntent);
+/*    Intent newIntent = new Intent(this, CaptureService.class);
+    startService(newIntent);*/
   }
 
   public AppComponent getAppComponet(){
