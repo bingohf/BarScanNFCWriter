@@ -41,13 +41,6 @@ public class WebViewFragment extends Fragment implements OnKeyPress {
   private String param;
   private String pdaGuid;
   private String mLastUrl;
-  private BroadcastReceiver mNetworkChange = new BroadcastReceiver() {
-    @Override public void onReceive(Context context, Intent intent) {
-      if (mWebView != null) {
-
-      }
-    }
-  };
 
   public WebViewFragment() {
     setRetainInstance(true);
@@ -59,7 +52,7 @@ public class WebViewFragment extends Fragment implements OnKeyPress {
     pdaGuid = timeIDGenerator.genID() + "~" + getLanguage();
     IntentFilter intentFilter = new IntentFilter();
     intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-    getContext().registerReceiver(mNetworkChange, intentFilter);
+
   }
 
   private String getLanguage() {
@@ -168,7 +161,6 @@ public class WebViewFragment extends Fragment implements OnKeyPress {
 
   @Override public void onDestroy() {
     super.onDestroy();
-    getContext().unregisterReceiver(mNetworkChange);
   }
 
   @Override public boolean onKeyDown(int keyCode, KeyEvent event) {

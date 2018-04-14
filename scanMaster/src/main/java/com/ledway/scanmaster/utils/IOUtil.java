@@ -105,9 +105,11 @@ public class IOUtil {
        float scaleHeight = ((float) resizeHeight) / height;
        float scale = Math.max(scaleWidth, scaleHeight);
        Bitmap b= BitmapFactory.decodeFile(sourceImage.getAbsolutePath());
+       int outWidth = (int) (scale * width);
+       int outHeight = (int) (scale * height);
        Bitmap out = Bitmap.createScaledBitmap(b,(int) (scale * width), (int)(scale *height), false);
-       int x = (out.getWidth() - resizeWidth) /2;
-       int y = (out.getHeight() - resizeHeight) /2;
+       int x = (outWidth - resizeWidth) /2;
+       int y = (outHeight - resizeHeight) /2;
        Bitmap dstBmp = Bitmap.createBitmap(out, x, y, resizeWidth, resizeHeight);
        //dstBmp.compress(Bitmap.CompressFormat.JPEG, 70, new FileOutputStream(sourceImage));
        out.recycle();
