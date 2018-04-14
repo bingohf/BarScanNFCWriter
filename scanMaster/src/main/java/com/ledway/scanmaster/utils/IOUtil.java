@@ -107,7 +107,7 @@ public class IOUtil {
        Bitmap b= BitmapFactory.decodeFile(sourceImage.getAbsolutePath());
        int outWidth = (int) (scale * width);
        int outHeight = (int) (scale * height);
-       Bitmap out = Bitmap.createScaledBitmap(b,(int) (scale * width), (int)(scale *height), false);
+       Bitmap out = Bitmap.createScaledBitmap(b,outWidth ,outHeight, false);
        int x = (outWidth - resizeWidth) /2;
        int y = (outHeight - resizeHeight) /2;
        Bitmap dstBmp = Bitmap.createBitmap(out, x, y, resizeWidth, resizeHeight);
