@@ -84,4 +84,6 @@
   <string name="download_from_group">Download Group Product</string>
   <string name="show_room">Show room</string>
   <string name="exhibition">Exhibition</string>
+  <string name="empty_sample_hint">Please click plus sign</string>
+
 </resources>

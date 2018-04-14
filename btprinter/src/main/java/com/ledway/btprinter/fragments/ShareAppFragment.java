@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,7 +44,8 @@ public class ShareAppFragment extends PagerFragment {
 
   @Override public void onStart() {
     super.onStart();
-    getQrCode("http://www.ledway.com.tw/uploads/sales_edge.apk", 300)
+    mImageView.setImageDrawable(ContextCompat.getDrawable(mImageView.getContext(), R.drawable.app_share_qrcode));
+/*    getQrCode("http://www.ledway.com.tw/uploads/sales_edge.apk", 300)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
@@ -51,7 +53,7 @@ public class ShareAppFragment extends PagerFragment {
           @Override public void call(Bitmap bitmap) {
             mImageView.setImageBitmap(bitmap);
           }
-        });
+        });*/
   }
 
   private Observable<Bitmap> getQrCode(final String qrCode, final int size) {
