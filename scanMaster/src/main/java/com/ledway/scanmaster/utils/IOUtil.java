@@ -68,10 +68,11 @@ public class IOUtil {
            Bitmap b= BitmapFactory.decodeFile(sourceImage.getAbsolutePath());
 
 
-
-           Bitmap out = Bitmap.createScaledBitmap(b,(int) (scale * width), (int)(scale *height), false);
-           int x = (out.getWidth() - resizeWidth) /2;
-           int y = (out.getHeight() - resizeHeight) /2;
+            int outWidth = (int) (scale * width);
+            int outHeight = (int) (scale * height);
+           Bitmap out = Bitmap.createScaledBitmap(b,outWidth, outHeight, false);
+           int x = (outWidth - resizeWidth) /2;
+           int y = (outHeight - resizeHeight) /2;
            Bitmap dstBmp = Bitmap.createBitmap(out, x, y, resizeWidth, resizeHeight);
            dstBmp.compress(Bitmap.CompressFormat.JPEG, 70, new FileOutputStream(sourceImage));
            dstBmp.recycle();
