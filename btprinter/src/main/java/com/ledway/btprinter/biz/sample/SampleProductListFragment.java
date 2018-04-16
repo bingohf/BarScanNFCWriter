@@ -179,8 +179,10 @@ public class SampleProductListFragment extends Fragment {
             : null;
     super.onCreate(savedInstanceState);
     ArrayList<String> prodList = new ArrayList<>();
-    for ( SampleProdLink item:mSampleMaster.sampleProdLinks){
-      prodList.add(item.prod_id);
+    if(mSampleMaster.sampleProdLinks != null) {
+      for (SampleProdLink item : mSampleMaster.sampleProdLinks) {
+        prodList.add(item.prod_id);
+      }
     }
     receiveSelected(prodList);
     mSampleListAdapter = new SampleListAdapter2(getContext());

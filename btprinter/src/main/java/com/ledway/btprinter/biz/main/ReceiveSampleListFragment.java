@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.List;
 import rx.Observable;
 import rx.Subscriber;
+import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
@@ -162,6 +163,14 @@ public class ReceiveSampleListFragment extends Fragment {
             cached.save();
             return itemData;
           });
+    }).sorted((itemData, itemData2) -> {
+      if(itemData.timestamp == null){
+        return -1;
+      }
+      if (itemData2 != null){
+        return (int)(itemData2.timestamp.getTime() - itemData.timestamp.getTime());
+      }
+      return 0;
     }).toList().subscribe(new Subscriber<List<SampleListAdapter2.ItemData>>() {
       @Override public void onCompleted() {
 

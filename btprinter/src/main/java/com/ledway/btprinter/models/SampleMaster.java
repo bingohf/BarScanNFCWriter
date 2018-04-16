@@ -348,7 +348,7 @@ import rx.functions.Func1;
       file2 = new File(image2);
     }
 
-    return !TextUtils.isEmpty(desc) || !TextUtils.isEmpty(shareToDeviceId)|| ( file1 != null && file1.length() > 0 ) || (file2 != null
+    return  !TextUtils.isEmpty(shareToDeviceId)|| ( file1 != null && file1.length() > 0 ) || (file2 != null
         && file2.length() > 0) || (sampleProdLinks != null && sampleProdLinks.size() > 0) ;
   }
 

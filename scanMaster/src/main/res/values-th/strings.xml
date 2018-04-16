@@ -1,5 +1,4 @@
 ﻿<resources>
-  <string name = "app_name"> Scan Master </string>
   <string name = "main_activity_name"> ข้อมูลตั๋วบัตร RFID ของ Weihong แบบสอบถาม </string>
   <string name = "barcode"> บาร์โค้ด </string>
   <string name = "barcode.help"> C1610550030 หรือติดป้าย RFID Card ที่มีเนื้อหาเหมือนกัน </string>

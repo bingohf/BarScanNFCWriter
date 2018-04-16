@@ -1,5 +1,4 @@
 ﻿<resources>
-  <string name="app_name">Scan Master</string>
   <string name="main_activity_name">威虹資訊RFID工票查詢</string>
   <string name="barcode">Barcode</string>
   <string name="barcode.help">C1610550030 or Tag the RFID Card with the same contents</string>
