@@ -272,8 +272,6 @@ import rx.functions.Func1;
       e.printStackTrace();
     }
     final Sp_UpSample_v3_Request request =new Sp_UpSample_v3_Request();
-    request.line = 1;
-    request.reader = 1;
     request.series = guid;
     request.empno = mac_address;
     request.custMemo = desc;

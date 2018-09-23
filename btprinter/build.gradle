@@ -5,7 +5,7 @@ apply plugin: 'io.fabric'
 def shortName = "sales_edge"
 android {
   compileSdkVersion 27
-  buildToolsVersion '26.0.2'
+  buildToolsVersion '27.0.3'
 
   packagingOptions {
     pickFirst  'META-INF/LICENSE'
@@ -14,8 +14,8 @@ android {
     applicationId "com.ledway.sales_edge"
     minSdkVersion 17
     targetSdkVersion 21
-    versionCode 85
-    versionName "8.5"
+    versionCode 86
+    versionName "8.6"
   }
   signingConfigs{
     relase_signing_config{
@@ -82,11 +82,11 @@ dependencies {
   implementation 'com.android.support:appcompat-v7:27.0.2'
   implementation 'com.android.support:design:27.0.2'
   implementation 'com.android.support:recyclerview-v7:27.0.2'
-  implementation "android.arch.lifecycle:extensions:1.0.0"
-  compile fileTree(include: ['*.jar'], dir: 'libs')
-  compile project(':scanMaster')
+  implementation "android.arch.lifecycle:extensions:1.1.1"
+  implementation fileTree(include: ['*.jar'], dir: 'libs')
+  implementation project(':scanMaster')
   implementation project(':framework')
-  testCompile 'junit:junit:4.12'
+  testImplementation 'junit:junit:4.12'
   implementation 'com.squareup.okhttp3:okhttp:3.9.1'
   implementation 'com.squareup.okhttp3:logging-interceptor:3.9.1'
  // implementation "android.arch.lifecycle:runtime:1.0.3"
@@ -103,31 +103,32 @@ dependencies {
   implementation 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
   implementation 'com.squareup.picasso:picasso:2.5.2'
   implementation 'com.squareup.okhttp:okhttp:2.4.0'
-  implementation 'com.jakewharton.rxbinding:rxbinding:0.4.0'
+  implementation 'com.jakewharton.rxbinding:rxbinding:1.0.1'
 
 
-  implementation 'com.jakewharton:butterknife:9.0.0-SNAPSHOT'
-  annotationProcessor 'com.jakewharton:butterknife-compiler:9.0.0-SNAPSHOT'
+  implementation 'com.jakewharton:butterknife:8.8.1'
+  annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+
   implementation "io.reactivex.rxjava2:rxjava:2.1.6"
   implementation 'me.dm7.barcodescanner:zxing:1.9.8'
   implementation 'com.github.gturedi:stateful-layout:1.2.1'
   implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
 
-  compile 'com.google.dagger:dagger-android:2.14.1'
-  compile 'com.google.dagger:dagger-android-support:2.14.1' // if you use the support libraries
+  implementation 'com.google.dagger:dagger-android:2.14.1'
+  implementation 'com.google.dagger:dagger-android-support:2.14.1' // if you use the support libraries
   annotationProcessor 'com.google.dagger:dagger-android-processor:2.14.1'
 
-  compile group: 'com.jakewharton.timber', name: 'timber', version: '4.5.1'
+  implementation group: 'com.jakewharton.timber', name: 'timber', version: '4.5.1'
 
   implementation('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
     transitive = true;
   }
-  compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
 
-  compile "com.google.dagger:dagger:2.14.1"
+  implementation "com.google.dagger:dagger:2.14.1"
   annotationProcessor "com.google.dagger:dagger-compiler:2.14.1"
-  provided 'javax.annotation:jsr250-api:1.0'
+  compileOnly 'javax.annotation:jsr250-api:1.0'
 }
 repositories {
   mavenCentral()
