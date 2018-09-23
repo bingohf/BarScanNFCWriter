@@ -89,8 +89,6 @@ import rx.Subscriber;
       }
     }
     Sp_UpProduct_Request request = new Sp_UpProduct_Request();
-    request.line = 1;
-    request.reader = 1;
     request.empno = mac_address;
     request.prodno = prodNo;
     request.specdesc = spec_desc;

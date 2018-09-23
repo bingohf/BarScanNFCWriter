@@ -38,7 +38,7 @@ public interface DBService {
   @GET("dataset/product") Observable<RestDataSetResponse<ProductReturn>> getProduct(
       @Query("query") String query, @Query("orderBy") String orderBy);
 
-  @POST("Sp/sp_UpSample_v3") Observable<RestSpResponse<SpReturn>> sp_UpSample_v3(@Body
+  @POST("Sp/sp_UpSample_v3Line") Observable<RestSpResponse<SpReturn>> sp_UpSample_v3(@Body
       Sp_UpSample_v3_Request request);
 
   @POST("Sp/sp_UpSampleDetail") Observable<RestSpResponse<Sp_UpSampleDetail_Return>> sp_UpSampleDetail(@Body

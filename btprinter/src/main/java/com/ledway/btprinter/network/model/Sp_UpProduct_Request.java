@@ -12,9 +12,7 @@ package com.ledway.btprinter.network.model;
 @errData nvarchar(50) output
 */
 
-public class Sp_UpProduct_Request {
-  public int line;
-  public int reader;
+public class Sp_UpProduct_Request extends BaseRequest{ ;
   public String empno;
   public String prodno;
   public String specdesc;
