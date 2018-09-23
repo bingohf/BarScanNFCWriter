@@ -171,6 +171,7 @@ import rx.functions.Func1;
     update_date = new Date();
     qrcode = "http://vip.ledway.com.tw/i/s.aspx?series=" + guid;
     save();
+
     int i = 0;
     for (SampleProdLink sampleProdLink : sampleProdLinks) {
       sampleProdLink.ext = ++i;

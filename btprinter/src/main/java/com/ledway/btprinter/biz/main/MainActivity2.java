@@ -43,7 +43,6 @@ import com.ledway.scanmaster.ScanMasterViewModel;
 import com.ledway.scanmaster.interfaces.MenuOpend;
 import com.ledway.scanmaster.nfc.GNfc;
 import com.ledway.scanmaster.nfc.GNfcLoader;
-import com.zkc.Service.CaptureService;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -81,8 +80,8 @@ public class MainActivity2 extends AppCompatActivity {
     scanMasterFragment.setArguments(bundle);
 
     initView();
-    Intent newIntent = new Intent(this, CaptureService.class);
-    newIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+/*    Intent newIntent = new Intent(this, CaptureService.class);
+    newIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);*/
    // startService(newIntent);
     checkAgreement();
     doCheckSetting();

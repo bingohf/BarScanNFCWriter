@@ -23,6 +23,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.activeandroid.Model;
+import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 import com.gturedi.views.StatefulLayout;
 import com.ledway.btprinter.R;
@@ -119,6 +120,7 @@ public class SampleProductListFragment extends Fragment {
     prodLink.ext = mSampleMaster.sampleProdLinks.size();
     prodLink.link_id = mSampleMaster.guid + "_"+ prodLink.ext;
     prodLink.spec_desc = todoProd.spec_desc;
+    prodLink.save();
     mSampleMaster.sampleProdLinks.add(prodLink);
   }
 
@@ -131,8 +133,8 @@ public class SampleProductListFragment extends Fragment {
     }
     while (mSampleMaster.sampleProdLinks.size()>0){
       SampleProdLink link = mSampleMaster.sampleProdLinks.get(0);
-      if(link.getId() != null) {
-        link.delete();
+      if(link.link_id != null) {
+        new Delete().from(SampleProdLink.class).where("link_id =?", link.link_id).execute();
       }
       mSampleMaster.sampleProdLinks.remove(0);
     }

@@ -137,7 +137,7 @@ public class SampleListFragment extends Fragment {
           mSampleListAdapter.setData(listResource.data);
           mSampleListAdapter.notifyDataSetChanged();
           if (listResource.data.isEmpty()) {
-            mStatefulLayout.showEmpty();
+            mStatefulLayout.showEmpty(R.string.empty_sample_hint);
           } else {
             mStatefulLayout.showContent();
           }

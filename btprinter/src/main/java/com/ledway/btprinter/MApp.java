@@ -9,11 +9,12 @@ import com.activeandroid.ActiveAndroid;
 import com.crashlytics.android.Crashlytics;
 import com.facebook.stetho.Stetho;
 import com.ledway.btprinter.models.SystemInfo;
-import com.ledway.scanmaster.utils.ContextUtils;
+import com.ledway.scanmaster.utils.*;
 import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
 import io.fabric.sdk.android.Fabric;
 import java.io.File;
+import timber.log.Timber;
 
 /**
  * Created by togb on 2016/5/29.
@@ -71,7 +72,14 @@ public class MApp extends com.ledway.scanmaster.MApp {
 
       }
     });
+    logToFile();
+
   }
+
+  private void logToFile() {
+    Timber.plant(new LogDebugTree(this));
+  }
+
   public String getPicPath(){
 
     File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);

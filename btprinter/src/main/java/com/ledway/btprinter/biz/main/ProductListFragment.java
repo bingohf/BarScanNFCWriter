@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import rx.Observable;
 import rx.Subscriber;
@@ -327,7 +328,7 @@ public class ProductListFragment extends Fragment {
         case SUCCESS: {
           hideLoading();
 
-          new MaterialDialog.Builder(getActivity()).title(R.string.show_room)
+          new MaterialDialog.Builder(getActivity()).title(R.string.exhibition)
               .items(listResource.data)
               .alwaysCallSingleChoiceCallback()
               .itemsCallbackSingleChoice(-1, (dialog, view, which, text) -> {
@@ -406,9 +407,9 @@ public class ProductListFragment extends Fragment {
           TodoProd todoProd = new TodoProd();
           todoProd.prodNo = remoteGroupProduct.prodno;
           todoProd.spec_desc = remoteGroupProduct.specdesc;
-          todoProd.update_time = remoteGroupProduct.updateDate;
-          todoProd.uploaded_time = remoteGroupProduct.updateDate;
-          todoProd.create_time = remoteGroupProduct.updateDate;
+          todoProd.update_time = remoteGroupProduct.updateDate == null? new Date() : remoteGroupProduct.updateDate ;
+          todoProd.uploaded_time =  new Date();
+          todoProd.create_time = remoteGroupProduct.updateDate == null? new Date() : remoteGroupProduct.updateDate;
           String file1Path =
               MApp.getApplication().getPicPath() + "/product_" + todoProd.prodNo + "_type1.jpg";
           String file2Path =
@@ -463,7 +464,7 @@ public class ProductListFragment extends Fragment {
       itemData.title = todoProd.prodNo;
       itemData.hold = todoProd.prodNo;
       itemData.iconPath = todoProd.image1;
-      itemData.redFlag = todoProd.uploaded_time == null
+      itemData.redFlag = todoProd.uploaded_time == null || todoProd.update_time == null
           || todoProd.update_time.getTime() > todoProd.uploaded_time.getTime();
 
       itemData.isChecked = mDefaultSelected.contains(todoProd.prodNo);

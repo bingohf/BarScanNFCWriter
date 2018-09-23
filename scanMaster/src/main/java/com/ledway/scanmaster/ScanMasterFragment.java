@@ -16,7 +16,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
 import android.provider.MediaStore;
-import android.serialport.api.SerialPort;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -63,7 +62,6 @@ import com.ledway.scanmaster.network.Sp_getDetail_Request;
 import com.ledway.scanmaster.utils.ContextUtils;
 import com.ledway.scanmaster.utils.IOUtil;
 import com.ledway.scanmaster.utils.JsonUtils;
-import com.zkc.Service.CaptureService;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -209,6 +207,7 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
   }
 
   private void showWarning(String message) {
+    if(message == null) message = "";
     Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
     alertWarning(message);
   }
@@ -248,8 +247,8 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
   }
 
   protected void openScan() {
-    SerialPort.CleanBuffer();
-    CaptureService.scanGpio.openScan();
+/*    SerialPort.CleanBuffer();
+    CaptureService.scanGpio.openScan();*/
   }
 
   @OnClick(R2.id.btn_camera_scan_bill) void onBillCameraClick() {
@@ -403,7 +402,7 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
 
   @Override public void onStart() {
     super.onStart();
-    CaptureService.scanGpio.openPower();
+  //  CaptureService.scanGpio.openPower();
   }
 
   @Override public void onDestroyView() {
@@ -415,8 +414,8 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
   }
 
   private void closeScan() {
-    CaptureService.scanGpio.closeScan();
-    CaptureService.scanGpio.closePower();
+   // CaptureService.scanGpio.closeScan();
+   /// CaptureService.scanGpio.closePower();
   }
 
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -519,6 +518,7 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
     request.reader = settings.reader;
     request.type = type;
     request.MyTaxNo = settings.myTaxNo;
+    request.pdaGuid = mIDGenerator.genID() + "~" + getLanguage();
     Observable<SpResponse> apiOb = MyNetWork.getServiceApi().sp_getBill(request);
     if(!TextUtils.isEmpty(photoPath)){
       File photoFile = new File(mCurrentPhotoPath);
@@ -537,7 +537,7 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
       }
     }
 
-    request.pdaGuid = mIDGenerator.genID() + "~" + getLanguage();
+
     mSubscriptions.add(apiOb
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())

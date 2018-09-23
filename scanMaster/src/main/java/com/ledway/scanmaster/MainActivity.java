@@ -10,7 +10,6 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.serialport.api.SerialPort;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
@@ -37,8 +36,6 @@ import com.ledway.scanmaster.domain.InvalidBarCodeException;
 import com.ledway.scanmaster.interfaces.IDGenerator;
 import com.ledway.scanmaster.nfc.GNfc;
 import com.ledway.scanmaster.nfc.GNfcLoader;
-import com.ledway.scanmaster.setting.AppPreferences;
-import com.zkc.Service.CaptureService;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
@@ -93,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
   @Override protected void onStart() {
     super.onStart();
-    CaptureService.scanGpio.openPower();
+    //CaptureService.scanGpio.openPower();
   }
 
   @Override protected void onStop() {
@@ -110,8 +107,8 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void closeScan() {
-    CaptureService.scanGpio.closeScan();
-    CaptureService.scanGpio.closePower();
+/*    CaptureService.scanGpio.closeScan();
+    CaptureService.scanGpio.closePower();*/
   }
 
   private void receiveZkcCode() {
@@ -381,8 +378,8 @@ public class MainActivity extends AppCompatActivity {
   }
 
   protected void openScan() {
-    SerialPort.CleanBuffer();
-    CaptureService.scanGpio.openScan();
+/*    SerialPort.CleanBuffer();
+    CaptureService.scanGpio.openScan();*/
   }
 
   private void showResponse(String s) {

@@ -391,7 +391,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
       @Override public void onResponse(Call call, Response response) throws IOException {
         try {
           JSONObject jsonObject = new JSONObject(response.body().string());
-          if (jsonObject.getInt("returnCode") < 0) {
+          if (jsonObject.getInt("returnCode") < 0 &&  jsonObject.has("returnInfo")) {
             orc.postValue(Resource.error(jsonObject.getString("returnInfo"), null));
           }
           JSONObject json = new JSONObject(jsonObject.getString("data"));

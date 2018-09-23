@@ -50,7 +50,9 @@ public class SerialPort {
 				if (os != null) {
 					os.close();
 				}
-				process.destroy();
+				if(process != null) {
+					process.destroy();
+				}
 			} catch (Exception e) {
 			}
 		}

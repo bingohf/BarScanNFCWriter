@@ -26,7 +26,6 @@ import com.ledway.btprinter.fragments.ReceiveSampleFragment;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.network.ApkVersionResponse;
 import com.ledway.btprinter.network.MyProjectApi;
-import com.zkc.Service.CaptureService;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import rx.Subscriber;
@@ -46,9 +45,9 @@ public class MainActivity extends AppCompatActivity {
     Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
 
-    Intent newIntent = new Intent(MainActivity.this, CaptureService.class);
+/*    Intent newIntent = new Intent(MainActivity.this, CaptureService.class);
     newIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-    startService(newIntent);
+    startService(newIntent);*/
     mSettingSubject.subscribe(new Action1<Boolean>() {
       @Override public void call(Boolean aBoolean) {
         if (aBoolean) {
