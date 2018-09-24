@@ -304,8 +304,6 @@ import rx.functions.Func1;
           @Override public Observable<SampleMaster> call(final SampleProdLink sampleProdLink) {
 
             Sp_UpSampleDetail_Request detailRequest = new Sp_UpSampleDetail_Request();
-            detailRequest.line = 1;
-            detailRequest.reader = 1;
             detailRequest.empno = mac_address;
             detailRequest.series = guid;
             detailRequest.prodno =sampleProdLink.prod_id;

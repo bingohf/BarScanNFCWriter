@@ -17,8 +17,6 @@ CREATE proc [dbo].[sp_UpSampleDetail]
 */
 
 public class Sp_UpSampleDetail_Request extends BaseRequest{
-  public int line;
-  public int reader;
   public String empno;
   public String series;
   public String prodno;

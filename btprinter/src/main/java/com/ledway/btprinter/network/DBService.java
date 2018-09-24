@@ -41,7 +41,7 @@ public interface DBService {
   @POST("Sp/sp_UpSample_v3Line") Observable<RestSpResponse<SpReturn>> sp_UpSample_v3(@Body
       Sp_UpSample_v3_Request request);
 
-  @POST("Sp/sp_UpSampleDetail") Observable<RestSpResponse<Sp_UpSampleDetail_Return>> sp_UpSampleDetail(@Body
+  @POST("Sp/sp_UpSampleDetailLine") Observable<RestSpResponse<Sp_UpSampleDetail_Return>> sp_UpSampleDetail(@Body
       Sp_UpSampleDetail_Request request);
 
   @GET("sql/{sql}") Observable<RestDataSetResponse<TotalUserReturn>> queryTotalUser(@Path("sql") String sql);
@@ -49,7 +49,7 @@ public interface DBService {
   @GET("sql/{sql}") Observable<ResponseBody> customQuery(@Path("sql") String sql);
 
 
-  @POST("Sp/sp_UpProduct") Observable<RestSpResponse<SpReturn>> sp_UpProduct(@Body
+  @POST("Sp/sp_UpProductLine") Observable<RestSpResponse<SpReturn>> sp_UpProduct(@Body
       Sp_UpProduct_Request request);
 
 
