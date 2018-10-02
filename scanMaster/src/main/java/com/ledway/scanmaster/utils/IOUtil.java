@@ -71,6 +71,8 @@ public class IOUtil {
             int outWidth = (int) (scale * width);
             int outHeight = (int) (scale * height);
            Bitmap out = Bitmap.createScaledBitmap(b,outWidth, outHeight, false);
+           outWidth = out.getWidth();
+           outHeight = out.getHeight();
            int x = (outWidth - resizeWidth) /2;
            int y = (outHeight - resizeHeight) /2;
            Bitmap dstBmp = Bitmap.createBitmap(out, x, y, resizeWidth, resizeHeight);
@@ -109,6 +111,8 @@ public class IOUtil {
        int outWidth = (int) (scale * width);
        int outHeight = (int) (scale * height);
        Bitmap out = Bitmap.createScaledBitmap(b,outWidth ,outHeight, false);
+       outWidth = out.getWidth();
+       outHeight = out.getHeight();
        int x = (outWidth - resizeWidth) /2;
        int y = (outHeight - resizeHeight) /2;
        Bitmap dstBmp = Bitmap.createBitmap(out, x, y, resizeWidth, resizeHeight);

@@ -26,6 +26,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnTextChanged;
 import com.activeandroid.query.Select;
+import com.example.android.common.logger.Log;
+import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.ledway.btprinter.models.TodoProd;
 import com.ledway.btprinter.network.model.RestSpResponse;
 import com.ledway.btprinter.network.model.SpReturn;
@@ -51,11 +53,13 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
 import org.json.JSONException;
 import org.json.JSONObject;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import timber.log.Timber;
 
 /**
  * Created by togb on 2016/7/3.
@@ -373,7 +377,12 @@ public class TodoProdDetailActivity extends AppCompatActivity {
 
   private void ocrImage(String fileName) {
     orc.setValue(Resource.loading(null));
-    OkHttpClient client = new OkHttpClient();
+    OkHttpClient client = new OkHttpClient.Builder()
+        .addInterceptor(new HttpLoggingInterceptor(message ->{
+          Log.d("OkHttp", message);
+          Timber.tag("OkHttp").d(message);
+        }).setLevel(HttpLoggingInterceptor.Level.BODY))
+        .addNetworkInterceptor(new StethoInterceptor()).build();
     RequestBody requestBody =
         RequestBody.create(MediaType.parse("application/octet-stream"), new File(fileName));
 
@@ -390,7 +399,8 @@ public class TodoProdDetailActivity extends AppCompatActivity {
 
       @Override public void onResponse(Call call, Response response) throws IOException {
         try {
-          JSONObject jsonObject = new JSONObject(response.body().string());
+          String json1 = response.body().string();
+          JSONObject jsonObject = new JSONObject(json1);
           if (jsonObject.getInt("returnCode") < 0 &&  jsonObject.has("returnInfo")) {
             orc.postValue(Resource.error(jsonObject.getString("returnInfo"), null));
           }
