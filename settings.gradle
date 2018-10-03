@@ -1,1 +1,6 @@
-include ':zkc', ':mylibrary',":framework",":rxbus",":scanMaster",":btprinter"
+include ':zkc',":rxbus",':mylibrary',":framework",":scanMaster",':btprinter'
+  //  ':mylibrary',
+   // ":framework",
+   // ":rxbus",
+   // ":scanMaster",
+   // ":btprinter"

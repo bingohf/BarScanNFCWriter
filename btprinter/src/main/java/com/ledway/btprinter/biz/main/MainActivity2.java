@@ -1,5 +1,6 @@
 package com.ledway.btprinter.biz.main;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.arch.lifecycle.Lifecycle;
@@ -11,10 +12,8 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -27,7 +26,6 @@ import android.view.MenuItem;
 import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.ledway.btprinter.AgreementActivity;
 import com.ledway.btprinter.AppConstants;
@@ -43,6 +41,7 @@ import com.ledway.scanmaster.ScanMasterViewModel;
 import com.ledway.scanmaster.interfaces.MenuOpend;
 import com.ledway.scanmaster.nfc.GNfc;
 import com.ledway.scanmaster.nfc.GNfcLoader;
+import com.tbruyelle.rxpermissions2.RxPermissions;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -55,12 +54,13 @@ import timber.log.Timber;
 import static com.ledway.btprinter.AppConstants.REQUEST_AGREEMENT;
 
 public class MainActivity2 extends AppCompatActivity {
+  final RxPermissions rxPermissions = new RxPermissions(this);
   @BindView(R.id.viewPager) ViewPager mViewPager;
   @BindView(R.id.bottomNavigation) BottomNavigationView mBottomNav;
-
   Fragment scanMasterFragment = new ScanMasterFragment();
   Fragment[] fragments = new Fragment[] {
-      new CombinFramgment(),  new ProductListFragment(),new MyAccountFragment(),scanMasterFragment,new  WebViewFragment()
+      new CombinFramgment(), new ProductListFragment(), new MyAccountFragment(), scanMasterFragment,
+      new WebViewFragment()
   };
   private CompositeSubscription mSubscriptions = new CompositeSubscription();
 
@@ -68,23 +68,32 @@ public class MainActivity2 extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main2);
 
-    String myTaxNo = getSharedPreferences("setting", Context.MODE_PRIVATE).getString("MyTaxNo","");
-    if(!myTaxNo.isEmpty()){
-      getSupportActionBar().setTitle(getString(R.string.app_name) + "(" + myTaxNo +")");
+    String myTaxNo = getSharedPreferences("setting", Context.MODE_PRIVATE).getString("MyTaxNo", "");
+    if (!myTaxNo.isEmpty()) {
+      getSupportActionBar().setTitle(getString(R.string.app_name) + "(" + myTaxNo + ")");
     }
     Bundle bundle = new Bundle();
-    bundle.putString("macNo", MApp.getApplication()
-            .getSystemInfo()
-            .getDeviceId());
+    bundle.putString("macNo", MApp.getApplication().getSystemInfo().getDeviceId());
     scanMasterFragment.setArguments(bundle);
 
     initView();
 /*    Intent newIntent = new Intent(this, CaptureService.class);
     newIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);*/
-   // startService(newIntent);
+    // startService(newIntent);
     checkAgreement();
     doCheckSetting();
     checkVersion();
+
+    rxPermissions.requestEachCombined(Manifest.permission.CAMERA, Manifest.permission.CALL_PHONE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.ACCESS_WIFI_STATE).subscribe(permission -> {
+      if (permission.granted) {
+
+      } else if (permission.shouldShowRequestPermissionRationale) {
+
+      } else {
+
+      }
+    });
   }
 
   private void doCheckSetting() {
@@ -196,19 +205,48 @@ public class MainActivity2 extends AppCompatActivity {
     super.onDestroy();
     mSubscriptions.clear();
     int currentIndex = mViewPager.getCurrentItem();
-    getSharedPreferences("view", Context.MODE_PRIVATE).edit().putInt("pagerIndex", currentIndex).apply();
+    getSharedPreferences("view", Context.MODE_PRIVATE).edit()
+        .putInt("pagerIndex", currentIndex)
+        .apply();
   }
 
-  @Override protected void onResume() {
-    super.onResume();
-    NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(getApplicationContext());
-    if(nfcAdapter != null && nfcAdapter.isEnabled()) {
-      PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
-      IntentFilter ndef = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
-      ndef.addCategory("*/*");
-      IntentFilter[] mFilters = new IntentFilter[] { ndef };// 过滤器
-      nfcAdapter.enableForegroundDispatch(this, pendingIntent, mFilters, GNfcLoader.TechList);
+  @Override public boolean onMenuOpened(int featureId, Menu menu) {
+    Fragment currentFragment = getCurrentFragment();
+    if (currentFragment != null
+        && currentFragment instanceof MenuOpend
+        && currentFragment.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
+      ((MenuOpend) currentFragment).menuOpened();
     }
+    return super.onMenuOpened(featureId, menu);
+  }
+
+  @Override public boolean onKeyDown(int keyCode, KeyEvent event) {
+    if (event.getAction() == KeyEvent.ACTION_DOWN) {
+      if (keyCode == KeyEvent.KEYCODE_BACK) {
+        Fragment currentFragment = getCurrentFragment();
+
+        boolean handled = false;
+        if (currentFragment != null
+            && currentFragment instanceof OnKeyPress
+            && currentFragment.getLifecycle()
+            .getCurrentState()
+            .isAtLeast(Lifecycle.State.STARTED)) {
+          handled = ((OnKeyPress) currentFragment).onKeyDown(keyCode, event);
+        }
+        if (handled) {
+          return true;
+        } else {
+          return super.onKeyDown(keyCode, event);
+        }
+      }
+    }
+    return super.onKeyDown(keyCode, event);
+  }
+
+  private Fragment getCurrentFragment() {
+    Fragment page = getSupportFragmentManager().findFragmentByTag(
+        "android:switcher:" + R.id.viewPager + ":" + mViewPager.getCurrentItem());
+    return page;
   }
 
   private void checkAgreement() {
@@ -237,31 +275,16 @@ public class MainActivity2 extends AppCompatActivity {
     }
   }
 
-  @Override public boolean onCreateOptionsMenu(Menu menu) {
-    //getMenuInflater().inflate(R.menu.menu_main, menu);
-    return true;
-  }
-
-  @Override public boolean onOptionsItemSelected(MenuItem item) {
-    if(item.getItemId() == R.id.action_scan_master){
-      startActivity(new Intent(this, com.ledway.scanmaster.MainActivity.class));
-    }
-    return super.onOptionsItemSelected(item);
-
-  }
-
   @Override public void onBackPressed() {
-    new MaterialDialog.Builder(this).title(R.string.exit).content(R.string.are_you_sure_to_exit)
+    new MaterialDialog.Builder(this).title(R.string.exit)
+        .content(R.string.are_you_sure_to_exit)
         .positiveText(R.string.yes)
         .negativeText(R.string.no)
         .onPositive((dialog, which) -> {
           finish();
-        }).show();
-
-
+        })
+        .show();
   }
-
-
 
   @Override protected void onNewIntent(Intent intent) {
     super.onNewIntent(intent);
@@ -272,11 +295,13 @@ public class MainActivity2 extends AppCompatActivity {
       try {
         gnfc.connect();
         String reader = gnfc.read();
-        getSharedPreferences("setting", Context.MODE_PRIVATE).edit().putString("reader", reader).apply();
+        getSharedPreferences("setting", Context.MODE_PRIVATE).edit()
+            .putString("reader", reader)
+            .apply();
         ScanMasterViewModel.getInstance().reader.setValue(reader);
         //   settings.setReader(reader);
         //  settingChanged();
-        Toast.makeText(this,String.format("Set Reader to %s", reader) , Toast.LENGTH_LONG).show();
+        Toast.makeText(this, String.format("Set Reader to %s", reader), Toast.LENGTH_LONG).show();
       } catch (IOException e) {
         e.printStackTrace();
         Timber.e(e, e.getMessage());
@@ -284,40 +309,28 @@ public class MainActivity2 extends AppCompatActivity {
     }
   }
 
-
-  @Override public boolean onKeyDown(int keyCode, KeyEvent event) {
-    if(event.getAction() == KeyEvent.ACTION_DOWN){
-      if(keyCode == KeyEvent.KEYCODE_BACK){
-        Fragment currentFragment = getCurrentFragment();
-
-        boolean handled = false;
-        if(currentFragment != null && currentFragment instanceof OnKeyPress &&   currentFragment.getLifecycle().getCurrentState().isAtLeast(
-            Lifecycle.State.STARTED) ){
-          handled =  ((OnKeyPress) currentFragment).onKeyDown(keyCode,event);
-        }
-        if(handled){
-          return true;
-        }else {
-          return super.onKeyDown(keyCode, event);
-        }
-      }
+  @Override protected void onResume() {
+    super.onResume();
+    NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(getApplicationContext());
+    if (nfcAdapter != null && nfcAdapter.isEnabled()) {
+      PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
+          new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+      IntentFilter ndef = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
+      ndef.addCategory("*/*");
+      IntentFilter[] mFilters = new IntentFilter[] { ndef };// 过滤器
+      nfcAdapter.enableForegroundDispatch(this, pendingIntent, mFilters, GNfcLoader.TechList);
     }
-    return super.onKeyDown(keyCode, event);
   }
 
-  @Override public boolean onMenuOpened(int featureId, Menu menu) {
-    Fragment currentFragment = getCurrentFragment();
-    if(currentFragment != null &&currentFragment instanceof MenuOpend &&   currentFragment.getLifecycle().getCurrentState().isAtLeast(
-        Lifecycle.State.STARTED)){
-      ((MenuOpend) currentFragment).menuOpened();
+  @Override public boolean onCreateOptionsMenu(Menu menu) {
+    //getMenuInflater().inflate(R.menu.menu_main, menu);
+    return true;
+  }
+
+  @Override public boolean onOptionsItemSelected(MenuItem item) {
+    if (item.getItemId() == R.id.action_scan_master) {
+      startActivity(new Intent(this, com.ledway.scanmaster.MainActivity.class));
     }
-    return super.onMenuOpened(featureId, menu);
+    return super.onOptionsItemSelected(item);
   }
-
-
-  private Fragment getCurrentFragment(){
-    Fragment page = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.viewPager + ":" + mViewPager.getCurrentItem());
-    return  page;
-  }
-
 }

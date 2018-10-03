@@ -27,7 +27,6 @@ import butterknife.OnClick;
 import butterknife.OnTextChanged;
 import com.activeandroid.query.Select;
 import com.example.android.common.logger.Log;
-import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.ledway.btprinter.models.TodoProd;
 import com.ledway.btprinter.network.model.RestSpResponse;
 import com.ledway.btprinter.network.model.SpReturn;
@@ -381,8 +380,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
         .addInterceptor(new HttpLoggingInterceptor(message ->{
           Log.d("OkHttp", message);
           Timber.tag("OkHttp").d(message);
-        }).setLevel(HttpLoggingInterceptor.Level.BODY))
-        .addNetworkInterceptor(new StethoInterceptor()).build();
+        }).setLevel(HttpLoggingInterceptor.Level.BODY)).build();
     RequestBody requestBody =
         RequestBody.create(MediaType.parse("application/octet-stream"), new File(fileName));
 
