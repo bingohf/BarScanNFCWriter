@@ -85,5 +85,8 @@
   <string name="show_room">Show room</string>
   <string name="exhibition">Exhibition</string>
   <string name="empty_sample_hint">Please click plus sign</string>
-
+  <string name="fail_grant">Fail to grant permissions</string>
+  <string name="re_grant">Re-grant</string>
+  <string name="re_grant_message">The permissions are required.</string>
+  <string name="app_setting">App Settings</string>
 </resources>

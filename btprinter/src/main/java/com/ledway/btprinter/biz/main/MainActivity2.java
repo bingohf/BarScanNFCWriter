@@ -8,10 +8,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -54,6 +56,7 @@ import timber.log.Timber;
 import static com.ledway.btprinter.AppConstants.REQUEST_AGREEMENT;
 
 public class MainActivity2 extends AppCompatActivity {
+  final int REQUEST_PERMISSIONS_SETTING = 10;
   final RxPermissions rxPermissions = new RxPermissions(this);
   @BindView(R.id.viewPager) ViewPager mViewPager;
   @BindView(R.id.bottomNavigation) BottomNavigationView mBottomNav;
@@ -63,6 +66,9 @@ public class MainActivity2 extends AppCompatActivity {
       new WebViewFragment()
   };
   private CompositeSubscription mSubscriptions = new CompositeSubscription();
+  final String[] PERMISSIONS = new String[]{Manifest.permission.NFC, Manifest.permission.CAMERA,
+      Manifest.permission.CALL_PHONE, Manifest.permission.WRITE_EXTERNAL_STORAGE,
+      Manifest.permission.ACCESS_WIFI_STATE};
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -84,48 +90,92 @@ public class MainActivity2 extends AppCompatActivity {
     doCheckSetting();
     checkVersion();
 
-    rxPermissions.requestEachCombined(Manifest.permission.CAMERA, Manifest.permission.CALL_PHONE,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.ACCESS_WIFI_STATE).subscribe(permission -> {
+    requestPermission();
+  }
+
+  @Override protected void onDestroy() {
+    super.onDestroy();
+    mSubscriptions.clear();
+    int currentIndex = mViewPager.getCurrentItem();
+    getSharedPreferences("view", Context.MODE_PRIVATE).edit()
+        .putInt("pagerIndex", currentIndex)
+        .apply();
+  }
+
+  @Override public boolean onMenuOpened(int featureId, Menu menu) {
+    Fragment currentFragment = getCurrentFragment();
+    if (currentFragment != null
+        && currentFragment instanceof MenuOpend
+        && currentFragment.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
+      ((MenuOpend) currentFragment).menuOpened();
+    }
+    return super.onMenuOpened(featureId, menu);
+  }
+
+  @Override public boolean onKeyDown(int keyCode, KeyEvent event) {
+    if (event.getAction() == KeyEvent.ACTION_DOWN) {
+      if (keyCode == KeyEvent.KEYCODE_BACK) {
+        Fragment currentFragment = getCurrentFragment();
+
+        boolean handled = false;
+        if (currentFragment != null
+            && currentFragment instanceof OnKeyPress
+            && currentFragment.getLifecycle()
+            .getCurrentState()
+            .isAtLeast(Lifecycle.State.STARTED)) {
+          handled = ((OnKeyPress) currentFragment).onKeyDown(keyCode, event);
+        }
+        if (handled) {
+          return true;
+        } else {
+          return super.onKeyDown(keyCode, event);
+        }
+      }
+    }
+    return super.onKeyDown(keyCode, event);
+  }
+
+  private Fragment getCurrentFragment() {
+    Fragment page = getSupportFragmentManager().findFragmentByTag(
+        "android:switcher:" + R.id.viewPager + ":" + mViewPager.getCurrentItem());
+    return page;
+  }
+
+  private void requestPermission() {
+    rxPermissions.requestEachCombined(PERMISSIONS).subscribe(permission -> {
       if (permission.granted) {
-
+        //Toast.makeText(this, "granted", Toast.LENGTH_LONG).show();
       } else if (permission.shouldShowRequestPermissionRationale) {
-
+        new AlertDialog.Builder(this).setTitle(R.string.re_grant)
+            .setMessage(R.string.re_grant_message)
+            .setCancelable(false)
+            .setPositiveButton(R.string.app_setting, (dialogInterface, i) -> {
+              requestPermission();
+            })
+            .setNegativeButton(R.string.exit, (dialogInterface, i) -> {
+              finish();
+            })
+            .create()
+            .show();
       } else {
 
+        new AlertDialog.Builder(this).setTitle(R.string.re_grant)
+            .setMessage(R.string.re_grant_message)
+            .setCancelable(false)
+            .setPositiveButton(R.string.re_grant, (dialogInterface, i) -> {
+              Intent intent = new Intent();
+              intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+              Uri uri = Uri.fromParts("package", getPackageName(), null);
+              intent.setData(uri);
+              startActivityForResult(intent, REQUEST_PERMISSIONS_SETTING);
+            })
+            .setNegativeButton(R.string.exit, (dialogInterface, i) -> {
+              finish();
+            })
+            .create()
+            .show();
       }
     });
-  }
-
-  private void doCheckSetting() {
-    if (!checkSetting()) {
-      AlertDialog.Builder builder = new AlertDialog.Builder(this);
-      builder.setTitle(R.string.invalid_setting)
-          .setMessage(R.string.goto_setting)
-          .setPositiveButton(R.string.setting, (dialog, which) -> {
-            Intent intent = new Intent(this, AppPreferences.class);
-            startActivityForResult(intent, AppConstants.REQUEST_TYPE_SETTING);
-          })
-          .setCancelable(false);
-      builder.create().show();
-    }
-  }
-
-  private boolean checkSetting() {
-    SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-    String line = sp.getString("Line", "01");
-    String reader = sp.getString("Reader", "01");
-    String server = sp.getString("Server", "vip.ledway.com.tw");
-    String cloudDataListUrl = sp.getString("cloudDataListUrl", "http://www.ledway.com.tw");
-    sp.edit()
-        .putString("Line", line)
-        .putString("Reader", reader)
-        .putString("Server", server)
-        .putString("cloudDataListUrl", cloudDataListUrl)
-        .apply();
-    if ((TextUtils.isEmpty(line) || TextUtils.isEmpty(reader) || TextUtils.isEmpty(server))) {
-      return false;
-    }
-    return true;
   }
 
   private void initView() {
@@ -201,54 +251,6 @@ public class MainActivity2 extends AppCompatActivity {
         }));
   }
 
-  @Override protected void onDestroy() {
-    super.onDestroy();
-    mSubscriptions.clear();
-    int currentIndex = mViewPager.getCurrentItem();
-    getSharedPreferences("view", Context.MODE_PRIVATE).edit()
-        .putInt("pagerIndex", currentIndex)
-        .apply();
-  }
-
-  @Override public boolean onMenuOpened(int featureId, Menu menu) {
-    Fragment currentFragment = getCurrentFragment();
-    if (currentFragment != null
-        && currentFragment instanceof MenuOpend
-        && currentFragment.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
-      ((MenuOpend) currentFragment).menuOpened();
-    }
-    return super.onMenuOpened(featureId, menu);
-  }
-
-  @Override public boolean onKeyDown(int keyCode, KeyEvent event) {
-    if (event.getAction() == KeyEvent.ACTION_DOWN) {
-      if (keyCode == KeyEvent.KEYCODE_BACK) {
-        Fragment currentFragment = getCurrentFragment();
-
-        boolean handled = false;
-        if (currentFragment != null
-            && currentFragment instanceof OnKeyPress
-            && currentFragment.getLifecycle()
-            .getCurrentState()
-            .isAtLeast(Lifecycle.State.STARTED)) {
-          handled = ((OnKeyPress) currentFragment).onKeyDown(keyCode, event);
-        }
-        if (handled) {
-          return true;
-        } else {
-          return super.onKeyDown(keyCode, event);
-        }
-      }
-    }
-    return super.onKeyDown(keyCode, event);
-  }
-
-  private Fragment getCurrentFragment() {
-    Fragment page = getSupportFragmentManager().findFragmentByTag(
-        "android:switcher:" + R.id.viewPager + ":" + mViewPager.getCurrentItem());
-    return page;
-  }
-
   private void checkAgreement() {
     SharedPreferences sp = getSharedPreferences("agreement", Context.MODE_PRIVATE);
     if (!sp.getBoolean("agree", false)) {
@@ -272,7 +274,48 @@ public class MainActivity2 extends AppCompatActivity {
         }
         break;
       }
+      case REQUEST_PERMISSIONS_SETTING:{
+        for(String permission : PERMISSIONS){
+          if(!rxPermissions.isGranted(permission)){
+            Toast.makeText(this, R.string.fail_grant,Toast.LENGTH_LONG).show();
+            finish();
+            break;
+          }
+        }
+      }
     }
+  }
+
+  private void doCheckSetting() {
+    if (!checkSetting()) {
+      AlertDialog.Builder builder = new AlertDialog.Builder(this);
+      builder.setTitle(R.string.invalid_setting)
+          .setMessage(R.string.goto_setting)
+          .setPositiveButton(R.string.setting, (dialog, which) -> {
+            Intent intent = new Intent(this, AppPreferences.class);
+            startActivityForResult(intent, AppConstants.REQUEST_TYPE_SETTING);
+          })
+          .setCancelable(false);
+      builder.create().show();
+    }
+  }
+
+  private boolean checkSetting() {
+    SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+    String line = sp.getString("Line", "01");
+    String reader = sp.getString("Reader", "01");
+    String server = sp.getString("Server", "vip.ledway.com.tw");
+    String cloudDataListUrl = sp.getString("cloudDataListUrl", "http://www.ledway.com.tw");
+    sp.edit()
+        .putString("Line", line)
+        .putString("Reader", reader)
+        .putString("Server", server)
+        .putString("cloudDataListUrl", cloudDataListUrl)
+        .apply();
+    if ((TextUtils.isEmpty(line) || TextUtils.isEmpty(reader) || TextUtils.isEmpty(server))) {
+      return false;
+    }
+    return true;
   }
 
   @Override public void onBackPressed() {

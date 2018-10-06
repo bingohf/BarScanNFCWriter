@@ -47,11 +47,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
+import timber.log.Timber;
 
 public class ReceiveSampleListFragment extends Fragment {
   @BindView(R.id.listview) RecyclerView mListView;
@@ -90,6 +92,7 @@ public class ReceiveSampleListFragment extends Fragment {
       }
 
       @Override public void onError(Throwable e) {
+        Timber.e(e);
         dataResource.postValue(Resource.error(e.getMessage(), null));
       }
 
@@ -177,6 +180,7 @@ public class ReceiveSampleListFragment extends Fragment {
       }
 
       @Override public void onError(Throwable e) {
+        Timber.e(e);
         Log.e("receive", e.getMessage(), e);
         dataResource.postValue(Resource.error(ContextUtils.getMessage(e), null));
       }

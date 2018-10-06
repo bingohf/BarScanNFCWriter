@@ -25,7 +25,7 @@ public class BaseRequest {
         context.getSharedPreferences(AppConstants.SP_NAME, Context.MODE_PRIVATE);
     line = sp.getString(AppConstants.SP_LINE, "01");
     reader = sp.getString(AppConstants.SP_READER, "01");
-    MyTaxNo = sp.getString("MyTaxNo", "");
+
 
     String mDeviceId =
         Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -34,5 +34,8 @@ public class BaseRequest {
     final String ID_FORMAT ="%s-%s-LEDWAY-%s";
     SimpleDateFormat mSimpleDateFormater = new SimpleDateFormat(DATA_FORMAT);
     pdaGuid=  String.format(ID_FORMAT,  mDeviceId,mDeviceName, mSimpleDateFormater.format(new Date()));
+
+    String t_mytaxno = sp.getString("MyTaxNo", "");
+    MyTaxNo = t_mytaxno.isEmpty()?pdaGuid:t_mytaxno;
   }
 }
