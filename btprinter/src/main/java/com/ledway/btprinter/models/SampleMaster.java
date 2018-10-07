@@ -60,6 +60,7 @@ import rx.functions.Func1;
   private boolean mIsChanged = false;
   protected boolean isLoadedAll = false;
 
+  public String myTaxno;
 
   public boolean isChanged(){
     return mIsChanged;

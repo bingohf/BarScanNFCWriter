@@ -6,4 +6,5 @@ package com.ledway.btprinter.network.model;
 
 public class ProductAppGetReturn {
   public String json;
+  public String mytaxno;
 }

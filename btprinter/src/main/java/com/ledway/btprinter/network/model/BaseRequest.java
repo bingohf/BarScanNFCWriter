@@ -36,6 +36,6 @@ public class BaseRequest {
     pdaGuid=  String.format(ID_FORMAT,  mDeviceId,mDeviceName, mSimpleDateFormater.format(new Date()));
 
     String t_mytaxno = sp.getString("MyTaxNo", "");
-    MyTaxNo = t_mytaxno.isEmpty()?pdaGuid:t_mytaxno;
+    MyTaxNo = t_mytaxno.isEmpty()?mDeviceId:t_mytaxno;
   }
 }

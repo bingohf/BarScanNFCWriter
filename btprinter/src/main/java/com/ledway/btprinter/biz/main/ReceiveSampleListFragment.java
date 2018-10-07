@@ -127,6 +127,7 @@ public class ReceiveSampleListFragment extends Fragment {
         try {
          // SampleMaster sampleMaster = objectMapper.readValue(json, SampleMaster.class);
           SampleMaster sampleMaster = JsonUtils.Companion.fromJson(json, SampleMaster.class);
+          sampleMaster.myTaxno = item.mytaxno;
           ret.add(sampleMaster);
         } catch (JsonSyntaxException e) {
           e.printStackTrace();
@@ -145,7 +146,7 @@ public class ReceiveSampleListFragment extends Fragment {
       itemData.hold = sampleMaster.guid;
       ReceivedSample cached = new ReceivedSample();
       return Observable.from(sampleMaster.sampleProdLinks)
-          .flatMap(sampleProdLink -> loadProductImage(sampleProdLink.prod_id == null ?sampleProdLink.prodNo:sampleProdLink.prod_id ))
+          .flatMap(sampleProdLink -> loadProductImage(sampleProdLink.prod_id == null ?sampleProdLink.prodNo:sampleProdLink.prod_id , sampleMaster.myTaxno))
           .toList()
           .map(files -> {
             if (!files.isEmpty()) {
@@ -189,12 +190,16 @@ public class ReceiveSampleListFragment extends Fragment {
     }));
   }
 
-  private Observable<File> loadProductImage(String prodno) {
+  private Observable<File> loadProductImage(String prodno, String myTaxno) {
+
     File imgFile = new File(MApp.getApplication().getPicPath() + "/product/" + prodno + ".png");
     if (!imgFile.getParentFile().exists()) {
       imgFile.getParentFile().mkdir();
     }
     String query = "prodNo='" + prodno + "'";
+    if (!TextUtils.isEmpty(myTaxno)){
+      query += " and mytaxno ='" + myTaxno +"'";
+    }
     return MyProjectApi.getInstance()
         .getDbService()
         .getProduct(query, "")
