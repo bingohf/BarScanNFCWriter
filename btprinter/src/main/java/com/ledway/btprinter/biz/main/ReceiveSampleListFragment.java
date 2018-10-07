@@ -47,10 +47,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
 import rx.Observable;
 import rx.Subscriber;
-import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
@@ -147,7 +145,7 @@ public class ReceiveSampleListFragment extends Fragment {
       itemData.hold = sampleMaster.guid;
       ReceivedSample cached = new ReceivedSample();
       return Observable.from(sampleMaster.sampleProdLinks)
-          .flatMap(sampleProdLink -> loadProductImage(sampleProdLink.prod_id))
+          .flatMap(sampleProdLink -> loadProductImage(sampleProdLink.prod_id == null ?sampleProdLink.prodNo:sampleProdLink.prod_id ))
           .toList()
           .map(files -> {
             if (!files.isEmpty()) {
@@ -196,7 +194,7 @@ public class ReceiveSampleListFragment extends Fragment {
     if (!imgFile.getParentFile().exists()) {
       imgFile.getParentFile().mkdir();
     }
-    String query = "prodno='" + prodno + "'";
+    String query = "prodNo='" + prodno + "'";
     return MyProjectApi.getInstance()
         .getDbService()
         .getProduct(query, "")

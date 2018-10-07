@@ -13,7 +13,9 @@ import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,16 +29,19 @@ import butterknife.OnClick;
 import butterknife.OnTextChanged;
 import com.activeandroid.query.Select;
 import com.example.android.common.logger.Log;
+import com.ledway.btprinter.event.ProdSaveEvent;
 import com.ledway.btprinter.models.TodoProd;
 import com.ledway.btprinter.network.model.RestSpResponse;
 import com.ledway.btprinter.network.model.SpReturn;
 import com.ledway.btprinter.views.MImageView;
 import com.ledway.framework.FullScannerActivity;
+import com.ledway.rxbus.RxBus;
 import com.ledway.scanmaster.model.OCRData;
 import com.ledway.scanmaster.model.Resource;
 import com.ledway.scanmaster.utils.BizUtils;
 import com.ledway.scanmaster.utils.ContextUtils;
 import com.ledway.scanmaster.utils.IOUtil;
+import com.ledway.scanmaster.utils.JsonUtils;
 import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -153,17 +158,18 @@ public class TodoProdDetailActivity extends AppCompatActivity {
         e.printStackTrace();
       }
       if (photoFile != null) {
-        Uri photoURI = FileProvider.getUriForFile(TodoProdDetailActivity.this,
-            BuildConfig.APPLICATION_ID + ".fileprovider", photoFile);
+        Uri photoURI = FileProvider.getUriForFile(getApplicationContext(),
+            BuildConfig.APPLICATION_ID + ".provider", photoFile);
         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+        takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         List<ResolveInfo> resolvedIntentActivities =
             getPackageManager().queryIntentActivities(takePictureIntent,
                 PackageManager.MATCH_DEFAULT_ONLY);
         for (ResolveInfo resolvedIntentInfo : resolvedIntentActivities) {
           String packageName = resolvedIntentInfo.activityInfo.packageName;
 
-          grantUriPermission(packageName, photoURI,
-              Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+/*          grantUriPermission(packageName, photoURI,
+              Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);*/
         }
         startActivityForResult(takePictureIntent, type);
       }
@@ -209,6 +215,23 @@ public class TodoProdDetailActivity extends AppCompatActivity {
       }
     });
 
+    mEdtSpec.addTextChangedListener(new TextWatcher() {
+      @Override public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+      }
+
+      @Override public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+      }
+
+      @Override public void afterTextChanged(Editable editable) {
+        if (!mEdtSpec.getText().toString().equals(mTodoProd.spec_desc)) {
+          mTodoProd.update_time = new Date();
+        }
+        mTodoProd.spec_desc = mEdtSpec.getText().toString();
+      }
+    });
+
     mMyTaxNo = BizUtils.getMyTaxNo(this);
 
     orc.observe(this, ocrData -> {
@@ -247,20 +270,28 @@ public class TodoProdDetailActivity extends AppCompatActivity {
   }
 
   private void loadTodoProd() {
+
     String prodno = getIntent().getStringExtra("prod_no");
+    String prodJson = getIntent().getStringExtra("prodJson");
+    TodoProd defaultProd = null;
+    if (!TextUtils.isEmpty(prodJson)){
+      defaultProd = JsonUtils.Companion.fromJson(prodJson, TodoProd.class);
+      prodno = defaultProd.prodNo;
+    }
     if (TextUtils.isEmpty(prodno)) {
       mTodoProd = (TodoProd) MApp.getApplication().getSession().getValue("current_todo_prod");
     } else {
-      mTodoProd = loadTodoProd(prodno);
+      mTodoProd = loadTodoProd(prodno,defaultProd);
     }
   }
 
-  private TodoProd loadTodoProd(String prodno) {
+  private TodoProd loadTodoProd(String prodno, TodoProd defaultProd) {
     List<TodoProd> todoProds =
-        new Select().from(TodoProd.class).where("prodno =?", prodno).execute();
+        new Select().from(TodoProd.class).where("prodNo =?", prodno).execute();
     if (todoProds.size() > 0) {
       return todoProds.get(0);
     }
+    if (defaultProd != null) return defaultProd;
     TodoProd todoProd = new TodoProd();
     todoProd.create_time = new Date();
     todoProd.update_time = todoProd.create_time;
@@ -282,12 +313,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     }
   }
 
-  @OnTextChanged(R.id.txt_spec) void onTextSpecChange() {
-    if (!mEdtSpec.getText().toString().equals(mTodoProd.spec_desc)) {
-      mTodoProd.update_time = new Date();
-    }
-    mTodoProd.spec_desc = mEdtSpec.getText().toString();
-  }
+
 
   @OnClick(R.id.img_qrcode) void onImgQrCodeClick() {
     startActivityForResult(new Intent(this, FullScannerActivity.class), RESULT_CAMERA_QR_CODE);
@@ -356,9 +382,14 @@ public class TodoProdDetailActivity extends AppCompatActivity {
   @Override public void onBackPressed() {
     if (mTodoProd.update_time != null
         && mTodoProd.create_time != null
-        && mTodoProd.update_time.getTime() != mTodoProd.create_time.getTime()) {
+        && mTodoProd.update_time.getTime() - mTodoProd.create_time.getTime() !=0) {
+      mTodoProd.create_time = mTodoProd.update_time;
       mTodoProd.save();
+      RxBus.getInstance().post(new ProdSaveEvent());
     }
+    Intent data = new Intent();
+    data.putExtra("prodJson", JsonUtils.Companion.toJson(mTodoProd));
+    setResult(Activity.RESULT_OK,data);
     super.onBackPressed();
   }
 

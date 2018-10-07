@@ -17,8 +17,8 @@ public class DatabaseContentProvider extends ContentProvider {
 		builder.addModelClass(SampleMaster.class);
 		builder.addModelClass(Prod.class);
 		builder.addModelClass(TodoProd.class);
-		builder.addModelClass(SampleProdLink.class);
 		builder.addModelClass(ReceivedSample.class);
+		builder.setDatabaseVersion(102);
 		return builder.create();
 	}
 

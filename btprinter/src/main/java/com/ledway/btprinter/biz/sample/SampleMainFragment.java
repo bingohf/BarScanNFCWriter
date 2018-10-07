@@ -36,6 +36,8 @@ import com.ledway.btprinter.R;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.models.SampleProdLink;
 import com.ledway.btprinter.models.TodoProd;
+import com.ledway.btprinter.network.model.RestSpResponse;
+import com.ledway.btprinter.network.model.SpReturn;
 import com.ledway.framework.FullScannerActivity;
 import com.ledway.scanmaster.model.OCRData;
 import com.ledway.scanmaster.model.Resource;
@@ -45,7 +47,6 @@ import com.ledway.scanmaster.utils.IOUtil;
 import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.io.IOException;
-import java.sql.CallableStatement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -61,13 +62,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import rx.Observable;
 import rx.Subscriber;
-import rx.functions.Func0;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 import static android.app.Activity.RESULT_OK;
+import static com.activeandroid.Cache.getContext;
 
 /**
  * Created by togb on 2017/12/3.
@@ -126,18 +127,20 @@ public class SampleMainFragment extends Fragment {
       }
       if (photoFile != null) {
         Uri photoURI =
-            FileProvider.getUriForFile(getActivity(), BuildConfig.APPLICATION_ID + ".fileprovider",
+            FileProvider.getUriForFile(getActivity(), BuildConfig.APPLICATION_ID + ".provider",
                 photoFile);
         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+        takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         List<ResolveInfo> resolvedIntentActivities = getActivity().getPackageManager()
             .queryIntentActivities(takePictureIntent, PackageManager.MATCH_DEFAULT_ONLY);
         for (ResolveInfo resolvedIntentInfo : resolvedIntentActivities) {
           String packageName = resolvedIntentInfo.activityInfo.packageName;
 
-          getActivity().grantUriPermission(packageName, photoURI,
-              Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+/*          getActivity().grantUriPermission(packageName, photoURI,
+              Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);*/
         }
         startActivityForResult(takePictureIntent, REQUEST_BUSINESS_CARD);
+
       }
     }
   }
@@ -280,6 +283,9 @@ public class SampleMainFragment extends Fragment {
           break;
         }
         case SUCCESS: {
+          if(resource.data instanceof String){
+            Toast.makeText(getContext(), (String)resource.data, Toast.LENGTH_LONG).show();
+          }
           stopLoading();
           break;
         }
@@ -331,9 +337,9 @@ public class SampleMainFragment extends Fragment {
 
     mSubscription.add(uploadSample().mergeWith(uploadProduct())
 
-        .subscribe(new Subscriber<Object>() {
+        .subscribe(new Subscriber<String>() {
           @Override public void onCompleted() {
-            uploading.postValue(Resource.success(null));
+
           }
 
           @Override public void onError(Throwable e) {
@@ -341,20 +347,20 @@ public class SampleMainFragment extends Fragment {
             uploading.postValue(Resource.error(ContextUtils.getMessage(e), null));
           }
 
-          @Override public void onNext(Object sampleMaster) {
-
+          @Override public void onNext(String message) {
+            uploading.postValue(Resource.success(message));
           }
         }));
   }
 
-  private Observable<Object> uploadProduct() {
+  private Observable<String> uploadProduct() {
     StringBuilder sb = new StringBuilder();
     sb.append(" 1 > 2");
     ArrayList<String> ids = new ArrayList<>();
     for (SampleProdLink item : mSampleMaster.sampleProdLinks) {
       sb.append(" or ");
-      ids.add(item.prod_id);
-      sb.append(" prodno =?");
+      ids.add(item.prodNo);
+      sb.append(" prodNo =?");
     }
     String where =
         "( " + sb.toString() + ") and (uploaded_time is NULL  or update_time > uploaded_time)";
@@ -363,7 +369,8 @@ public class SampleMainFragment extends Fragment {
         .map((Func1<Pair<String, String[]>, List<TodoProd>>) stringPair -> new Select().from(
             TodoProd.class).where(stringPair.first, stringPair.second).execute())
         .flatMap(Observable::from)
-        .flatMap(todoProd -> todoProd.remoteSave2().flatMap(spReturnRestSpResponse -> {
+        .flatMap(todoProd -> todoProd.remoteSave2()
+            .flatMap(spReturnRestSpResponse -> {
           int returnCode = spReturnRestSpResponse.result.get(0).errCode;
           String returnMessage = spReturnRestSpResponse.result.get(0).errData;
           if (returnCode == 1) {
@@ -374,13 +381,12 @@ public class SampleMainFragment extends Fragment {
           }
 
           return Observable.just(spReturnRestSpResponse);
-        }))
+        })        .onErrorResumeNext(throwable -> Observable.empty()))
         .subscribeOn(Schedulers.io())
-        .ignoreElements()
-        .cast(Object.class);
+        .ignoreElements().cast(String.class);
   }
 
-  private Observable<Object> uploadSample() {
+  private Observable<String> uploadSample() {
     return Observable.concat(Observable.just(mSampleMaster), Observable.defer(() -> {
       List<SampleMaster> data = new Select().from(SampleMaster.class)
           .where("isDirty =? and guid <>?", true, mSampleMaster.guid)
@@ -391,9 +397,7 @@ public class SampleMainFragment extends Fragment {
         .filter(sampleMaster -> !sampleMaster.isUploaded())
         .doOnSubscribe(() -> uploading.postValue(Resource.loading(null)))
         .concatMap(sampleMaster -> sampleMaster.remoteSave())
-        .subscribeOn(Schedulers.io())
-        .ignoreElements()
-        .cast(Object.class);
+        .subscribeOn(Schedulers.io());
   }
 
   private void parseOCR(StringBuilder sb, Object obj) throws JSONException {
@@ -427,8 +431,12 @@ public class SampleMainFragment extends Fragment {
     } else {
       Intent intent = new Intent();
       intent.setAction(Intent.ACTION_VIEW);
-      intent.setDataAndType(Uri.parse("file://" + mSampleMaster.image1), "image/*");
-      getActivity().startActivity(intent);
+      intent.setDataAndType(
+          FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".provider",
+              new File(mSampleMaster.image1)), "image/*");
+      intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+      getContext().startActivity(intent);
+
     }
   }
 

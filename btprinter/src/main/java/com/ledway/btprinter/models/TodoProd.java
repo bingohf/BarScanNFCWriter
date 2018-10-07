@@ -38,8 +38,8 @@ import rx.Subscriber;
     return Observable.create(new Observable.OnSubscribe<TodoProd>() {
       @Override public void call(final Subscriber<? super TodoProd> subscriber) {
         List<TodoProd> records =
-            new Select(new String[] { "id", "prodno", "spec_desc" }).from(TodoProd.class)
-                .where("prodno=?", prodNo)
+            new Select(new String[] { "id", "prodNo", "spec_desc" }).from(TodoProd.class)
+                .where("prodNo=?", prodNo)
                 .execute();
         if (records.size() == 1) {
           subscriber.onNext(records.get(0));
@@ -109,4 +109,6 @@ import rx.Subscriber;
       spec_desc = temp.spec_desc;
     }
   }
+
+
 }

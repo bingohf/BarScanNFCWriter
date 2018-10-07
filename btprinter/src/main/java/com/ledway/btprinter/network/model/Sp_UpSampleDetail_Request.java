@@ -6,7 +6,7 @@ CREATE proc [dbo].[sp_UpSampleDetail]
 @Reader int,
 @empno nvarchar(20)  ,--員工代碼,輸入Mac No,不可爲空
 @series nvarchar(50) ,--取樣單series,不可爲空
-@prodno nvarchar(50),--布種,不可爲空
+@prodNo nvarchar(50),--布種,不可爲空
 @itemExt nvarchar(10),--序號,不可爲空
 @pcsnum int,--片數,不可爲空,默認爲1即可
 @errCode int output,

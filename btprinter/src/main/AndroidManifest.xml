@@ -71,9 +71,6 @@
         android:screenOrientation="portrait"/>
 
     <activity android:name=".AppPreferences"/>
-    <activity android:name=".ItemDetailActivity"
-        android:screenOrientation="portrait"
-        />
     <activity android:name=".PrintPreviewActivity"/>
     <activity android:name=".ProdListActivity"
         android:screenOrientation="portrait"
@@ -104,7 +101,8 @@
     <provider
         android:name="com.ledway.btprinter.DatabaseContentProvider"
         android:authorities="${applicationId}"
-        android:exported="false">
+        android:exported="false"
+        android:grantUriPermissions="true">
       <meta-data
           android:name="android.support.FILE_PROVIDER_PATHS"
           android:resource="@xml/file_paths"></meta-data>
@@ -114,7 +112,7 @@
         android:value="cust.db"/>
     <meta-data
         android:name="AA_DB_VERSION"
-        android:value="1"/>
+        android:value="102"/>
     <meta-data
         android:name="AA_MODELS"
         android:value="com.ledway.btprinter.models.SampleMaster,com.ledway.btprinter.models.Prod,com.ledway.btprinter.models.TodoProd,com.ledway.btprinter.models.SampleProdLink,com.ledway.btprinter.models.ReceivedSample"/>
@@ -123,6 +121,16 @@
     <meta-data
         android:name="io.fabric.ApiKey"
         android:value="a04d5a25cc1d0cc31478f9172e259c1bd212ed60" />
+
+<provider
+    android:name=".GenericFileProvider"
+    android:authorities="${applicationId}.provider"
+    android:exported="false"
+    android:grantUriPermissions="true">
+    <meta-data
+        android:name="android.support.FILE_PROVIDER_PATHS"
+        android:resource="@xml/provider_paths"/>
+  </provider>
   </application>
 
 </manifest>

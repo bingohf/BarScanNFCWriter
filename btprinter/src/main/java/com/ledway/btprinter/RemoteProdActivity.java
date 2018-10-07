@@ -41,7 +41,7 @@ public class RemoteProdActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_remote_product);
     String remoteDeviceId = getIntent().getStringExtra("deviceId");
-    String prodno = getIntent().getStringExtra("prodno");
+    String prodno = getIntent().getStringExtra("prodNo");
     mTxtSpec = (TextView) findViewById(R.id.txt_spec);
     mImageView = (MImageView) findViewById(R.id.image);
     mImageHintView = (TextView) findViewById(R.id.txt_hint);
@@ -55,7 +55,7 @@ public class RemoteProdActivity extends AppCompatActivity {
         ProgressDialog.show(this, getString(R.string.loading), getString(R.string.wait_a_moment),
             true, true);
 
-    String query = String.format("empno ='%s' and prodno ='%s'", remoteDeviceId, prodno);
+    String query = String.format("empno ='%s' and prodNo ='%s'", remoteDeviceId, prodno);
     final Subscription subscription = MyProjectApi.getInstance()
         .getDbService()
         .getProduct(query, "")

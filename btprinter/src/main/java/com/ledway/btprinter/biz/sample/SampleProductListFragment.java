@@ -23,7 +23,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.activeandroid.Model;
-import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 import com.gturedi.views.StatefulLayout;
 import com.ledway.btprinter.R;
@@ -37,6 +36,7 @@ import com.ledway.btprinter.models.SampleProdLink;
 import com.ledway.btprinter.models.TodoProd;
 import com.ledway.scanmaster.utils.ContextUtils;
 import com.ledway.framework.FullScannerActivity;
+import com.ledway.scanmaster.utils.JsonUtils;
 import io.reactivex.disposables.CompositeDisposable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -82,11 +82,26 @@ public class SampleProductListFragment extends Fragment {
         break;
       }
       case REQUEST_PRODUCT:{
-        ArrayList<String> prodList = new ArrayList<>();
-        for ( SampleProdLink item:mSampleMaster.sampleProdLinks){
-          prodList.add(item.prod_id);
+        String prodJson = data.getStringExtra("prodJson");
+        if(!TextUtils.isEmpty(prodJson)){
+          SampleProdLink prodLink = JsonUtils.Companion.fromJson(prodJson, SampleProdLink.class);
+          if (TextUtils.isEmpty(prodLink.prod_id)){
+            prodLink.prod_id = prodLink.prodNo;
+          }
+          int index = mSampleMaster.sampleProdLinks.size();
+          for (int i =0;i < mSampleMaster.sampleProdLinks.size(); ++i){
+            if(mSampleMaster.sampleProdLinks.get(i).prodNo.equals(prodLink.prodNo)){
+              index = i;
+              mSampleMaster.sampleProdLinks.remove(i);
+              break;
+            }
+          }
+          mSampleMaster.sampleProdLinks.add(index ,prodLink);
+          Observable.from(mSampleMaster.sampleProdLinks ).map(this::toViewItem).toList().subscribe(
+              itemData -> dataResource.postValue(Resource.success(itemData)));
         }
-        receiveSelected(prodList);
+
+
         break;
       }
     }
@@ -94,12 +109,14 @@ public class SampleProductListFragment extends Fragment {
 
   private void appendOrNewProduct(String qrcode) {
     for (int i =0;i < viewData.size() ; ++i){
-      if(viewData.get(i).hold.equals(qrcode)){
+      String json = (String) viewData.get(i).hold;
+      SampleProdLink link = JsonUtils.Companion.fromJson(json, SampleProdLink.class);
+      if(link.prodNo.equals(qrcode)){
         Toast.makeText(getContext(),R.string.prod_exists, Toast.LENGTH_LONG).show();
         return;
       }
     }
-    List<Model> list = new Select().from(TodoProd.class).where("prodno = ?", qrcode).execute();
+    List<Model> list = new Select().from(TodoProd.class).where("prodNo = ?", qrcode).execute();
     if(list.isEmpty()){
 
     } else {
@@ -114,13 +131,13 @@ public class SampleProductListFragment extends Fragment {
 
   private void add(TodoProd todoProd){
     SampleProdLink prodLink = new SampleProdLink();
-    prodLink.prod_id = todoProd.prodNo;
-    prodLink.create_date = new Date();
-    prodLink.sample_id = mSampleMaster.guid;
+    prodLink.prodNo = todoProd.prodNo;
+    prodLink.create_time = new Date();
+    prodLink.update_time = todoProd.update_time;
+    prodLink.uploaded_time = todoProd.uploaded_time;
+    prodLink.image1 = todoProd.image1;
     prodLink.ext = mSampleMaster.sampleProdLinks.size();
-    prodLink.link_id = mSampleMaster.guid + "_"+ prodLink.ext;
     prodLink.spec_desc = todoProd.spec_desc;
-    prodLink.save();
     mSampleMaster.sampleProdLinks.add(prodLink);
   }
 
@@ -132,14 +149,10 @@ public class SampleProductListFragment extends Fragment {
       paramArray[i] = selected.get(i);
     }
     while (mSampleMaster.sampleProdLinks.size()>0){
-      SampleProdLink link = mSampleMaster.sampleProdLinks.get(0);
-      if(link.link_id != null) {
-        new Delete().from(SampleProdLink.class).where("link_id =?", link.link_id).execute();
-      }
       mSampleMaster.sampleProdLinks.remove(0);
     }
     Observable.defer(() -> Observable.from(new Select().from(TodoProd.class)
-        .where("prodno in (" + TextUtils.join(",", placeholderArray) + ")",       paramArray)
+        .where("prodNo in (" + TextUtils.join(",", placeholderArray) + ")",       paramArray)
         .orderBy("update_time desc")
         .execute())).map(o -> {
       TodoProd todoProd = (TodoProd) o;
@@ -165,33 +178,40 @@ public class SampleProductListFragment extends Fragment {
    // itemData.timestamp = todoProd.create_time;
     itemData.subTitle = todoProd.spec_desc;
     itemData.title = todoProd.prodNo;
-    itemData.hold = todoProd.prodNo;
+    itemData.hold = JsonUtils.Companion.toJson(todoProd);
     itemData.iconPath = todoProd.image1;
     itemData.redFlag = todoProd.uploaded_time == null
         || todoProd.update_time.getTime() > todoProd.uploaded_time.getTime();
     return itemData;
   }
 
+  private SampleListAdapter2.ItemData toViewItem(SampleProdLink prodLink){
+    SampleListAdapter2.ItemData itemData = new SampleListAdapter2.ItemData();
+    // itemData.timestamp = todoProd.create_time;
+    itemData.subTitle = prodLink.spec_desc;
+    itemData.title = prodLink.prodNo;
+    itemData.hold = JsonUtils.Companion.toJson(prodLink);
+    itemData.iconPath = prodLink.image1;
+    itemData.redFlag = prodLink.uploaded_time == null
+        || prodLink.update_time.getTime() > prodLink.uploaded_time.getTime();
+    return itemData;
+  }
 
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     mSampleMaster =
         getActivity() != null ? ((SampleActivity) getActivity()).mSampleMaster
             : null;
     super.onCreate(savedInstanceState);
-    ArrayList<String> prodList = new ArrayList<>();
-    if(mSampleMaster.sampleProdLinks != null) {
-      for (SampleProdLink item : mSampleMaster.sampleProdLinks) {
-        prodList.add(item.prod_id);
-      }
-    }
-    receiveSelected(prodList);
     mSampleListAdapter = new SampleListAdapter2(getContext());
 
+    Observable.from(mSampleMaster.sampleProdLinks ).map(this::toViewItem).toList().subscribe(
+        itemData -> dataResource.postValue(Resource.success(itemData)));
+
     mDisposables.add(mSampleListAdapter.getClickObservable()
-        .subscribe(prodno -> startActivityForResult(
-            new Intent(getActivity(), TodoProdDetailActivity.class).putExtra("prod_no",
-                (String) prodno),REQUEST_PRODUCT)));
-  }
+        .subscribe(json -> startActivityForResult(
+            new Intent(getActivity(), TodoProdDetailActivity.class).putExtra("prodJson",
+      (String) json),REQUEST_PRODUCT)));
+}
 
   @Nullable @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -255,7 +275,9 @@ public class SampleProductListFragment extends Fragment {
       case R.id.action_add: {
         ArrayList<String> selected = new ArrayList<>();
         for(int i =0;i < viewData.size(); ++i){
-          selected.add((String)viewData.get(i).hold);
+          String json = (String) viewData.get(i).hold;
+          SampleProdLink link = JsonUtils.Companion.fromJson(json, SampleProdLink.class);
+          selected.add(link.prodNo);
         }
 
         startActivityForResult(new Intent(getActivity(), ProductPickerActivity.class).putExtra(

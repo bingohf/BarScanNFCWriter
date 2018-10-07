@@ -113,7 +113,9 @@ public class SampleListAdapter2 extends RecyclerView.Adapter<SampleListAdapter2.
 
   @Override public void onClick(View view) {
     ItemData item = mData.get((int) view.getTag());
-    mClickSubject.onNext(item.hold);
+    if (item.hold != null) {
+      mClickSubject.onNext(item.hold);
+    }
   }
 
   public ItemData get(int position){

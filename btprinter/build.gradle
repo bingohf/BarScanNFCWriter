@@ -13,8 +13,8 @@ android {
     applicationId "com.ledway.sales_edge"
     minSdkVersion 17
     targetSdkVersion 28
-    versionCode 87
-    versionName "8.7"
+    versionCode 88
+    versionName "8.8"
     multiDexEnabled true
   }
   signingConfigs{
@@ -92,6 +92,7 @@ dependencies {
   implementation fileTree(include: ['*.jar'], dir: 'libs')
   implementation project(':scanMaster')
   implementation project(':framework')
+  implementation project(':rxbus')
   implementation 'com.squareup.okhttp3:okhttp:3.9.1'
   implementation 'com.squareup.okhttp3:logging-interceptor:3.9.1'
  // implementation "android.arch.lifecycle:runtime:1.0.3"

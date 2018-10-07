@@ -69,7 +69,7 @@ public class SampleReadonlyActivity extends AppCompatActivity {
               && baseData.getType() == DataAdapter.DATA_TYPE_BARCODE) {
             String prodno = (String) baseData.value;
             startActivity(
-                new Intent(SampleReadonlyActivity.this, RemoteProdActivity.class).putExtra("prodno",
+                new Intent(SampleReadonlyActivity.this, RemoteProdActivity.class).putExtra("prodNo",
                     prodno).putExtra("deviceId", mSampleMaster.mac_address));
             return true;
           }
@@ -115,19 +115,19 @@ public class SampleReadonlyActivity extends AppCompatActivity {
     while (iterator.hasNext()) {
       SampleProdLink prod = iterator.next();
       TextData textData = new TextData(DataAdapter.DATA_TYPE_BARCODE);
-      textData.setText(prod.ext + ": " + prod.prod_id + "  " + prod.spec_desc);
-      textData.value = prod.prod_id;
+      textData.setText(prod.ext + ": " + prod.prodNo + "  " + prod.spec_desc);
+      textData.value = prod.prodNo;
       mDataAdapter.addData(textData);
     }
   }
 
   private void loadProduct() {
-    String sql = "select specdesc,prodno from product where empNo ='%s' and  ( 1=2 ";
+    String sql = "select specdesc,prodNo from product where empNo ='%s' and  ( 1=2 ";
     int i = 1;
     Object[] objects = new Object[mSampleMaster.sampleProdLinks.size() + 1];
     objects[0] = mSampleMaster.mac_address;
     for (SampleProdLink prodLink : mSampleMaster.sampleProdLinks) {
-      objects[i] = prodLink.prod_id;
+      objects[i] = prodLink.prodNo;
       sql += "or  prodNo ='%s'";
       ++i;
     }
@@ -164,7 +164,7 @@ public class SampleReadonlyActivity extends AppCompatActivity {
 
   private void setProdDesc(String prodno, String desc) {
     for (SampleProdLink sampleProdLink : mSampleMaster.sampleProdLinks) {
-      if (sampleProdLink.prod_id.equals(prodno)) {
+      if (sampleProdLink.prodNo.equals(prodno)) {
         sampleProdLink.spec_desc = desc;
         break;
       }

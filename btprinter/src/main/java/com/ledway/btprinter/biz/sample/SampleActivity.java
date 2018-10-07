@@ -14,6 +14,7 @@ import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.models.SampleProdLink;
+import com.ledway.scanmaster.utils.JsonUtils;
 import java.util.Date;
 import java.util.List;
 import org.w3c.dom.Text;
@@ -61,9 +62,7 @@ public class SampleActivity extends AppCompatActivity {
 
   @Override public void onBackPressed() {
     if(mSampleMaster.update_date != null) {
-      for(SampleProdLink item :mSampleMaster.sampleProdLinks){
-        item.save();
-      }
+      mSampleMaster.prodListJson = JsonUtils.Companion.toJson(mSampleMaster.sampleProdLinks);
       mSampleMaster.save();
     }
     super.onBackPressed();

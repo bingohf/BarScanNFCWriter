@@ -37,12 +37,14 @@ import com.gturedi.views.StatefulLayout;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.TodoProdDetailActivity;
+import com.ledway.btprinter.event.ProdSaveEvent;
 import com.ledway.btprinter.models.TodoProd;
 import com.ledway.btprinter.network.MyProjectApi;
 import com.ledway.btprinter.network.model.GroupProduct;
 import com.ledway.btprinter.network.model.RemoteGroupProduct;
 import com.ledway.btprinter.network.model.RestDataSetResponse;
 import com.ledway.framework.FullScannerActivity;
+import com.ledway.rxbus.RxBus;
 import com.ledway.scanmaster.model.Resource;
 import com.ledway.scanmaster.utils.BizUtils;
 import com.ledway.scanmaster.utils.ContextUtils;
@@ -59,7 +61,9 @@ import java.util.Date;
 import java.util.List;
 import rx.Observable;
 import rx.Subscriber;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 public class ProductListFragment extends Fragment {
@@ -71,6 +75,7 @@ public class ProductListFragment extends Fragment {
   @BindView(R.id.statefulLayout) StatefulLayout mStatefulLayout;
   private Unbinder mViewBinder;
   private CompositeDisposable mDisposables = new CompositeDisposable();
+  private CompositeSubscription mSubscription = new CompositeSubscription();
   private SampleListAdapter2 mSampleListAdapter;
   private MutableLiveData<Resource<List<SampleListAdapter2.ItemData>>> dataResource =
       new MutableLiveData<>();
@@ -144,13 +149,14 @@ public class ProductListFragment extends Fragment {
     }));
 
     mDisposables.add(mSampleListAdapter.getCheckObservable().subscribe(o -> titleChange()));
+    mSubscription.add(RxBus.getInstance().toObservable(ProdSaveEvent.class).subscribe(prodSaveEvent -> loadData()));
     loadData();
     ((LifecycleRegistry)getLifecycle()).handleLifecycleEvent(Lifecycle.Event.ON_CREATE);
     initView();
   }
 
   private void removeProduct(String prodNo) {
-    new Delete().from(TodoProd.class).where("prodno=?", prodNo).execute();
+    new Delete().from(TodoProd.class).where("prodNo=?", prodNo).execute();
     loadData();
   }
 
@@ -194,6 +200,7 @@ public class ProductListFragment extends Fragment {
   @Override public void onDestroy() {
     super.onDestroy();
     mDisposables.clear();
+    mSubscription.clear();
   }
 
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -403,7 +410,7 @@ public class ProductListFragment extends Fragment {
         })
         .flatMap(Observable::from)
         .doOnNext(remoteGroupProduct -> {
-          new Delete().from(TodoProd.class).where("prodno =?", remoteGroupProduct.prodno).execute();
+          new Delete().from(TodoProd.class).where("prodNo =?", remoteGroupProduct.prodno).execute();
           TodoProd todoProd = new TodoProd();
           todoProd.prodNo = remoteGroupProduct.prodno;
           todoProd.spec_desc = remoteGroupProduct.specdesc;
