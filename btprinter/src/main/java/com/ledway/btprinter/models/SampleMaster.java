@@ -138,6 +138,12 @@ import rx.functions.Func1;
       if (TextUtils.isEmpty(sampleProdLink.prod_id)){
         sampleProdLink.prod_id = sampleProdLink.prodNo;
       }
+      if (sampleProdLink.update_date == null){
+        sampleProdLink.update_date = sampleProdLink.update_time;
+      }
+      if (sampleProdLink.create_date == null){
+        sampleProdLink.create_date = sampleProdLink.create_time;
+      }
     }
     prodListJson = JsonUtils.Companion.toJson(sampleProdLinks);
     save();

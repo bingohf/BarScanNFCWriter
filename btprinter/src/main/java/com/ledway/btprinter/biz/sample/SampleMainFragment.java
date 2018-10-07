@@ -186,6 +186,7 @@ public class SampleMainFragment extends Fragment {
           String qrcode = data.getStringExtra("barcode");
           mSampleMaster.shareToDeviceId = qrcode;
           mSampleMaster.update_date = new Date();
+          mSampleMaster.save();
           Toast.makeText(getActivity(), qrcode, Toast.LENGTH_LONG).show();
           if (mSampleMaster.isHasData()) {
             uploadAll();

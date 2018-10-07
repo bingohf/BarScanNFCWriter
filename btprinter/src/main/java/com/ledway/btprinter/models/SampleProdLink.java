@@ -16,7 +16,7 @@ public class SampleProdLink {
 
 
   public Date create_time;
-
+  public Date create_date;
 
   public int ext;
 
@@ -26,6 +26,8 @@ public class SampleProdLink {
 
   public Date uploaded_time;
   public Date update_time;
+  public Date update_date;
+
   public String toSpec(){
     if(TextUtils.isEmpty(spec_desc)){
       return "";

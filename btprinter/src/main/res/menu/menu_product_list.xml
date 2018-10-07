@@ -34,7 +34,7 @@
   <item
       android:id="@+id/action_add"
       android:icon="@drawable/ic_add_white_24dp"
-      android:title="Create Sample"
+      android:title="Add"
       app:showAsAction="ifRoom"
       />
 
