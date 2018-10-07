@@ -17,21 +17,25 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 import com.gturedi.views.StatefulLayout;
 import com.ledway.btprinter.AppConstants;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.biz.sample.SampleActivity;
-import com.ledway.scanmaster.model.Resource;
 import com.ledway.btprinter.models.SampleMaster;
+import com.ledway.scanmaster.model.Resource;
 import com.ledway.scanmaster.utils.ContextUtils;
 import io.reactivex.Single;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,6 +84,25 @@ public class SampleListFragment extends Fragment {
     DividerItemDecoration dividerItemDecoration =
         new DividerItemDecoration(getActivity(), layoutManager.getOrientation());
     mListView.addItemDecoration(dividerItemDecoration);
+
+    mSampleListAdapter.getmLongClickSubject().subscribe(obj -> {
+      View itemView = (View) obj;
+      Integer index = (Integer) itemView.getTag();
+      SampleMaster sampleMaster = (SampleMaster) mSampleListAdapter.get(index).hold;
+        PopupMenu popup = new PopupMenu(getActivity(), itemView);
+        popup.setOnMenuItemClickListener(menuItem -> {
+          if (menuItem.getItemId() == R.id.action_delete) {
+            sampleMaster.delete();
+            loadRecordData();
+          } else if (menuItem.getItemId() == R.id.action_delete_all) {
+            new Delete().from(SampleMaster.class).execute();
+            loadRecordData();
+          }
+          return false;
+        });
+        popup.inflate(R.menu.menu_product_delete);
+        popup.show();
+    });
     initView();
   }
 

@@ -648,17 +648,12 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
       }
       // Continue only if the File was successfully created
       if (photoFile != null) {
-        Uri photoURI =
-            FileProvider.getUriForFile(context, "com.ledway.sales_edge.fileprovider", photoFile);
+
+
+        Uri photoURI = FileProvider.getUriForFile(getActivity().getApplicationContext(),
+            getContext().getPackageName() + ".provider", photoFile);
         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-        List<ResolveInfo> resolvedIntentActivities =
-            context. getPackageManager().queryIntentActivities(takePictureIntent,
-                PackageManager.MATCH_DEFAULT_ONLY);
-        for (ResolveInfo resolvedIntentInfo : resolvedIntentActivities) {
-          String packageName = resolvedIntentInfo.activityInfo.packageName;
-          context.grantUriPermission(packageName, photoURI,
-              Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        }
+        takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
       }
     }
