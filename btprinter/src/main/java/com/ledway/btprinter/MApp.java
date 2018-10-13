@@ -1,9 +1,11 @@
 package com.ledway.btprinter;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.multidex.MultiDex;
 import android.view.Display;
 import com.activeandroid.ActiveAndroid;
 import com.crashlytics.android.Crashlytics;
@@ -26,6 +28,7 @@ public class MApp extends com.ledway.scanmaster.MApp {
   public Point point = new Point();
   @Override public void onCreate() {
     super.onCreate();
+
     Fabric.with(this, new Crashlytics());
     ContextUtils.init(this);
     ActiveAndroid.initialize(this);
@@ -94,5 +97,10 @@ public class MApp extends com.ledway.scanmaster.MApp {
   }
   public Session getSession(){
     return session;
+  }
+
+  @Override protected void attachBaseContext(Context base) {
+    super.attachBaseContext(base);
+    MultiDex.install(this);
   }
 }

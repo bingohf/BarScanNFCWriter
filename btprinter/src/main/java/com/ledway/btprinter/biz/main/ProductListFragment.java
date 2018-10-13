@@ -279,7 +279,7 @@ public class ProductListFragment extends Fragment {
     //myTaxNo = "3036A";
     MyProjectApi.getInstance()
         .getDbService()
-        .customQuery("select * from view_GroupShowName where mytaxno ='" + myTaxNo + "'")
+        .customQuery("select * from view_GroupShowName where mytaxno ='" + myTaxNo +"'")
         .doOnSubscribe(() -> showRooms.postValue(Resource.loading(null)))
         .map(responseBody -> {
           try {
@@ -417,7 +417,7 @@ public class ProductListFragment extends Fragment {
             + myTaxNo
             + "' and showname ='"
             + room
-            + "'")
+            + "' order by prodno ")
         .doOnSubscribe(() -> syncProducts.postValue(Resource.loading(null)))
         .map(responseBody -> {
           try {
@@ -495,7 +495,7 @@ public class ProductListFragment extends Fragment {
 
   private void loadData(String filter) {
     Observable.defer(() -> Observable.from(
-        new Select().from(TodoProd.class).where("prodno like ? or spec_desc like ?", filter,filter).orderBy("create_time desc").execute())).map(o -> {
+        new Select().from(TodoProd.class).where("prodno like ? or spec_desc like ?", filter,filter).orderBy("prodno desc").execute())).map(o -> {
       TodoProd todoProd = (TodoProd) o;
       SampleListAdapter2.ItemData itemData = new SampleListAdapter2.ItemData();
       itemData.timestamp = todoProd.create_time;
