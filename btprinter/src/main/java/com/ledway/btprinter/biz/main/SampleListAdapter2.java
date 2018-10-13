@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +32,7 @@ public class SampleListAdapter2 extends RecyclerView.Adapter<SampleListAdapter2.
   private List<ItemData> mData = new ArrayList<>();
   private PublishSubject<Object> mClickSubject = PublishSubject.create();
   private PublishSubject<Object> mLongClickSubject = PublishSubject.create();
-  private PublishSubject<Object> mCheckSubject = PublishSubject.create();
+  private PublishSubject<Pair<Integer,Boolean>> mCheckSubject = PublishSubject.create();
   private boolean selectMode = false;
 
   public SampleListAdapter2(Context context) {
@@ -47,8 +48,9 @@ public class SampleListAdapter2 extends RecyclerView.Adapter<SampleListAdapter2.
         (compoundButton, b) -> {
           if(hold.position >-1) {
             mData.get(hold.position).isChecked = b;
+            mCheckSubject.onNext(new Pair<>(hold.position, b));
           }
-            mCheckSubject.onNext(hold.position);
+
 
         });
     return hold;
@@ -71,9 +73,10 @@ public class SampleListAdapter2 extends RecyclerView.Adapter<SampleListAdapter2.
     holder.txtTimestamp.setVisibility(dataItem.timestamp== null ?View.GONE:View.VISIBLE);
     holder.imgSynced.setVisibility(dataItem.redFlag ? View.VISIBLE : View.GONE);
     holder.checkBox.setVisibility(selectMode ? View.VISIBLE : View.GONE);
-    holder.checkBox.setChecked(dataItem.isChecked);
+
     holder.position = position;
     holder.itemView.setTag(position);
+    holder.checkBox.setChecked(dataItem.isChecked);
   }
 
   private String formatDate(Date date) {
@@ -107,7 +110,7 @@ public class SampleListAdapter2 extends RecyclerView.Adapter<SampleListAdapter2.
     return mLongClickSubject;
   }
 
-  public PublishSubject<Object> getCheckObservable() {
+  public PublishSubject<Pair<Integer, Boolean>> getCheckObservable() {
     return mCheckSubject;
   }
 

@@ -88,7 +88,7 @@ public class ProductListFragment extends Fragment {
       new MutableLiveData<>();
   private MutableLiveData<Resource<List<String>>> showRooms = new MutableLiveData<>();
   private MutableLiveData<Resource> syncProducts = new MutableLiveData<>();
-  private ArrayList<String> mDefaultSelected;
+  private ArrayList<String> mSelectedList;
 
   private boolean inSelectMode = false;
   private MaterialDialog progress;
@@ -125,10 +125,10 @@ public class ProductListFragment extends Fragment {
     super.onCreate(savedInstanceState);
     if (getArguments() != null) {
       inSelectMode = getArguments().getBoolean("select", false);
-      mDefaultSelected = getArguments().getStringArrayList(DATA_PRODUCTS);
+      mSelectedList = getArguments().getStringArrayList(DATA_PRODUCTS);
     }
-    if (mDefaultSelected == null) {
-      mDefaultSelected = new ArrayList<>();
+    if (mSelectedList == null) {
+      mSelectedList = new ArrayList<>();
     }
     mSampleListAdapter = new SampleListAdapter2(getContext());
     mSampleListAdapter.setSelectMode(inSelectMode);
@@ -155,7 +155,17 @@ public class ProductListFragment extends Fragment {
       popup.show();
     }));
 
-    mDisposables.add(mSampleListAdapter.getCheckObservable().subscribe(o -> titleChange()));
+    mDisposables.add(mSampleListAdapter.getCheckObservable().subscribe(pair -> {
+      Timber.d("%d", pair.first);
+      String prodno = (String) mSampleListAdapter.get(pair.first).hold;
+      int index = mSelectedList.indexOf(prodno);
+      if(pair.second && index <0 ){
+        mSelectedList.add(prodno);
+      }else if (!pair.second && index >-1){
+        mSelectedList.remove(prodno);
+      }
+      titleChange();
+    }));
     mSubscription.add(RxBus.getInstance()
         .toObservable(ProdSaveEvent.class)
         .subscribe(prodSaveEvent -> loadData()));
@@ -177,7 +187,7 @@ public class ProductListFragment extends Fragment {
   private void titleChange() {
     ActionBar actionbar = ((AppCompatActivity) getActivity()).getSupportActionBar();
     actionbar.setTitle(
-        getString(R.string.formater_selected, mSampleListAdapter.getSelection().length));
+        getString(R.string.formater_selected, mSelectedList.size()));
   }
 
   @Nullable @Override
@@ -247,13 +257,9 @@ public class ProductListFragment extends Fragment {
         break;
       }
       case R.id.action_done: {
-        ArrayList<String> selected = new ArrayList<>();
-        SampleListAdapter2.ItemData[] selectedViewItem = mSampleListAdapter.getSelection();
-        for (SampleListAdapter2.ItemData viewItem : selectedViewItem) {
-          selected.add((String) viewItem.hold);
-        }
+
         getActivity().setResult(Activity.RESULT_OK,
-            new Intent().putStringArrayListExtra("selected", selected));
+            new Intent().putStringArrayListExtra("selected", mSelectedList));
         getActivity().finish();
         break;
       }
@@ -264,7 +270,7 @@ public class ProductListFragment extends Fragment {
     }
     return true;
   }
-  
+
   @OnClick(R.id.calc_clear_txt_filter) void onClearClick(){
       mEdtFilter.setText("");
   }
@@ -485,6 +491,8 @@ public class ProductListFragment extends Fragment {
     loadData("%");
   }
 
+
+
   private void loadData(String filter) {
     Observable.defer(() -> Observable.from(
         new Select().from(TodoProd.class).where("prodno like ? or spec_desc like ?", filter,filter).orderBy("create_time desc").execute())).map(o -> {
@@ -499,7 +507,7 @@ public class ProductListFragment extends Fragment {
           || todoProd.update_time == null
           || todoProd.update_time.getTime() > todoProd.uploaded_time.getTime();
 
-      itemData.isChecked = mDefaultSelected.contains(todoProd.prodNo);
+      itemData.isChecked = mSelectedList.contains(todoProd.prodNo);
       return itemData;
     }).toList().subscribe(new Subscriber<List<SampleListAdapter2.ItemData>>() {
       @Override public void onCompleted() {
@@ -512,6 +520,24 @@ public class ProductListFragment extends Fragment {
 
       @Override public void onNext(List<SampleListAdapter2.ItemData> itemData) {
         dataResource.postValue(Resource.success(itemData));
+
+        if(filter.equals("%")){
+          int i =0;
+          while (i < mSelectedList.size()){
+            boolean found = false;
+            for(SampleListAdapter2.ItemData item:itemData){
+              if(item.hold.equals(mSelectedList.get(i))){
+                found = true;
+                break;
+              }
+            }
+            if(!found){
+              mSelectedList.remove(i);
+            }else {
+              ++i;
+            }
+          }
+        }
       }
     });
   }
