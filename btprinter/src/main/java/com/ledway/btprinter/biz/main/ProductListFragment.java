@@ -24,16 +24,20 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.Unbinder;
 import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.gson.reflect.TypeToken;
 import com.gturedi.views.StatefulLayout;
+import com.jakewharton.rxbinding.widget.RxTextView;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.TodoProdDetailActivity;
@@ -59,9 +63,10 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import rx.Observable;
 import rx.Subscriber;
-import rx.functions.Action1;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
@@ -73,6 +78,8 @@ public class ProductListFragment extends Fragment {
   @BindView(R.id.listview) RecyclerView mListView;
   @BindView(R.id.swiperefresh) SwipeRefreshLayout mSwipeRefresh;
   @BindView(R.id.statefulLayout) StatefulLayout mStatefulLayout;
+  @BindView(R.id.edt_filter) EditText mEdtFilter;
+  @BindView(R.id.calc_clear_txt_filter) Button mBtnClear;
   private Unbinder mViewBinder;
   private CompositeDisposable mDisposables = new CompositeDisposable();
   private CompositeSubscription mSubscription = new CompositeSubscription();
@@ -149,9 +156,11 @@ public class ProductListFragment extends Fragment {
     }));
 
     mDisposables.add(mSampleListAdapter.getCheckObservable().subscribe(o -> titleChange()));
-    mSubscription.add(RxBus.getInstance().toObservable(ProdSaveEvent.class).subscribe(prodSaveEvent -> loadData()));
+    mSubscription.add(RxBus.getInstance()
+        .toObservable(ProdSaveEvent.class)
+        .subscribe(prodSaveEvent -> loadData()));
     loadData();
-    ((LifecycleRegistry)getLifecycle()).handleLifecycleEvent(Lifecycle.Event.ON_CREATE);
+    ((LifecycleRegistry) getLifecycle()).handleLifecycleEvent(Lifecycle.Event.ON_CREATE);
     initView();
   }
 
@@ -174,7 +183,7 @@ public class ProductListFragment extends Fragment {
   @Nullable @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
       @Nullable Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.fragment_sample_list, container, false);
+    return inflater.inflate(R.layout.fragment_show_room_list, container, false);
   }
 
   @Override public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -189,8 +198,14 @@ public class ProductListFragment extends Fragment {
     mListView.addItemDecoration(dividerItemDecoration);
     mSwipeRefresh.setEnabled(false);
 
-
+    mSubscription.add(RxTextView.textChanges(mEdtFilter)
+        .doOnNext(charSequence -> mBtnClear.setVisibility(
+            charSequence.length() > 0 ? View.VISIBLE : View.GONE))
+        .debounce(800, TimeUnit.MILLISECONDS)
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(filter -> loadData("%" + filter.toString() +"%")));
   }
+
 
   @Override public void onDestroyView() {
     super.onDestroyView();
@@ -249,7 +264,10 @@ public class ProductListFragment extends Fragment {
     }
     return true;
   }
-
+  
+  @OnClick(R.id.calc_clear_txt_filter) void onClearClick(){
+      mEdtFilter.setText("");
+  }
   private void loadGroupProduct() {
     String myTaxNo = BizUtils.getMyTaxNo(getActivity());
     //myTaxNo = "3036A";
@@ -321,7 +339,7 @@ public class ProductListFragment extends Fragment {
     });
 
     showRooms.observe(this, listResource -> {
-      if(listResource == null) return;
+      if (listResource == null) return;
       switch (listResource.status) {
         case LOADING: {
           showLoading();
@@ -385,7 +403,7 @@ public class ProductListFragment extends Fragment {
 
   private void syncProduct(String room) {
     String myTaxNo = BizUtils.getMyTaxNo(getActivity());
-   // myTaxNo = "3036A";
+    // myTaxNo = "3036A";
 
     MyProjectApi.getInstance()
         .getDbService()
@@ -414,9 +432,11 @@ public class ProductListFragment extends Fragment {
           TodoProd todoProd = new TodoProd();
           todoProd.prodNo = remoteGroupProduct.prodno;
           todoProd.spec_desc = remoteGroupProduct.specdesc;
-          todoProd.update_time = remoteGroupProduct.updateDate == null? new Date() : remoteGroupProduct.updateDate ;
-          todoProd.uploaded_time =  new Date();
-          todoProd.create_time = remoteGroupProduct.updateDate == null? new Date() : remoteGroupProduct.updateDate;
+          todoProd.update_time =
+              remoteGroupProduct.updateDate == null ? new Date() : remoteGroupProduct.updateDate;
+          todoProd.uploaded_time = new Date();
+          todoProd.create_time =
+              remoteGroupProduct.updateDate == null ? new Date() : remoteGroupProduct.updateDate;
           String file1Path =
               MApp.getApplication().getPicPath() + "/product_" + todoProd.prodNo + "_type1.jpg";
           String file2Path =
@@ -461,9 +481,13 @@ public class ProductListFragment extends Fragment {
         });
   }
 
-  private void loadData() {
+  private void loadData(){
+    loadData("%");
+  }
+
+  private void loadData(String filter) {
     Observable.defer(() -> Observable.from(
-        new Select().from(TodoProd.class).orderBy("create_time desc").execute())).map(o -> {
+        new Select().from(TodoProd.class).where("prodno like ? or spec_desc like ?", filter,filter).orderBy("create_time desc").execute())).map(o -> {
       TodoProd todoProd = (TodoProd) o;
       SampleListAdapter2.ItemData itemData = new SampleListAdapter2.ItemData();
       itemData.timestamp = todoProd.create_time;
@@ -471,7 +495,8 @@ public class ProductListFragment extends Fragment {
       itemData.title = todoProd.prodNo;
       itemData.hold = todoProd.prodNo;
       itemData.iconPath = todoProd.image1;
-      itemData.redFlag = todoProd.uploaded_time == null || todoProd.update_time == null
+      itemData.redFlag = todoProd.uploaded_time == null
+          || todoProd.update_time == null
           || todoProd.update_time.getTime() > todoProd.uploaded_time.getTime();
 
       itemData.isChecked = mDefaultSelected.contains(todoProd.prodNo);

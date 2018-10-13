@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+
+
+  <FrameLayout
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="9dp"
+      android:padding="5dp">
+
+    <EditText android:id="@+id/edt_filter"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:drawableStart= "@drawable/ic_search_black_24dp"
+      android:inputType="text"
+      android:hint="@string/hint_filter_product"
+      android:maxLines="1"
+        />
+
+    <Button
+        android:id="@+id/calc_clear_txt_filter"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginRight="1dp"
+        android:layout_gravity="right|center_vertical"
+        android:background="@drawable/ic_close_circle" />
+
+  </FrameLayout>
+  <android.support.v4.widget.SwipeRefreshLayout
+
+      android:id="@+id/swiperefresh"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      >
+    <com.gturedi.views.StatefulLayout
+        android:id="@+id/statefulLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+      <android.support.v7.widget.RecyclerView
+          android:id="@+id/listview"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:orientation="vertical"
+          />
+    </com.gturedi.views.StatefulLayout>
+  </android.support.v4.widget.SwipeRefreshLayout>
+</LinearLayout>

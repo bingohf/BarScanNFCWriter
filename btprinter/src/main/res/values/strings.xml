@@ -89,4 +89,5 @@
   <string name="re_grant">Re-grant</string>
   <string name="re_grant_message">The permissions are required.</string>
   <string name="app_setting">App Settings</string>
+  <string name="hint_filter_product">Input text to filter show rooms</string>
 </resources>
