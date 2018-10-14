@@ -29,14 +29,19 @@ public class SampleListAdapter2 extends RecyclerView.Adapter<SampleListAdapter2.
   private final LayoutInflater mLayoutInflater;
   private SimpleDateFormat mDateFormatter =
       new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault());
-  private List<ItemData> mData = new ArrayList<>();
+  private List<ItemData> mData;
   private PublishSubject<Object> mClickSubject = PublishSubject.create();
   private PublishSubject<Object> mLongClickSubject = PublishSubject.create();
   private PublishSubject<Pair<Integer,Boolean>> mCheckSubject = PublishSubject.create();
   private boolean selectMode = false;
 
   public SampleListAdapter2(Context context) {
+    this(context, new ArrayList<>());
+  }
+
+  public SampleListAdapter2(Context context, List<ItemData> data) {
     mLayoutInflater = LayoutInflater.from(context);
+    mData = data;
   }
 
   @Override public SampleViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {

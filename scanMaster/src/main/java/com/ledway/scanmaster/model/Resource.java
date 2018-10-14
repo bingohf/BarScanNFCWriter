@@ -26,4 +26,9 @@ public class Resource<T> {
     public static <T> Resource<T> loading(@Nullable T data) {
         return new Resource<>(Status.LOADING, data, null);
     }
+
+    public static <T> Resource<T> progressing(T data){
+        return new Resource<>(Status.PROGRESSING, data, null);
+    }
+
 }

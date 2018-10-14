@@ -6,6 +6,7 @@ package com.ledway.scanmaster.model;
 
 public enum  Status {
   LOADING,
+  PROGRESSING,
   SUCCESS,
   ERROR
 }

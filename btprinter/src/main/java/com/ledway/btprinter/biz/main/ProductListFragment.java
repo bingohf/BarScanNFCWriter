@@ -63,10 +63,12 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
@@ -89,6 +91,8 @@ public class ProductListFragment extends Fragment {
   private MutableLiveData<Resource<List<String>>> showRooms = new MutableLiveData<>();
   private MutableLiveData<Resource> syncProducts = new MutableLiveData<>();
   private ArrayList<String> mSelectedList;
+  private ArrayList<SampleListAdapter2.ItemData> mDataList;
+  private MutableLiveData<Resource<List<SampleListAdapter2.ItemData>>> downloadGroup = new MutableLiveData<>();
 
   private boolean inSelectMode = false;
   private MaterialDialog progress;
@@ -130,7 +134,8 @@ public class ProductListFragment extends Fragment {
     if (mSelectedList == null) {
       mSelectedList = new ArrayList<>();
     }
-    mSampleListAdapter = new SampleListAdapter2(getContext());
+    mDataList = new ArrayList<>();
+    mSampleListAdapter = new SampleListAdapter2(getContext(), mDataList);
     mSampleListAdapter.setSelectMode(inSelectMode);
     mDisposables.add(mSampleListAdapter.getClickObservable()
         .subscribe(prodno -> startActivityForResult(
@@ -277,7 +282,7 @@ public class ProductListFragment extends Fragment {
   private void loadGroupProduct() {
     String myTaxNo = BizUtils.getMyTaxNo(getActivity());
     //myTaxNo = "3036A";
-    MyProjectApi.getInstance()
+    mSubscription.add(MyProjectApi.getInstance()
         .getDbService()
         .customQuery("select * from view_GroupShowName where mytaxno ='" + myTaxNo +"'")
         .doOnSubscribe(() -> showRooms.postValue(Resource.loading(null)))
@@ -311,7 +316,7 @@ public class ProductListFragment extends Fragment {
             //     strings = Arrays.asList("1","2");
             showRooms.postValue(Resource.success(strings));
           }
-        });
+        }));
   }
 
   private void scanBarCode() {
@@ -333,7 +338,9 @@ public class ProductListFragment extends Fragment {
         }
         case SUCCESS: {
           mSwipeRefresh.setRefreshing(false);
-          mSampleListAdapter.setData(resource.data);
+          //mSampleListAdapter.setData(resource.data);
+          mDataList.clear();
+          mDataList.addAll(resource.data);
           mSampleListAdapter.notifyDataSetChanged();
           if (resource.data.isEmpty()) {
             mStatefulLayout.showEmpty();
@@ -364,7 +371,9 @@ public class ProductListFragment extends Fragment {
               .alwaysCallSingleChoiceCallback()
               .itemsCallbackSingleChoice(-1, (dialog, view, which, text) -> {
                 dialog.setSelectedIndex(which);
-                syncProduct(text.toString());
+               // syncProduct(text.toString());
+                downloadGroup.postValue(Resource.loading(null));
+                downloadGroupProduct(text.toString(),0,1);
                 return false;
               })
               .show();
@@ -393,6 +402,43 @@ public class ProductListFragment extends Fragment {
         }
       }
     });
+    downloadGroup.observe(this, resource -> {
+      switch (resource.status){
+        case LOADING: {
+          showLoading();
+          break;
+        }
+        case ERROR: {
+          Toast.makeText(getActivity(), resource.message, Toast.LENGTH_LONG).show();
+          hideLoading();
+          break;
+        }
+        case PROGRESSING:{
+          for(SampleListAdapter2.ItemData item:resource.data){
+            for(int i =0;i < mDataList.size(); ++i){
+              if(mDataList.get(i).hold.equals(item.hold)){
+                mDataList.remove(i);
+                break;
+              }
+
+            }
+          }
+          mDataList.addAll(resource.data);
+          mSampleListAdapter.notifyDataSetChanged();
+          if (mDataList.isEmpty()) {
+            mStatefulLayout.showEmpty();
+          } else {
+            mStatefulLayout.showContent();
+          }
+          break;
+        }
+        case SUCCESS: {
+          hideLoading();
+          break;
+        }
+      }
+    });
+
   }
 
   private void showLoading() {
@@ -405,6 +451,92 @@ public class ProductListFragment extends Fragment {
       progress.dismiss();
       progress = null;
     }
+  }
+
+
+  private void downloadGroupProduct(String room,int offset,int size){
+    String myTaxNo = BizUtils.getMyTaxNo(getActivity());
+    mSubscription.add(MyProjectApi.getInstance()
+        .getDbService()
+        .customQuery("select * from view_GroupShowList where mytaxno ='"
+            + myTaxNo
+            + "' and showname ='"
+            + room
+            + "' order by prodno OFFSET " + offset +" ROWS FETCH NEXT "+ size + " ROWS ONLY")
+        .map(responseBody -> {
+          try {
+            String json = responseBody.string();
+            Type listType = new TypeToken<RestDataSetResponse<RemoteGroupProduct>>() {
+            }.getType();
+            RestDataSetResponse<RemoteGroupProduct> response =
+                JsonUtils.Companion.fromJson(json, listType);
+            return response.result.get(0);
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+          return null;
+        })
+        .flatMap(Observable::from)
+        .map(remoteGroupProduct -> {
+          new Delete().from(TodoProd.class).where("prodNo =?", remoteGroupProduct.prodno).execute();
+          TodoProd todoProd = new TodoProd();
+          todoProd.prodNo = remoteGroupProduct.prodno;
+          todoProd.spec_desc = remoteGroupProduct.specdesc;
+          todoProd.update_time =
+              remoteGroupProduct.updateDate == null ? new Date() : remoteGroupProduct.updateDate;
+          todoProd.uploaded_time = new Date();
+          todoProd.create_time =
+              remoteGroupProduct.updateDate == null ? new Date() : remoteGroupProduct.updateDate;
+          String file1Path =
+              MApp.getApplication().getPicPath() + "/product_" + todoProd.prodNo + "_type1.jpg";
+          String file2Path =
+              MApp.getApplication().getPicPath() + "/product_" + todoProd.prodNo + "_type2.jpg";
+          if (!TextUtils.isEmpty(remoteGroupProduct.graphic)) {
+            byte[] data = Base64.decode(remoteGroupProduct.graphic, Base64.DEFAULT);
+            try (OutputStream stream = new FileOutputStream(new File(file1Path))) {
+              stream.write(data);
+              todoProd.image1 = file1Path;
+            } catch (FileNotFoundException e) {
+              e.printStackTrace();
+            } catch (IOException e) {
+              e.printStackTrace();
+            }
+          }
+          if (!TextUtils.isEmpty(remoteGroupProduct.graphic2)) {
+            byte[] data = Base64.decode(remoteGroupProduct.graphic2, Base64.DEFAULT);
+            try (OutputStream stream = new FileOutputStream(new File(file2Path))) {
+              stream.write(data);
+              todoProd.image2 = file2Path;
+            } catch (FileNotFoundException e) {
+              e.printStackTrace();
+            } catch (IOException e) {
+              e.printStackTrace();
+            }
+          }
+          todoProd.save();
+          return toViewData(todoProd);
+        })
+        .toList()
+        //.delay(2, TimeUnit.SECONDS)
+        .subscribeOn(Schedulers.io())
+        .subscribe(new Subscriber<List<SampleListAdapter2.ItemData>>() {
+          @Override public void onCompleted() {
+
+          }
+
+          @Override public void onError(Throwable e) {
+            downloadGroup.postValue(Resource.error(ContextUtils.getMessage(e), null));
+          }
+
+          @Override public void onNext(List<SampleListAdapter2.ItemData> itemData) {
+             if (itemData.isEmpty()){
+               downloadGroup.postValue(Resource.success( null));
+             }else {
+               downloadGroup.postValue(Resource.progressing(itemData));
+               downloadGroupProduct(room,offset + size, size);
+             }
+          }
+        }));
   }
 
   private void syncProduct(String room) {
@@ -492,23 +624,26 @@ public class ProductListFragment extends Fragment {
   }
 
 
+  private SampleListAdapter2.ItemData toViewData(TodoProd todoProd){
+    SampleListAdapter2.ItemData itemData = new SampleListAdapter2.ItemData();
+    itemData.timestamp = todoProd.create_time;
+    itemData.subTitle = todoProd.spec_desc;
+    itemData.title = todoProd.prodNo;
+    itemData.hold = todoProd.prodNo;
+    itemData.iconPath = todoProd.image1;
+    itemData.redFlag = todoProd.uploaded_time == null
+        || todoProd.update_time == null
+        || todoProd.update_time.getTime() > todoProd.uploaded_time.getTime();
+
+    itemData.isChecked = mSelectedList.contains(todoProd.prodNo);
+    return itemData;
+  }
 
   private void loadData(String filter) {
     Observable.defer(() -> Observable.from(
-        new Select().from(TodoProd.class).where("prodno like ? or spec_desc like ?", filter,filter).orderBy("prodno desc").execute())).map(o -> {
+        new Select().from(TodoProd.class).where("prodno like ? or spec_desc like ?", filter,filter).orderBy("prodno ").execute())).map(o -> {
       TodoProd todoProd = (TodoProd) o;
-      SampleListAdapter2.ItemData itemData = new SampleListAdapter2.ItemData();
-      itemData.timestamp = todoProd.create_time;
-      itemData.subTitle = todoProd.spec_desc;
-      itemData.title = todoProd.prodNo;
-      itemData.hold = todoProd.prodNo;
-      itemData.iconPath = todoProd.image1;
-      itemData.redFlag = todoProd.uploaded_time == null
-          || todoProd.update_time == null
-          || todoProd.update_time.getTime() > todoProd.uploaded_time.getTime();
-
-      itemData.isChecked = mSelectedList.contains(todoProd.prodNo);
-      return itemData;
+      return toViewData(todoProd);
     }).toList().subscribe(new Subscriber<List<SampleListAdapter2.ItemData>>() {
       @Override public void onCompleted() {
 
