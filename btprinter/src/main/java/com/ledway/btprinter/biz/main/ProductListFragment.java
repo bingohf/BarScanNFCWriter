@@ -373,7 +373,7 @@ public class ProductListFragment extends Fragment {
                 dialog.setSelectedIndex(which);
                // syncProduct(text.toString());
                 downloadGroup.postValue(Resource.loading(null));
-                downloadGroupProduct(text.toString(),0,1);
+                downloadGroupProduct(text.toString(),0,2);
                 return false;
               })
               .show();
@@ -443,7 +443,7 @@ public class ProductListFragment extends Fragment {
 
   private void showLoading() {
     hideLoading();
-    progress = new MaterialDialog.Builder(getActivity()).progress(true, 100).show();
+    progress = new MaterialDialog.Builder(getActivity()).cancelable(false).progress(true, 100).show();
   }
 
   private void hideLoading() {
