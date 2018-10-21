@@ -13,8 +13,8 @@ android {
     applicationId "com.ledway.sales_edge"
     minSdkVersion 17
     targetSdkVersion 28
-    versionCode 94
-    versionName "9.4"
+    versionCode 95
+    versionName "9.5"
     multiDexEnabled true
   }
   signingConfigs{
