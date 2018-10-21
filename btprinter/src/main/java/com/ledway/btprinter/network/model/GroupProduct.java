@@ -7,4 +7,6 @@ package com.ledway.btprinter.network.model;
 public class GroupProduct {
   public String mytaxno;
   public String showname;
+  public int ttl;
+  public String showname2;
 }

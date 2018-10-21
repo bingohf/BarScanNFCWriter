@@ -41,6 +41,7 @@ import com.jakewharton.rxbinding.widget.RxTextView;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.TodoProdDetailActivity;
+import com.ledway.btprinter.biz.main.viewmodel.LabelValue;
 import com.ledway.btprinter.event.ProdSaveEvent;
 import com.ledway.btprinter.models.TodoProd;
 import com.ledway.btprinter.network.MyProjectApi;
@@ -65,10 +66,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
@@ -88,7 +91,7 @@ public class ProductListFragment extends Fragment {
   private SampleListAdapter2 mSampleListAdapter;
   private MutableLiveData<Resource<List<SampleListAdapter2.ItemData>>> dataResource =
       new MutableLiveData<>();
-  private MutableLiveData<Resource<List<String>>> showRooms = new MutableLiveData<>();
+  private MutableLiveData<Resource<List<LabelValue<String>>>> showRooms = new MutableLiveData<>();
   private MutableLiveData<Resource> syncProducts = new MutableLiveData<>();
   private ArrayList<String> mSelectedList;
   private ArrayList<SampleListAdapter2.ItemData> mDataList;
@@ -284,7 +287,7 @@ public class ProductListFragment extends Fragment {
     //myTaxNo = "3036A";
     mSubscription.add(MyProjectApi.getInstance()
         .getDbService()
-        .customQuery("select * from view_GroupShowName where mytaxno ='" + myTaxNo +"'")
+        .customQuery("select * from view_GroupShowName2 where mytaxno ='" + myTaxNo +"'")
         .doOnSubscribe(() -> showRooms.postValue(Resource.loading(null)))
         .map(responseBody -> {
           try {
@@ -300,10 +303,11 @@ public class ProductListFragment extends Fragment {
           return null;
         })
         .flatMap(Observable::from)
-        .map(groupProduct -> groupProduct.showname)
+        .map(groupProduct -> new LabelValue<>(groupProduct.showname,
+            groupProduct.showname + " " + groupProduct.ttl + groupProduct.showname2) )
         .toList()
         .subscribeOn(Schedulers.io())
-        .subscribe(new Subscriber<List<String>>() {
+        .subscribe(new Subscriber<List<LabelValue<String>>>() {
           @Override public void onCompleted() {
 
           }
@@ -312,9 +316,9 @@ public class ProductListFragment extends Fragment {
             showRooms.postValue(Resource.error(ContextUtils.getMessage(e), null));
           }
 
-          @Override public void onNext(List<String> strings) {
+          @Override public void onNext(List<LabelValue<String>> values) {
             //     strings = Arrays.asList("1","2");
-            showRooms.postValue(Resource.success(strings));
+            showRooms.postValue(Resource.success(values));
           }
         }));
   }
@@ -365,15 +369,20 @@ public class ProductListFragment extends Fragment {
         }
         case SUCCESS: {
           hideLoading();
-
+          List<String> label = Observable.from(listResource.data)
+              .map(stringLabelValue -> stringLabelValue.label)
+              .toList()
+              .toBlocking()
+              .first();
           new MaterialDialog.Builder(getActivity()).title(R.string.exhibition)
-              .items(listResource.data)
+              .items(label)
               .alwaysCallSingleChoiceCallback()
               .itemsCallbackSingleChoice(-1, (dialog, view, which, text) -> {
                 dialog.setSelectedIndex(which);
                // syncProduct(text.toString());
                 downloadGroup.postValue(Resource.loading(null));
-                downloadGroupProduct(text.toString(),0,2);
+                String value = listResource.data.get(which).value;
+                downloadGroupProduct(value,0,2);
                 return false;
               })
               .show();
