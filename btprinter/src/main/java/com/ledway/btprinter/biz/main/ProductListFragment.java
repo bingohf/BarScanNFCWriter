@@ -41,11 +41,11 @@ import com.jakewharton.rxbinding.widget.RxTextView;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.TodoProdDetailActivity;
-import com.ledway.btprinter.biz.main.viewmodel.LabelValue;
+import com.ledway.btprinter.biz.main.viewmodel.PagingInfo;
 import com.ledway.btprinter.event.ProdSaveEvent;
 import com.ledway.btprinter.models.TodoProd;
 import com.ledway.btprinter.network.MyProjectApi;
-import com.ledway.btprinter.network.model.GroupProduct;
+import com.ledway.btprinter.network.model.GroupNameInfo;
 import com.ledway.btprinter.network.model.RemoteGroupProduct;
 import com.ledway.btprinter.network.model.RestDataSetResponse;
 import com.ledway.framework.FullScannerActivity;
@@ -64,14 +64,10 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
@@ -91,11 +87,12 @@ public class ProductListFragment extends Fragment {
   private SampleListAdapter2 mSampleListAdapter;
   private MutableLiveData<Resource<List<SampleListAdapter2.ItemData>>> dataResource =
       new MutableLiveData<>();
-  private MutableLiveData<Resource<List<LabelValue<String>>>> showRooms = new MutableLiveData<>();
+  private MutableLiveData<Resource<List<GroupNameInfo>>> showRooms = new MutableLiveData<>();
   private MutableLiveData<Resource> syncProducts = new MutableLiveData<>();
   private ArrayList<String> mSelectedList;
   private ArrayList<SampleListAdapter2.ItemData> mDataList;
-  private MutableLiveData<Resource<List<SampleListAdapter2.ItemData>>> downloadGroup = new MutableLiveData<>();
+  private MutableLiveData<Resource<PagingInfo<List<SampleListAdapter2.ItemData>>>> downloadGroup =
+      new MutableLiveData<>();
 
   private boolean inSelectMode = false;
   private MaterialDialog progress;
@@ -167,9 +164,9 @@ public class ProductListFragment extends Fragment {
       Timber.d("%d", pair.first);
       String prodno = (String) mSampleListAdapter.get(pair.first).hold;
       int index = mSelectedList.indexOf(prodno);
-      if(pair.second && index <0 ){
+      if (pair.second && index < 0) {
         mSelectedList.add(prodno);
-      }else if (!pair.second && index >-1){
+      } else if (!pair.second && index > -1) {
         mSelectedList.remove(prodno);
       }
       titleChange();
@@ -180,22 +177,6 @@ public class ProductListFragment extends Fragment {
     loadData();
     ((LifecycleRegistry) getLifecycle()).handleLifecycleEvent(Lifecycle.Event.ON_CREATE);
     initView();
-  }
-
-  private void removeProduct(String prodNo) {
-    new Delete().from(TodoProd.class).where("prodNo=?", prodNo).execute();
-    loadData();
-  }
-
-  private void removeAllProduct() {
-    new Delete().from(TodoProd.class).execute();
-    loadData();
-  }
-
-  private void titleChange() {
-    ActionBar actionbar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-    actionbar.setTitle(
-        getString(R.string.formater_selected, mSelectedList.size()));
   }
 
   @Nullable @Override
@@ -221,9 +202,8 @@ public class ProductListFragment extends Fragment {
             charSequence.length() > 0 ? View.VISIBLE : View.GONE))
         .debounce(800, TimeUnit.MILLISECONDS)
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(filter -> loadData("%" + filter.toString() +"%")));
+        .subscribe(filter -> loadData("%" + filter.toString() + "%")));
   }
-
 
   @Override public void onDestroyView() {
     super.onDestroyView();
@@ -279,22 +259,19 @@ public class ProductListFragment extends Fragment {
     return true;
   }
 
-  @OnClick(R.id.calc_clear_txt_filter) void onClearClick(){
-      mEdtFilter.setText("");
-  }
   private void loadGroupProduct() {
     String myTaxNo = BizUtils.getMyTaxNo(getActivity());
     //myTaxNo = "3036A";
     mSubscription.add(MyProjectApi.getInstance()
         .getDbService()
-        .customQuery("select * from view_GroupShowName2 where mytaxno ='" + myTaxNo +"'")
+        .customQuery("select * from view_GroupShowName2 where mytaxno ='" + myTaxNo + "'")
         .doOnSubscribe(() -> showRooms.postValue(Resource.loading(null)))
         .map(responseBody -> {
           try {
             String json = responseBody.string();
-            Type listType = new TypeToken<RestDataSetResponse<GroupProduct>>() {
+            Type listType = new TypeToken<RestDataSetResponse<GroupNameInfo>>() {
             }.getType();
-            RestDataSetResponse<GroupProduct> response =
+            RestDataSetResponse<GroupNameInfo> response =
                 JsonUtils.Companion.fromJson(json, listType);
             return response.result.get(0);
           } catch (IOException e) {
@@ -302,12 +279,8 @@ public class ProductListFragment extends Fragment {
           }
           return null;
         })
-        .flatMap(Observable::from)
-        .map(groupProduct -> new LabelValue<>(groupProduct.showname,
-            groupProduct.showname + " " + groupProduct.ttl + groupProduct.showname2) )
-        .toList()
         .subscribeOn(Schedulers.io())
-        .subscribe(new Subscriber<List<LabelValue<String>>>() {
+        .subscribe(new Subscriber<ArrayList<GroupNameInfo>>() {
           @Override public void onCompleted() {
 
           }
@@ -316,9 +289,8 @@ public class ProductListFragment extends Fragment {
             showRooms.postValue(Resource.error(ContextUtils.getMessage(e), null));
           }
 
-          @Override public void onNext(List<LabelValue<String>> values) {
-            //     strings = Arrays.asList("1","2");
-            showRooms.postValue(Resource.success(values));
+          @Override public void onNext(ArrayList<GroupNameInfo> groupNameInfos) {
+            showRooms.postValue(Resource.success(groupNameInfos));
           }
         }));
   }
@@ -326,6 +298,84 @@ public class ProductListFragment extends Fragment {
   private void scanBarCode() {
     startActivityForResult(new Intent(getActivity(), FullScannerActivity.class),
         RESULT_CAMERA_QR_CODE);
+  }
+
+  private void loadData() {
+    loadData("%");
+  }
+
+  private void loadData(String filter) {
+    Observable.defer(() -> Observable.from(new Select().from(TodoProd.class)
+        .where("prodno like ? or spec_desc like ?", filter, filter)
+        .orderBy("prodno ")
+        .execute())).map(o -> {
+      TodoProd todoProd = (TodoProd) o;
+      return toViewData(todoProd);
+    }).toList().subscribe(new Subscriber<List<SampleListAdapter2.ItemData>>() {
+      @Override public void onCompleted() {
+
+      }
+
+      @Override public void onError(Throwable e) {
+        dataResource.postValue(Resource.error(ContextUtils.getMessage(e), null));
+      }
+
+      @Override public void onNext(List<SampleListAdapter2.ItemData> itemData) {
+        dataResource.postValue(Resource.success(itemData));
+
+        if (filter.equals("%")) {
+          int i = 0;
+          while (i < mSelectedList.size()) {
+            boolean found = false;
+            for (SampleListAdapter2.ItemData item : itemData) {
+              if (item.hold.equals(mSelectedList.get(i))) {
+                found = true;
+                break;
+              }
+            }
+            if (!found) {
+              mSelectedList.remove(i);
+            } else {
+              ++i;
+            }
+          }
+        }
+      }
+    });
+  }
+
+  private SampleListAdapter2.ItemData toViewData(TodoProd todoProd) {
+    SampleListAdapter2.ItemData itemData = new SampleListAdapter2.ItemData();
+    itemData.timestamp = todoProd.create_time;
+    itemData.subTitle = todoProd.spec_desc;
+    itemData.title = todoProd.prodNo;
+    itemData.hold = todoProd.prodNo;
+    itemData.iconPath = todoProd.image1;
+    itemData.redFlag = todoProd.uploaded_time == null
+        || todoProd.update_time == null
+        || todoProd.update_time.getTime() > todoProd.uploaded_time.getTime();
+
+    itemData.isChecked = mSelectedList.contains(todoProd.prodNo);
+    return itemData;
+  }
+
+  private void removeProduct(String prodNo) {
+    new Delete().from(TodoProd.class).where("prodNo=?", prodNo).execute();
+    loadData();
+  }
+
+  private void removeAllProduct() {
+    new Delete().from(TodoProd.class).execute();
+    loadData();
+  }
+
+  private void titleChange() {
+    ActionBar actionbar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+    actionbar.setTitle(getString(R.string.formater_selected, mSelectedList.size()));
+  }
+
+  @OnClick(R.id.calc_clear_txt_filter) void onClearClick() {
+    mEdtFilter.setText("");
   }
 
   private void initView() {
@@ -370,7 +420,10 @@ public class ProductListFragment extends Fragment {
         case SUCCESS: {
           hideLoading();
           List<String> label = Observable.from(listResource.data)
-              .map(stringLabelValue -> stringLabelValue.label)
+              .map(groupNameInfo -> groupNameInfo.showname
+                  + " "
+                  + groupNameInfo.ttl
+                  + groupNameInfo.showname2)
               .toList()
               .toBlocking()
               .first();
@@ -379,10 +432,10 @@ public class ProductListFragment extends Fragment {
               .alwaysCallSingleChoiceCallback()
               .itemsCallbackSingleChoice(-1, (dialog, view, which, text) -> {
                 dialog.setSelectedIndex(which);
-               // syncProduct(text.toString());
-                downloadGroup.postValue(Resource.loading(null));
-                String value = listResource.data.get(which).value;
-                downloadGroupProduct(value,0,2);
+                // syncProduct(text.toString());
+                GroupNameInfo selected = listResource.data.get(which);
+                downloadGroup.postValue(Resource.loading(new PagingInfo<>(selected.ttl, 0, null)));
+                downloadGroupProduct(selected.showname, selected.ttl, 0, 1);
                 return false;
               })
               .show();
@@ -412,9 +465,9 @@ public class ProductListFragment extends Fragment {
       }
     });
     downloadGroup.observe(this, resource -> {
-      switch (resource.status){
+      switch (resource.status) {
         case LOADING: {
-          showLoading();
+          showProgress(resource.data.max, resource.data.position);
           break;
         }
         case ERROR: {
@@ -422,17 +475,17 @@ public class ProductListFragment extends Fragment {
           hideLoading();
           break;
         }
-        case PROGRESSING:{
-          for(SampleListAdapter2.ItemData item:resource.data){
-            for(int i =0;i < mDataList.size(); ++i){
-              if(mDataList.get(i).hold.equals(item.hold)){
+        case PROGRESSING: {
+          showProgress(resource.data.max, resource.data.position);
+          for (SampleListAdapter2.ItemData item : resource.data.data) {
+            for (int i = 0; i < mDataList.size(); ++i) {
+              if (mDataList.get(i).hold.equals(item.hold)) {
                 mDataList.remove(i);
                 break;
               }
-
             }
           }
-          mDataList.addAll(resource.data);
+          mDataList.addAll(resource.data.data);
           mSampleListAdapter.notifyDataSetChanged();
           if (mDataList.isEmpty()) {
             mStatefulLayout.showEmpty();
@@ -447,12 +500,21 @@ public class ProductListFragment extends Fragment {
         }
       }
     });
+  }
 
+  private void showProgress(int max, int position) {
+    if (progress == null || progress.isIndeterminateProgress()) {
+      hideLoading();
+      progress =
+          new MaterialDialog.Builder(getActivity()).cancelable(false).progress(false, max).show();
+    }
+    progress.setProgress(position);
   }
 
   private void showLoading() {
     hideLoading();
-    progress = new MaterialDialog.Builder(getActivity()).cancelable(false).progress(true, 100).show();
+    progress =
+        new MaterialDialog.Builder(getActivity()).cancelable(false).progress(true, 100).show();
   }
 
   private void hideLoading() {
@@ -462,8 +524,7 @@ public class ProductListFragment extends Fragment {
     }
   }
 
-
-  private void downloadGroupProduct(String room,int offset,int size){
+  private void downloadGroupProduct(String room, int totalCount, int offset, int size) {
     String myTaxNo = BizUtils.getMyTaxNo(getActivity());
     mSubscription.add(MyProjectApi.getInstance()
         .getDbService()
@@ -471,7 +532,11 @@ public class ProductListFragment extends Fragment {
             + myTaxNo
             + "' and showname ='"
             + room
-            + "' order by prodno OFFSET " + offset +" ROWS FETCH NEXT "+ size + " ROWS ONLY")
+            + "' order by prodno OFFSET "
+            + offset
+            + " ROWS FETCH NEXT "
+            + size
+            + " ROWS ONLY")
         .map(responseBody -> {
           try {
             String json = responseBody.string();
@@ -538,12 +603,17 @@ public class ProductListFragment extends Fragment {
           }
 
           @Override public void onNext(List<SampleListAdapter2.ItemData> itemData) {
-             if (itemData.isEmpty()){
-               downloadGroup.postValue(Resource.success( null));
-             }else {
-               downloadGroup.postValue(Resource.progressing(itemData));
-               downloadGroupProduct(room,offset + size, size);
-             }
+            if (itemData.isEmpty()) {
+              downloadGroup.postValue(Resource.success(null));
+            } else {
+              downloadGroup.postValue(
+                  Resource.progressing(new PagingInfo<>(totalCount, offset + size, itemData)));
+              if (totalCount - offset - size > 0) {
+                downloadGroupProduct(room, totalCount, offset + size, size);
+              } else {
+                downloadGroup.postValue(Resource.success(null));
+              }
+            }
           }
         }));
   }
@@ -626,63 +696,5 @@ public class ProductListFragment extends Fragment {
             syncProducts.postValue(Resource.success(null));
           }
         });
-  }
-
-  private void loadData(){
-    loadData("%");
-  }
-
-
-  private SampleListAdapter2.ItemData toViewData(TodoProd todoProd){
-    SampleListAdapter2.ItemData itemData = new SampleListAdapter2.ItemData();
-    itemData.timestamp = todoProd.create_time;
-    itemData.subTitle = todoProd.spec_desc;
-    itemData.title = todoProd.prodNo;
-    itemData.hold = todoProd.prodNo;
-    itemData.iconPath = todoProd.image1;
-    itemData.redFlag = todoProd.uploaded_time == null
-        || todoProd.update_time == null
-        || todoProd.update_time.getTime() > todoProd.uploaded_time.getTime();
-
-    itemData.isChecked = mSelectedList.contains(todoProd.prodNo);
-    return itemData;
-  }
-
-  private void loadData(String filter) {
-    Observable.defer(() -> Observable.from(
-        new Select().from(TodoProd.class).where("prodno like ? or spec_desc like ?", filter,filter).orderBy("prodno ").execute())).map(o -> {
-      TodoProd todoProd = (TodoProd) o;
-      return toViewData(todoProd);
-    }).toList().subscribe(new Subscriber<List<SampleListAdapter2.ItemData>>() {
-      @Override public void onCompleted() {
-
-      }
-
-      @Override public void onError(Throwable e) {
-        dataResource.postValue(Resource.error(ContextUtils.getMessage(e), null));
-      }
-
-      @Override public void onNext(List<SampleListAdapter2.ItemData> itemData) {
-        dataResource.postValue(Resource.success(itemData));
-
-        if(filter.equals("%")){
-          int i =0;
-          while (i < mSelectedList.size()){
-            boolean found = false;
-            for(SampleListAdapter2.ItemData item:itemData){
-              if(item.hold.equals(mSelectedList.get(i))){
-                found = true;
-                break;
-              }
-            }
-            if(!found){
-              mSelectedList.remove(i);
-            }else {
-              ++i;
-            }
-          }
-        }
-      }
-    });
   }
 }
