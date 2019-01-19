@@ -304,6 +304,7 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
     vibrator = (Vibrator) getActivity().getApplication().getSystemService(Service.VIBRATOR_SERVICE);
     if (!TextUtils.isEmpty(settings.myTaxNo)) {
       mMode = "In";
+
     }
     loadMenu();
     subscribeView();
@@ -371,6 +372,7 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
   @Override public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     ButterKnife.bind(this, view);
+    setTextHint(mMode);
     mWebResponse.getSettings().setJavaScriptEnabled(false);
     mTxtBarcode.requestFocus();
     listenKeyCode();
@@ -449,6 +451,17 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
     menu.setGroupCheckable(GROUP_ID, true, true);
   }
 
+  private void setTextHint(String mode){
+    if(mode.equals(mode.toUpperCase())){
+      mTxtBill.setHint(R.string.billno_hint);
+      mTxtBarcode.setHint(R.string.barcode_hint);
+    }else{
+      mTxtBill.setHint(R.string.billno_hint2);
+      mTxtBarcode.setHint(R.string.barcode_hint2);
+    }
+  }
+
+
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     int id = item.getItemId();
     if (id == R.id.action_set_group) {
@@ -459,6 +472,7 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
       int index = item.getItemId();
       if (menus.getValue() != null && menus.getValue().data != null) {
         mMode = menus.getValue().data[index].menu_Label_Eng;
+        setTextHint(mMode);
       }
     }
     if (getActivity() != null) {

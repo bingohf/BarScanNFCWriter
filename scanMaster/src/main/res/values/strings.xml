@@ -49,6 +49,10 @@
   <string name="action_settings">Set</string>
   <string name="barcode.hint">2.掃描二維碼</string>
   <string name="billno.hint">1.儲位/單號/Help</string>
+
+  <string name="barcode.hint2">1.掃描二維碼</string>
+  <string name="billno.hint2">2.儲位/單號/Help</string>
+
   <string name="nfc.hint">請將IC放到感應區</string>
   <string name="write_to_mifare">寫入IC卡</string>
   <string name="device_no_nfc">妳的設備不支持NFC</string>
