@@ -48,8 +48,6 @@
 
 
   <string name = "action_settings"> Đặt </string>
-  <string name = "barcode.hint">2.Quét mã QR </string>
-  <string name = "billno.hint">1.lưu trữ/số thứ tự/Help </string>
   <string name = "nfc.hint"> Hãy đặt IC vào vùng cảm biến </string>
   <string name = "write_to_mifare"> viết thẻ IC </string>
   <string name = "device_no_nfc"> Thiết bị của bạn không hỗ trợ NFC </string>

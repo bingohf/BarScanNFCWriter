@@ -46,8 +46,6 @@
 
 
   <string name = "action_settings"> កំណត់ </string>
-  <string name = "barcode.hint">2.ស្កេនកូដ QR </string>
-  <string name = "billno.hint">1.ផ្ទុក / លេខលំដាប់ / ជំនួយ </string>
   <string name = "nfc.hint"> សូមដាក់ IC ទៅកន្លែងចាប់អារម្មណ៍ </string>
   <string name = "write_to_mifare"> សរសេរ IC card </string>
   <string name = "device_no_nfc"> ឧបករណ៍របស់អ្នកមិនគាំទ្រ NFC </string> ទេ

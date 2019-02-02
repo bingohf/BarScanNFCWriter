@@ -47,12 +47,8 @@
 
 
   <string name = "action_settings"> Set </string>
-  <string name = "barcode.hint">2.Scan QRcode </string>
-  <string name = "billno.hint">1.storage/shipping#/Help </string>
 
 
-    <string name = "barcode.hint2">1.Scan QRcode </string>
-    <string name = "billno.hint2">2.storage/shipping#/Help </string>
 
   <string name = "nfc.hint"> Please put the IC into the sensing area </string>
   <string name = "write_to_mifare"> write IC card </string>

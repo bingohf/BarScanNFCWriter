@@ -48,8 +48,6 @@
 
 
   <string name = "action_settings"> Tetapkan </string>
-  <string name = "barcode.hint">2.Imbas kod QR </string>
-  <string name = "billno.hint">1.nombor simpanan / pesanan / Bantuan </string>
   <string name = "nfc.hint"> Sila masukkan IC ke kawasan penginderaan </string>
   <string name = "write_to_mifare"> tulis kad IC </string>
   <string name = "device_no_nfc"> Peranti anda tidak menyokong NFC </string>

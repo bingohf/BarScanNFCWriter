@@ -47,8 +47,6 @@
 
 
   <string name = "action_settings"> 설정 </string>
-  <string name = "barcode.hint">2.QR 코드 스캔 </string>
-  <string name = "billno.hint">1.보관/주문 번호/Help</string>
   <string name = "nfc.hint"> IC를 감지 영역에 놓으십시오. </string>
   <string name = "write_to_mifare"> IC 카드에 쓰기 </string>
   <string name = "device_no_nfc"> 귀하의 장치가 NFC를 지원하지 않습니다 </string>

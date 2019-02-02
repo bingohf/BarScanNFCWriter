@@ -1,7 +1,6 @@
 <resources>
   <string name="app_name">framework</string>
   <string name="action_settings">Set</string>
-  <string name="barcode.hint">Scan bar code</string>
   <string name="nfc.hint">請將IC放到感應區</string>
   <string name="write_to_mifare">寫入IC卡</string>
   <string name="device_no_nfc">妳的設備不支持NFC</string>

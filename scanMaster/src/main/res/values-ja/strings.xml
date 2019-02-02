@@ -82,7 +82,5 @@
   <string name="txt_return">返品送料</string>
   <string name="special">特殊機能</string>
   <string name="check">一般</string>
-  <string name="barcode.hint">2.のバーコードをスキャンする</string>
-  <string name="billno.hint">1.ストレージまたは出荷番号をスキャンする</string>
   <string name="barcode_invalid">バーコードが無効です。再試行してください</string>
 </resources>

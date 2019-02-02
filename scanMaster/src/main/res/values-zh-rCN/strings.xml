@@ -47,12 +47,6 @@
 
 
   <string name="action_settings">Set</string>
-  <string name="barcode.hint">2.扫描二维码</string>
-  <string name="billno.hint">1.储位/单号/Help</string>
-
-
-    <string name="barcode.hint2">1.扫描二维码</string>
-    <string name="billno.hint2">2.储位/单号/Help</string>
   <string name="nfc.hint">请将IC放到感应区</string>
   <string name="write_to_mifare">写入IC卡</string>
   <string name="device_no_nfc">妳的设备不支持NFC</string>
