@@ -21,11 +21,14 @@
         android:layout_weight="1"
         android:padding="5dp"
         >
-
+<FrameLayout
+    android:layout_width="0dp"
+    android:layout_weight="1"
+    android:layout_height="wrap_content"
+    >
       <EditText
           android:id="@+id/txt_bill_no"
-          android:layout_width="0dp"
-          android:layout_weight="1"
+          android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:hint="@string/billno.hint"
           android:imeOptions="actionSearch"
@@ -35,7 +38,15 @@
           android:textStyle="bold"
           android:digits="@string/digits"
           />
-
+      <Button
+          android:id="@+id/calc_clear_txt_bill_no"
+          android:layout_width="20dp"
+          android:layout_height="20dp"
+          android:layout_marginRight="10dp"
+          android:layout_gravity="right|center_vertical"
+          android:visibility="gone"
+          android:background="@drawable/ic_close_circle_grey600_18dp" />
+</FrameLayout>
       <ImageButton
           android:id="@+id/btn_photo"
           android:src="@drawable/ic_camera_black_24dp"
@@ -49,6 +60,7 @@
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:layout_gravity="center_vertical"
+
           />
 
 
@@ -70,11 +82,14 @@
         android:layout_weight="1"
         android:padding="5dp"
         >
-
+<FrameLayout
+    android:layout_width="0dp"
+    android:layout_weight="1"
+    android:layout_height="wrap_content"
+    >
       <EditText
           android:id="@+id/txt_barcode"
-          android:layout_width="0dp"
-          android:layout_weight="1"
+          android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:hint="@string/barcode.hint"
           android:imeOptions="actionSearch"
@@ -84,6 +99,15 @@
           android:textStyle="bold"
           android:digits="@string/digits"
       />
+  <Button
+      android:id="@+id/calc_clear_txt_barcode"
+      android:layout_width="20dp"
+      android:layout_height="20dp"
+      android:layout_marginRight="10dp"
+      android:visibility="gone"
+      android:layout_gravity="right|center_vertical"
+      android:background="@drawable/ic_close_circle_grey600_18dp" />
+</FrameLayout>
       <ImageButton
           android:id="@+id/btn_camera_scan_barcode"
           android:src="@drawable/ic_qrcode_scan_black_24dp"

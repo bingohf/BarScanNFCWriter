@@ -43,6 +43,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnFocusChange;
+import butterknife.OnTextChanged;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.jakewharton.rxbinding.widget.RxTextView;
 import com.ledway.scanmaster.data.DBCommand;
@@ -96,6 +97,9 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
   @BindView(R2.id.web_response) WebView mWebResponse;
   @BindView(R2.id.btn_scan) Button mBtnScan;
   @BindView(R2.id.btn_camera_scan_barcode) ImageView mPAIcon;
+  @BindView(R2.id.calc_clear_txt_barcode) View mBtnClearBarCode;
+  @BindView(R2.id.calc_clear_txt_bill_no) View mBtnClearBillNo;
+
   String mCurrentPhotoPath;
   private Vibrator vibrator;
   private CompositeSubscription mSubscriptions = new CompositeSubscription();
@@ -255,6 +259,23 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
     mCurrEdit = mTxtBill;
     mCurrEdit.requestFocus();
     startActivityForResult(new Intent("android.intent.action.full.scanner"), REQUEST_BAR_CODE);
+  }
+
+  @OnTextChanged(R2.id.txt_bill_no) void onBillNoChanged(){
+    mBtnClearBillNo.setVisibility(mTxtBill.getText().length()>0 ? View.VISIBLE:View.GONE);
+  }
+
+
+  @OnClick(R2.id.calc_clear_txt_bill_no) void onBtnClearTextBillNo(){
+    mTxtBill.setText("");
+  }
+  @OnTextChanged(R2.id.txt_barcode) void onBarCodeChanged(){
+    mBtnClearBarCode.setVisibility(mTxtBarcode.getText().length()>0 ? View.VISIBLE:View.GONE);
+  }
+
+
+  @OnClick(R2.id.calc_clear_txt_barcode) void onBtnClearTextBarCode(){
+    mTxtBarcode.setText("");
   }
 
   @OnClick(R2.id.btn_camera_scan_barcode) void onBarCodeCameraClick() {
@@ -589,6 +610,7 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
           mLoading.setVisibility(View.GONE);
           mWebResponse.setVisibility(View.VISIBLE);
           mTxtBarcode.setEnabled(true);
+          mTxtBarcode.setText("");
           Timber.v("end_query");
         })
         .subscribe(this::showResponse, this::showWarning));
