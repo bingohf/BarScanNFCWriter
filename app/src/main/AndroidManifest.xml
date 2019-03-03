@@ -88,6 +88,14 @@
     <meta-data
         android:name="AA_MODELS"
         android:value="com.ledway.barcodescannfcwriter.models.Record"/>
+
+
+    <provider
+        android:name="com.activeandroid.content.ContentProvider"
+        android:authorities="${applicationId}"
+        android:enabled="true"
+        android:exported="false">
+    </provider>
   </application>
 
 </manifest>

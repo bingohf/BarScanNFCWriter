@@ -12,20 +12,20 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.preference.PreferenceManager;
-import android.serialport.api.SerialPort;
-import android.serialport.api.SerialPortHelper;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.activeandroid.Model;
@@ -34,9 +34,6 @@ import com.ledway.barcodescannfcwriter.models.Record;
 import com.ledway.barcodescannfcwriter.nfc.GMifareNfc;
 import com.ledway.barcodescannfcwriter.nfc.GNfc;
 import com.ledway.barcodescannfcwriter.nfc.GNfcLoader;
-import com.zkc.Receiver.StartReceiver;
-import com.zkc.Service.CaptureService;
-import com.zkc.beep.ServiceBeepManager;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -73,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
     private Intent intents;
     private EditText mEdtBarCode;
     private Settings settings;
-    private ServiceBeepManager beepManager;
     private int todayActionCount = 0;
     private PublishSubject<String> mScanTimer = PublishSubject.create();
     private CompositeSubscription mSubscriptions = new CompositeSubscription();
@@ -101,8 +97,8 @@ public class MainActivity extends AppCompatActivity {
             mScanTimer.onNext("Receiver");
             Observable.just(true).delay(1,TimeUnit.SECONDS).subscribe(new Action1<Boolean>() {
                 @Override public void call(Boolean aBoolean) {
-                    SerialPort.CleanBuffer();
-                    CaptureService.scanGpio.openScan();
+//                    SerialPort.CleanBuffer();
+//                   CaptureService.scanGpio.openScan();
                     mScanTimer.onNext("Receiver-delay");
                 }
             });
@@ -116,12 +112,12 @@ public class MainActivity extends AppCompatActivity {
         autoScanTimeStamp = 0;
     }
     private boolean validBarCode(String barcode)  {
-        Pattern pattern = Pattern.compile("^[0-9a-zA-Z]*$");
+/*        Pattern pattern = Pattern.compile("^[0-9a-zA-Z]*$");
         if (!pattern.matcher(barcode).matches()) {
             Toast.makeText(this, R.string.invalid_barcode, Toast.LENGTH_LONG).show();
             vibrator.vibrate(1000);
             return false;
-        }
+        }*/
         return true;
     }
 
@@ -131,14 +127,14 @@ public class MainActivity extends AppCompatActivity {
             String action = intent.getAction();
             Log.v("action_test",action);
             if (action.equals("com.zkc.keycode")) {
-                if (StartReceiver.times++ > 0) {
+            /*    if (StartReceiver.times++ > 0) {
                     times = 0;
                     int keyValue = intent.getIntExtra("keyvalue", 0);
                     if (keyValue == 136 || keyValue == 135 || keyValue == 131) {
                         mScanTimer.onNext("scan_key");
                         autoScanTimeStamp = System.currentTimeMillis();
                     }
-                }
+                }*/
 
 
             } else if (action.equals("android.intent.action.SCREEN_ON")) {
@@ -215,8 +211,8 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btn_scan).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SerialPort.CleanBuffer();
-                CaptureService.scanGpio.openScan();
+//                SerialPort.CleanBuffer();
+//                CaptureService.scanGpio.openScan();
                 mScanTimer.onNext("Click");
                 autoScanTimeStamp = System.currentTimeMillis();
 
@@ -245,10 +241,25 @@ public class MainActivity extends AppCompatActivity {
                 mBtnClear.setVisibility(s.length() > 0? View.VISIBLE:View.GONE);
             }
         });
-        Intent newIntent = new Intent(MainActivity.this, CaptureService.class);
+/*        Intent newIntent = new Intent(MainActivity.this, CaptureService.class);
         newIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP );
-        startService(newIntent);
-
+        startService(newIntent);*/
+        mEdtBarCode.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
+                // or EditorInfo.IME_NULL if being called due to the enter key being pressed.
+                if (actionId == EditorInfo.IME_ACTION_SEARCH
+                    || actionId == EditorInfo.IME_ACTION_DONE
+                    || keyEvent.getAction() == KeyEvent.ACTION_DOWN
+                    && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                    Intent i = new Intent("com.zkc.scancode");
+                    i.putExtra("code", textView.getText().toString());
+                   MainActivity.this.sendBroadcast(i);
+                    return true;
+                }
+                // Return true if you have consumed the action, else false.
+                return false;
+            }
+        });
 
 
         subscriptions.add(Observable.create(new Observable.OnSubscribe<Object>() {
@@ -280,8 +291,8 @@ public class MainActivity extends AppCompatActivity {
                     Log.v("timer",s);
                     long timeDelta = System.currentTimeMillis() - autoScanTimeStamp;
                     if (timeDelta < 20000) {
-                        SerialPort.CleanBuffer();
-                        CaptureService.scanGpio.openScan();
+//                        SerialPort.CleanBuffer();
+//                        CaptureService.scanGpio.openScan();
                         mScanTimer.onNext("Auto");
                     }
                 }
@@ -312,8 +323,8 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog,
                                                 int which) {
 
-                                CaptureService.scanGpio.closeScan();
-                                CaptureService.scanGpio.closePower();
+//                                CaptureService.scanGpio.closeScan();
+ //                               CaptureService.scanGpio.closePower();
                                 finish();
                             }
                         }).setNegativeButton(R.string.no, null).show();

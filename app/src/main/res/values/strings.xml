@@ -4,5 +4,6 @@
     <string name="wait_a_moment">Wait a moment</string>
     <string name="license">License</string>
     <string name="authorization">授權中</string>
+    <string name="barcode.hint">Scan bar code</string>
 
 </resources>
