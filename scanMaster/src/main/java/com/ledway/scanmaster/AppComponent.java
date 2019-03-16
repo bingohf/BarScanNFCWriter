@@ -15,5 +15,6 @@ public interface AppComponent {
   @ApplicationContext Context context();
   void inject(MainActivity mainActivity);
   void inject(ScanMasterFragment scanMasterFragment);
+  void inject(ScanMasterFragment2 scanMasterFragment);
   Settings settings();
 }

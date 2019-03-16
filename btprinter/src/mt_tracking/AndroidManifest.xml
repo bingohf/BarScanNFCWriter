@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.ledway.btprinter">
+
+  <uses-feature android:name="android.hardware.camera"
+      android:required="true" />
+  <uses-permission android:name="android.permission.BLUETOOTH"/>
+  <uses-permission android:name="android.permission.CALL_PHONE"/>
+  <uses-permission android:name="android.permission.NFC"/>
+  <uses-permission android:name="android.permission.INJECT_EVENT">
+  </uses-permission>
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED">
+  </uses-permission>
+
+  <uses-permission android:name="android.permission.VIBRATE"/>
+  <uses-permission android:name="android.permission.INTERNET"/>
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+  <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+  <uses-permission android:name="android.permission.CAMERA" />
+
+  <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+  <application
+      android:name=".MApp"
+      android:allowBackup="true"
+      android:icon="@drawable/ic_launcher"
+      android:label="@string/app_name"
+      android:supportsRtl="true"
+      android:theme="@style/AppTheme"
+      android:networkSecurityConfig="@xml/network_security_config"
+
+      >
+
+    <activity android:name=".biz.main.MTMainActivity">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+        <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
+
+      <intent-filter>
+        <action android:name="android.nfc.action.TECH_DISCOVERED"/>
+      </intent-filter>
+
+      <meta-data
+          android:name="android.nfc.action.TECH_DISCOVERED"
+          android:resource="@xml/nfc_tech_filter"/>
+
+    </activity>
+<!--    <activity android:name=".biz.startup.StartupActivity"
+        android:theme="@style/AppTheme.NoActionBar"
+        >
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+        <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
+    </activity>-->
+<!--    <activity android:name=".biz.main.MainActivity2"
+        android:windowSoftInputMode="adjustResize"
+       >
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+
+        <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
+    </activity>-->
+
+    <activity android:name=".biz.sample.SampleActivity"
+        android:screenOrientation="portrait"/>
+
+    <activity android:name=".biz.ProductPickerActivity"
+        android:screenOrientation="portrait"/>
+
+    <activity android:name=".AppPreferences"/>
+    <activity android:name=".PrintPreviewActivity"/>
+    <activity android:name=".ProdListActivity"
+        android:screenOrientation="portrait"
+        android:label="@string/update_prod"
+        />
+    <activity android:name=".TodoProdDetailActivity"    android:screenOrientation="portrait"/>
+    <activity android:name=".AgreementActivity"
+        android:label="@string/title_agreement"
+        />
+<!--    <activity android:name=".BusinessCardActivity"
+        android:label="@string/title_my_business_card"
+        />-->
+    <activity android:name=".RemoteProdActivity"/>
+    <activity
+        android:theme="@style/AppOverlayTheme"
+        android:name="com.ledway.framework.FullScannerActivity">
+      <intent-filter>
+        <action android:name="android.intent.action.full.scanner"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+      </intent-filter>
+    </activity>
+
+    <activity android:name=".SampleReadonlyActivity"/>
+
+    <activity android:name=".biz.sample.ReceivedSampleDetailActivity" android:label="@string/title_receive_sample"/>
+
+    <activity android:name=".WebViewActivity"/>
+    <provider
+        android:name="com.ledway.btprinter.DatabaseContentProvider"
+        android:authorities="${applicationId}"
+        android:exported="false"
+        android:grantUriPermissions="true">
+      <meta-data
+          android:name="android.support.FILE_PROVIDER_PATHS"
+          android:resource="@xml/file_paths"></meta-data>
+    </provider>
+    <meta-data
+        android:name="AA_DB_NAME"
+        android:value="cust.db"/>
+    <meta-data
+        android:name="AA_DB_VERSION"
+        android:value="102"/>
+    <meta-data
+        android:name="AA_MODELS"
+        android:value="com.ledway.btprinter.models.SampleMaster,com.ledway.btprinter.models.Prod,com.ledway.btprinter.models.TodoProd,com.ledway.btprinter.models.SampleProdLink,com.ledway.btprinter.models.ReceivedSample"/>
+
+
+    <meta-data
+        android:name="io.fabric.ApiKey"
+        android:value="a04d5a25cc1d0cc31478f9172e259c1bd212ed60" />
+
+<provider
+    android:name=".GenericFileProvider"
+    android:authorities="${applicationId}.provider"
+    android:exported="false"
+    android:grantUriPermissions="true">
+    <meta-data
+        android:name="android.support.FILE_PROVIDER_PATHS"
+        android:resource="@xml/provider_paths"/>
+  </provider>
+  </application>
+
+</manifest>

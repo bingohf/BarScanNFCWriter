@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    >
+
+
+  <GridLayout
+      android:layout_marginLeft="@dimen/activity_horizontal_margin"
+      android:layout_marginRight="@dimen/activity_horizontal_margin"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:columnCount="3"
+      android:orientation="horizontal"
+      >
+    <FrameLayout
+        android:layout_width="0dp"
+        android:layout_columnWeight="1"
+        android:layout_columnSpan="1"
+        android:layout_height="wrap_content"
+        >
+      <EditText
+          android:id="@+id/txt_bill_no"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:hint="@string/billno.hint"
+          android:imeOptions="actionSearch"
+          android:maxLength="255"
+          android:singleLine="true"
+          android:textSize="24sp"
+          android:textStyle="bold"
+          android:digits="@string/digits"
+          />
+      <Button
+          android:id="@+id/calc_clear_txt_bill_no"
+          android:layout_width="20dp"
+          android:layout_height="20dp"
+          android:layout_marginRight="10dp"
+          android:layout_gravity="right|center_vertical"
+          android:visibility="gone"
+          android:background="@drawable/ic_close_circle_grey600_18dp" />
+    </FrameLayout>
+
+    <ImageButton
+        android:id="@+id/btn_photo"
+        android:src="@drawable/ic_camera_black_24dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        />
+    <ImageButton
+        android:id="@+id/btn_camera_scan_bill"
+        android:src="@drawable/ic_qrcode_scan_black_24dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        />
+
+
+    <FrameLayout
+        android:layout_width="0dp"
+        android:layout_columnWeight="1"
+        android:layout_columnSpan="2"
+        android:layout_height="wrap_content"
+        >
+      <EditText
+          android:id="@+id/txt_barcode"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:hint="@string/barcode.hint"
+          android:imeOptions="actionSearch"
+          android:maxLength="255"
+          android:singleLine="true"
+          android:textSize="24sp"
+          android:textStyle="bold"
+          android:digits="@string/digits"
+          />
+      <Button
+          android:id="@+id/calc_clear_txt_barcode"
+          android:layout_width="20dp"
+          android:layout_height="20dp"
+          android:layout_marginRight="10dp"
+          android:visibility="gone"
+          android:layout_gravity="right|center_vertical"
+          android:background="@drawable/ic_close_circle_grey600_18dp" />
+    </FrameLayout>
+    <ImageButton
+        android:id="@+id/btn_camera_scan_barcode"
+        android:src="@drawable/ic_qrcode_scan_black_24dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        />
+  </GridLayout>
+  <FrameLayout
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="1"
+      android:gravity="center_vertical|center_horizontal"
+      >
+
+    <WebView
+        android:id="@+id/web_response"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textSize="20sp"
+        />
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/prg_loading"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        />
+
+  </FrameLayout>
+
+
+  <Button
+      android:id="@+id/btn_scan"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center_vertical"
+      android:drawableLeft="@drawable/ic_barcode_black_24dp"
+      android:text="@string/scan.btn"
+      android:textStyle="bold"
+      android:layout_marginLeft="@dimen/activity_horizontal_margin"
+      android:layout_marginRight="@dimen/activity_horizontal_margin"
+      />
+  <LinearLayout
+      android:id="@+id/my_layout"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:focusable="true"
+      android:focusableInTouchMode="true"
+      android:orientation="horizontal"
+      />
+</LinearLayout>

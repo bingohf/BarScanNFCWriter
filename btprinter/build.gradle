@@ -29,7 +29,19 @@ android {
     abortOnError false
 
   }
-
+  flavorDimensions "version"
+  productFlavors {
+    sales_edge {
+      // Assigns this product flavor to the "version" flavor dimension.
+      // This property is optional if you are using only one dimension.
+      dimension "version"
+    }
+    mt_tracking {
+      dimension "version"
+      applicationId "com.ledway.mt_tracking"
+      shortName="mt_tracking"
+    }
+  }
   buildTypes {
     debug{
       debuggable true
