@@ -10,90 +10,111 @@
 
 
   <GridLayout
-      android:layout_marginLeft="@dimen/activity_horizontal_margin"
-      android:layout_marginRight="@dimen/activity_horizontal_margin"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
+      android:layout_marginLeft="@dimen/activity_horizontal_margin"
+      android:layout_marginRight="@dimen/activity_horizontal_margin"
       android:columnCount="3"
       android:orientation="horizontal"
       >
     <FrameLayout
         android:layout_width="0dp"
         android:layout_columnWeight="1"
-        android:layout_columnSpan="1"
         android:layout_height="wrap_content"
         >
       <EditText
           android:id="@+id/txt_bill_no"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:hint="@string/billno.hint"
+          android:digits="@string/digits"
+          android:hint="1. Working #"
           android:imeOptions="actionSearch"
           android:maxLength="255"
           android:singleLine="true"
           android:textSize="24sp"
           android:textStyle="bold"
-          android:digits="@string/digits"
           />
       <Button
           android:id="@+id/calc_clear_txt_bill_no"
           android:layout_width="20dp"
           android:layout_height="20dp"
-          android:layout_marginRight="10dp"
           android:layout_gravity="right|center_vertical"
+          android:layout_marginRight="10dp"
+          android:background="@drawable/ic_close_circle_grey600_18dp"
           android:visibility="gone"
-          android:background="@drawable/ic_close_circle_grey600_18dp" />
+          />
     </FrameLayout>
 
     <ImageButton
         android:id="@+id/btn_photo"
-        android:src="@drawable/ic_camera_black_24dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
+        android:src="@drawable/ic_camera_black_24dp"
         />
     <ImageButton
         android:id="@+id/btn_camera_scan_bill"
-        android:src="@drawable/ic_qrcode_scan_black_24dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
+        android:src="@drawable/ic_qrcode_scan_black_24dp"
         />
 
-
+    <GridLayout android:layout_columnSpan="3"
+        android:layout_width="match_parent"
+        android:columnCount="2">
+      <EditText android:text="111"
+          android:hint="2.Lot#"
+          android:layout_columnWeight="1"
+          android:lines="1"
+          android:imeOptions="actionNext"
+          android:singleLine="true"
+          android:textSize="24sp"
+          android:textStyle="bold"
+          />
+      <EditText android:layout_columnWeight="1" android:text="" android:hint="Quantity"
+          android:inputType="number"
+          android:lines="1"
+          android:imeOptions="actionNext"
+          android:singleLine="true"
+          android:textSize="24sp"
+          android:textStyle="bold"
+          />
+    </GridLayout>
     <FrameLayout
         android:layout_width="0dp"
-        android:layout_columnWeight="1"
-        android:layout_columnSpan="2"
         android:layout_height="wrap_content"
+        android:layout_columnSpan="2"
+        android:layout_columnWeight="1"
         >
       <EditText
           android:id="@+id/txt_barcode"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:hint="@string/barcode.hint"
+          android:digits="@string/digits"
+          android:hint="4. Process"
           android:imeOptions="actionSearch"
           android:maxLength="255"
           android:singleLine="true"
           android:textSize="24sp"
           android:textStyle="bold"
-          android:digits="@string/digits"
           />
       <Button
           android:id="@+id/calc_clear_txt_barcode"
           android:layout_width="20dp"
           android:layout_height="20dp"
-          android:layout_marginRight="10dp"
-          android:visibility="gone"
           android:layout_gravity="right|center_vertical"
-          android:background="@drawable/ic_close_circle_grey600_18dp" />
+          android:layout_marginRight="10dp"
+          android:background="@drawable/ic_close_circle_grey600_18dp"
+          android:visibility="gone"
+          />
     </FrameLayout>
     <ImageButton
         android:id="@+id/btn_camera_scan_barcode"
-        android:src="@drawable/ic_qrcode_scan_black_24dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
+        android:src="@drawable/ic_qrcode_scan_black_24dp"
         />
   </GridLayout>
   <FrameLayout

@@ -468,13 +468,13 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
   }
 
   private void setTextHint(String mode){
-    if(mode.equals(mode.toUpperCase())){
+/*    if(mode.equals(mode.toUpperCase())){
       mTxtBill.setHint(R.string.billno_hint);
       mTxtBarcode.setHint(R.string.barcode_hint);
     }else{
       mTxtBill.setHint(R.string.billno_hint2);
       mTxtBarcode.setHint(R.string.barcode_hint2);
-    }
+    }*/
   }
 
 
