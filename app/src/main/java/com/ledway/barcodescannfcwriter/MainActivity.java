@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, R.string.invalid_barcode, Toast.LENGTH_LONG).show();
             }*/
             Log.i(TAG, "MyBroadcastReceiver code:" + text);
-            mEdtBarCode.setText(text);
+            //mEdtBarCode.setText(text);
             if(validBarCode(text)) {
                 if (settings.getDeviceType().equals("ReadNFC")){
                     Record record = new Record();
@@ -94,6 +94,9 @@ public class MainActivity extends AppCompatActivity {
                     insertRecordLog(record);
                 }
             }
+
+            mEdtBarCode.setText("");
+            mEdtBarCode.requestFocus();
             mScanTimer.onNext("Receiver");
             Observable.just(true).delay(1,TimeUnit.SECONDS).subscribe(new Action1<Boolean>() {
                 @Override public void call(Boolean aBoolean) {
@@ -399,11 +402,12 @@ public class MainActivity extends AppCompatActivity {
                     String barcode = gnfc.read();
                     if (!TextUtils.isEmpty(barcode)) {
                             if(validBarCode(barcode)) {
-                                mEdtBarCode.setText(barcode);
+                             //   mEdtBarCode.setText(barcode);
                                 Record record = new Record();
                                 record.readings = barcode;
                                 record.rfidSeries = mifareID;
                                 insertRecordLog(record);
+                                mEdtBarCode.setText("");
                             }
                     }
                 } catch (IOException e) {
@@ -493,6 +497,7 @@ public class MainActivity extends AppCompatActivity {
                             r.readings = barcode;
                             r.rfidSeries = readMifareId(intents);
                             insertRecordLog(r);
+                            mEdtBarCode.setText("");
                             mListRecord.smoothScrollByOffset(0);
                         }
 
@@ -567,7 +572,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void call(final Subscriber<? super Object> subscriber) {
                 Record record = findRecord(barcode);
-                if (record == null){
+                subscriber.onNext(null);
+                /*if (record == null){
                     subscriber.onNext(null);
                 }else{
                     if (inWrite){
@@ -600,7 +606,7 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                 }).create().show();
                     }
-                }
+                }*/
             }
         });
     }
