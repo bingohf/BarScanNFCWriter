@@ -25,4 +25,10 @@ public interface ServiceApi {
 
   @POST("Sp/Sp_GetScanMasterMenu") Observable<SpResponse> spGetScanMasterMenu(@Body
       SpGetMenuRequest request);
+
+  @POST("Sp/Sp_GetScanMasterMenu_MT") Observable<SpResponse> spGetScanMasterMenu_MT(@Body
+      SpGetMenuRequest request);
+
+  @POST("Sp/sp_MaProcessScan") Observable<SpResponse> sp_MaProcessScan(@Body
+      SpMaProcessRequest request);
 }

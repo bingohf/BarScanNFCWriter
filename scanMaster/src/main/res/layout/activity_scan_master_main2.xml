@@ -27,8 +27,8 @@
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:digits="@string/digits"
-          android:hint="1. Working #"
-          android:imeOptions="actionSearch"
+          android:hint="1. 稽核單號"
+          android:imeOptions="actionNext"
           android:maxLength="255"
           android:singleLine="true"
           android:textSize="24sp"
@@ -63,16 +63,23 @@
     <GridLayout android:layout_columnSpan="3"
         android:layout_width="match_parent"
         android:columnCount="2">
-      <EditText android:text="111"
-          android:hint="2.Lot#"
+      <EditText
+          android:id="@+id/edt_lotno"
+          android:text=""
+          android:hint="2. 缸號"
           android:layout_columnWeight="1"
           android:lines="1"
+          android:inputType="number"
           android:imeOptions="actionNext"
           android:singleLine="true"
           android:textSize="24sp"
           android:textStyle="bold"
           />
-      <EditText android:layout_columnWeight="1" android:text="" android:hint="Quantity"
+      <EditText
+          android:id="@+id/edt_qty"
+          android:layout_columnWeight="1"
+          android:text=""
+          android:hint="3. 數量"
           android:inputType="number"
           android:lines="1"
           android:imeOptions="actionNext"
@@ -81,6 +88,31 @@
           android:textStyle="bold"
           />
     </GridLayout>
+
+    <FrameLayout android:layout_columnSpan="3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+      <EditText
+          android:hint="4. 備註"
+          android:id="@+id/edt_memo"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:textSize="24sp"
+          android:textStyle="bold"
+          />
+      <Button
+          android:id="@+id/calc_clear_txt_memo"
+          android:layout_width="20dp"
+          android:layout_height="20dp"
+          android:layout_gravity="right|center_vertical"
+          android:layout_marginRight="10dp"
+          android:background="@drawable/ic_close_circle_grey600_18dp"
+          android:visibility="gone"
+          />
+    </FrameLayout>
+
+
     <FrameLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -92,8 +124,8 @@
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:digits="@string/digits"
-          android:hint="4. Process"
-          android:imeOptions="actionSearch"
+          android:hint="4. 進度"
+          android:imeOptions="actionDone"
           android:maxLength="255"
           android:singleLine="true"
           android:textSize="24sp"
@@ -131,6 +163,7 @@
         android:textSize="20sp"
         />
 
+
     <ProgressBar
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
@@ -139,7 +172,11 @@
         android:layout_gravity="center"
         android:visibility="gone"
         />
-
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
   </FrameLayout>
 
 

@@ -52,13 +52,16 @@ import com.ledway.scanmaster.network.GroupRequest;
 import com.ledway.scanmaster.network.GroupResponse;
 import com.ledway.scanmaster.network.MyNetWork;
 import com.ledway.scanmaster.network.RemoteMenu;
+import com.ledway.scanmaster.network.ServiceApi;
 import com.ledway.scanmaster.network.SpGetMenuRequest;
+import com.ledway.scanmaster.network.SpMaProcessRequest;
 import com.ledway.scanmaster.network.SpResponse;
 import com.ledway.scanmaster.network.Sp_getBill_Request;
 import com.ledway.scanmaster.network.Sp_getDetail_Request;
 import com.ledway.scanmaster.utils.ContextUtils;
 import com.ledway.scanmaster.utils.IOUtil;
 import com.ledway.scanmaster.utils.JsonUtils;
+import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -68,6 +71,11 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -83,6 +91,7 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
   static final int REQUEST_TAKE_PHOTO = 3;
   private static final int REQUEST_GROUP = 1;
   private static final int REQUEST_BAR_CODE = 2;
+  private static ServiceApi serviceApi;
   final int GROUP_ID = 1001;
   @Inject Settings settings;
   @Inject IDGenerator mIDGenerator;
@@ -91,10 +100,13 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
   @BindView(R2.id.prg_loading) View mLoading;
   @BindView(R2.id.web_response) WebView mWebResponse;
   @BindView(R2.id.btn_scan) Button mBtnScan;
+  @BindView(R2.id.edt_qty) EditText mEdtQty;
+  @BindView(R2.id.edt_lotno) EditText mEdtLotNo;
+  @BindView(R2.id.edt_memo) EditText mEdtMemo;
   @BindView(R2.id.btn_camera_scan_barcode) ImageView mPAIcon;
   @BindView(R2.id.calc_clear_txt_barcode) View mBtnClearBarCode;
   @BindView(R2.id.calc_clear_txt_bill_no) View mBtnClearBillNo;
-
+  @BindView(R2.id.image) ImageView mImageView;
   String mCurrentPhotoPath;
   private Vibrator vibrator;
   private CompositeSubscription mSubscriptions = new CompositeSubscription();
@@ -139,10 +151,11 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
   boolean onEditAction(TextView view, int actionId, KeyEvent keyEvent) {
     try {
       Timber.v("onEditAction");
-      if (view.isEnabled() && (actionId == EditorInfo.IME_ACTION_SEARCH || (keyEvent.getAction()
+      if (view.isEnabled() && (actionId == EditorInfo.IME_ACTION_DONE
+          || actionId == EditorInfo.IME_ACTION_SEARCH || (keyEvent.getAction()
           == KeyEvent.ACTION_UP && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER))) {
         if (view.getId() == R.id.txt_bill_no) {
-          queryBill();
+          //queryBill();
         } else if (view.getId() == R.id.txt_barcode) {
           queryBarCode();
         }
@@ -160,6 +173,9 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
 
   private void showResponse(SpResponse spResponse) {
     showResponse(spResponse.result[0].memotext);
+    mImageView.setImageDrawable(null);
+    mCurrentPhotoPath = "";
+    //Toast.makeText(getContext(),spResponse.result[0].memotext,Toast.LENGTH_LONG).show();
   }
 
   private void showResponse(String s) {
@@ -303,9 +319,14 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
       case REQUEST_TAKE_PHOTO:{
         if (resultCode == Activity.RESULT_OK) {
           try {
-            queryBill(mCurrentPhotoPath);
-            mCurrentPhotoPath = null;
-          } catch (InvalidBarCodeException e) {
+            mImageView.setVisibility(View.VISIBLE);
+            mWebResponse.setVisibility(View.GONE);
+            //Picasso.with(getActivity()).load(mCurrentPhotoPath).into(mImageView);
+            Bitmap bitmap = IOUtil.loadImage(mCurrentPhotoPath, mImageView.getMeasuredWidth(), mImageView.getMeasuredHeight());
+            mImageView.setImageBitmap(bitmap);
+           // mImageView.setImageResource(R.drawable.ic_barcode_black_18dp);
+       //     queryBill(mCurrentPhotoPath);
+          } catch (Exception e) {
             Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
           }
         }
@@ -322,10 +343,23 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
       mMode = "In";
 
     }
-    loadMenu();
+  //  loadMenu();
     subscribeView();
+    build();
   }
-
+  private static void build(){
+    OkHttpClient.Builder builder = new OkHttpClient.Builder();
+    builder.writeTimeout(60, TimeUnit.SECONDS).readTimeout(60, TimeUnit.SECONDS);
+    builder.addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY));
+    OkHttpClient client = builder.build();
+    Retrofit retrofit = new Retrofit.Builder()
+        .baseUrl("http://www.ledway.com.tw:8089/datasnap/rest/TLwDataModule/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+        .client(client)
+        .build();
+    serviceApi = retrofit.create(ServiceApi.class);
+  }
   private void subscribeView() {
     menus.observe(this, remoteMenus -> {
       if(getActivity() == null || remoteMenus == null){
@@ -349,8 +383,8 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
     request.reader = settings.reader;
     request.MyTaxNo = settings.myTaxNo;
     request.pdaGuid = mIDGenerator.genID() + "~" + getLanguage();
-    MyNetWork.getServiceApi()
-        .spGetScanMasterMenu(request)
+    serviceApi
+        .spGetScanMasterMenu_MT(request)
         .subscribeOn(Schedulers.io())
         .subscribe(new Subscriber<SpResponse>() {
           @Override public void onCompleted() {
@@ -410,8 +444,8 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
 
     if(savedInstanceState == null) {
       try {
-        queryBill(null, "Hello");
-      } catch (InvalidBarCodeException e) {
+        //queryBill(null, "Hello");
+      } catch (Exception e) {
         e.printStackTrace();
         Timber.e(e);
       }
@@ -509,7 +543,7 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
         mCurrEdit.setText(code);
         mCurrEdit.selectAll();
         if (mCurrEdit.getId() == R.id.txt_bill_no) {
-          queryBill();
+        //  queryBill();
         } else if (mCurrEdit.getId() == R.id.txt_barcode) {
           queryBarCode();
         }
@@ -581,7 +615,26 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
 
   private void queryBarCode() throws InvalidBarCodeException {
     String billNo = mTxtBill.getText().toString();
-    String barCode = mTxtBarcode.getText().toString();
+    String process = mTxtBarcode.getText().toString();
+    String lotno = mEdtLotNo.getText().toString();
+    String qty = mEdtQty.getText().toString();
+
+    if(TextUtils.isEmpty(billNo)){
+      Toast.makeText(getContext(),"請輸入稽核單號",Toast.LENGTH_LONG).show();
+      return;
+    }
+    if(TextUtils.isEmpty(lotno)){
+      Toast.makeText(getContext(),"請輸入缸號",Toast.LENGTH_LONG).show();
+      return;
+    }
+    if(TextUtils.isEmpty(qty)){
+      Toast.makeText(getContext(),"請輸入數量",Toast.LENGTH_LONG).show();
+      return;
+    }
+    if(TextUtils.isEmpty(process)){
+      Toast.makeText(getContext(),"請輸入進度",Toast.LENGTH_LONG).show();
+      return;
+    }
     //validBarCode(billNo);
     // validBarCode(barCode);
     mTxtBarcode.setEnabled(false);
@@ -589,23 +642,33 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
     mWebResponse.setVisibility(View.GONE);
     Timber.v("start_query");
 
-    Sp_getDetail_Request request = new Sp_getDetail_Request();
+    SpMaProcessRequest request = new SpMaProcessRequest();
     request.line = settings.line;
     request.reader = settings.reader;
-    request.billNo = billNo;
-    request.detailNo = barCode;
-    request.MyTaxNo = settings.myTaxNo;
-    request.pdaGuid = mIDGenerator.genID() + "~" + getLanguage();
-    request.type = mMode;
+    request.process = process;
+    request.lotno = lotno;
+    request.lotq = Integer.parseInt(qty);
+    request.color_stuffno = mTxtBill.getText().toString();
+    request.memo = mEdtMemo.getText().toString();
+    if (!TextUtils.isEmpty(mCurrentPhotoPath)) {
+      Bitmap bitmap512 = null;
+      try {
+        bitmap512 = IOUtil.scaleCrop(new File(mCurrentPhotoPath), 512);
+        request.pic = IOUtil.bitmapToBase64(bitmap512, 70);
+      } catch (FileNotFoundException e) {
+        e.printStackTrace();
+      }
+    }
+
     mSubscriptions.add(MyNetWork.getServiceApi()
-        .sp_UpSampleDetail(request)
+        .sp_MaProcessScan(request)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .doOnUnsubscribe(() -> {
           mLoading.setVisibility(View.GONE);
           mWebResponse.setVisibility(View.VISIBLE);
           mTxtBarcode.setEnabled(true);
-          mTxtBarcode.setText("");
+        //  mTxtBarcode.setText("");
           Timber.v("end_query");
         })
         .subscribe(this::showResponse, this::showWarning));

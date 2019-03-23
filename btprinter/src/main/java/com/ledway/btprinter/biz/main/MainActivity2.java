@@ -89,8 +89,8 @@ public class MainActivity2 extends AppCompatActivity {
     checkAgreement();
     doCheckSetting();
     checkVersion();
-
     requestPermission();
+
   }
 
   @Override protected void onDestroy() {
