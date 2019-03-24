@@ -39,6 +39,8 @@ android {
     mt_tracking {
       dimension "version"
       applicationId "com.ledway.mt_tracking"
+      versionCode 10
+      versionName "1.0"
       shortName="mt_tracking"
     }
   }

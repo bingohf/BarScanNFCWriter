@@ -8,6 +8,7 @@ package com.ledway.scanmaster.network;
 public class SpMaProcessRequest {
   public String color_stuffno;
   public String line;
+  public String mytaxno;
   public String reader;
   public String lotno;
   public int lotq;

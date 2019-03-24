@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -50,6 +51,8 @@ import com.ledway.scanmaster.interfaces.MenuOpend;
 import com.ledway.scanmaster.model.Resource;
 import com.ledway.scanmaster.network.GroupRequest;
 import com.ledway.scanmaster.network.GroupResponse;
+import com.ledway.scanmaster.network.JoinGroupItem;
+import com.ledway.scanmaster.network.JoinGroupRequest;
 import com.ledway.scanmaster.network.MyNetWork;
 import com.ledway.scanmaster.network.RemoteMenu;
 import com.ledway.scanmaster.network.ServiceApi;
@@ -57,22 +60,22 @@ import com.ledway.scanmaster.network.SpGetMenuRequest;
 import com.ledway.scanmaster.network.SpMaProcessRequest;
 import com.ledway.scanmaster.network.SpResponse;
 import com.ledway.scanmaster.network.Sp_getBill_Request;
-import com.ledway.scanmaster.network.Sp_getDetail_Request;
 import com.ledway.scanmaster.utils.ContextUtils;
 import com.ledway.scanmaster.utils.IOUtil;
 import com.ledway.scanmaster.utils.JsonUtils;
-import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.HttpException;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -88,11 +91,13 @@ import timber.log.Timber;
  */
 
 public class ScanMasterFragment2 extends Fragment implements MenuOpend {
+  static final String SP_SM ="SM";
   static final int REQUEST_TAKE_PHOTO = 3;
   private static final int REQUEST_GROUP = 1;
   private static final int REQUEST_BAR_CODE = 2;
   private static ServiceApi serviceApi;
   final int GROUP_ID = 1001;
+  boolean isAutoReset = false;
   @Inject Settings settings;
   @Inject IDGenerator mIDGenerator;
   @BindView(R2.id.txt_bill_no) EditText mTxtBill;
@@ -108,6 +113,7 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
   @BindView(R2.id.calc_clear_txt_bill_no) View mBtnClearBillNo;
   @BindView(R2.id.image) ImageView mImageView;
   String mCurrentPhotoPath;
+
   private Vibrator vibrator;
   private CompositeSubscription mSubscriptions = new CompositeSubscription();
   private DBCommand dbCommand = new DBCommand();
@@ -152,10 +158,12 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
     try {
       Timber.v("onEditAction");
       if (view.isEnabled() && (actionId == EditorInfo.IME_ACTION_DONE
-          || actionId == EditorInfo.IME_ACTION_SEARCH || (keyEvent.getAction()
+          || actionId == EditorInfo.IME_ACTION_SEARCH || (keyEvent != null && keyEvent.getAction()
           == KeyEvent.ACTION_UP && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER))) {
         if (view.getId() == R.id.txt_bill_no) {
           //queryBill();
+          mEdtLotNo.requestFocus();
+
         } else if (view.getId() == R.id.txt_barcode) {
           queryBarCode();
         }
@@ -163,18 +171,25 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
     } catch (InvalidBarCodeException e) {
       Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
     }
-    InputMethodManager inputMethodManager =
+/*    InputMethodManager inputMethodManager =
         (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
     if(inputMethodManager != null) {
       inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
-    }
-    return true;
+    }*/
+    return false;
   }
 
   private void showResponse(SpResponse spResponse) {
     showResponse(spResponse.result[0].memotext);
     mImageView.setImageDrawable(null);
     mCurrentPhotoPath = "";
+    if(isAutoReset){
+      mEdtLotNo.setText("");
+      mEdtMemo.setText("");
+      mEdtQty.setText("");
+      mTxtBill.setText("");
+      mTxtBarcode.setText("");
+    }
     //Toast.makeText(getContext(),spResponse.result[0].memotext,Toast.LENGTH_LONG).show();
   }
 
@@ -269,7 +284,7 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
   @OnClick(R2.id.btn_camera_scan_bill) void onBillCameraClick() {
     mCurrEdit = mTxtBill;
     mCurrEdit.requestFocus();
-    startActivityForResult(new Intent("android.intent.action.full.scanner"), REQUEST_BAR_CODE);
+    startActivityForResult(new Intent("android.intent.action.full.scanner").setPackage(getActivity().getPackageName()), REQUEST_BAR_CODE);
   }
 
   @OnTextChanged(R2.id.txt_bill_no) void onBillNoChanged(){
@@ -292,7 +307,7 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
   @OnClick(R2.id.btn_camera_scan_barcode) void onBarCodeCameraClick() {
     mCurrEdit = mTxtBarcode;
     mCurrEdit.requestFocus();
-    startActivityForResult(new Intent("android.intent.action.full.scanner"), REQUEST_BAR_CODE);
+    startActivityForResult(new Intent("android.intent.action.full.scanner").setPackage(getActivity().getPackageName()), REQUEST_BAR_CODE);
   }
 
   @OnClick(R2.id.btn_photo) void  onBtnPhotoClick(){
@@ -341,13 +356,18 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
     vibrator = (Vibrator) getActivity().getApplication().getSystemService(Service.VIBRATOR_SERVICE);
     if (!TextUtils.isEmpty(settings.myTaxNo)) {
       mMode = "In";
-
     }
+
+    SharedPreferences sp = getContext().getSharedPreferences(SP_SM, Context.MODE_PRIVATE);
+    isAutoReset = sp.getBoolean("isAutoReset",false);
+    String company = sp.getString("mt_company", "");
   //  loadMenu();
     subscribeView();
-    build();
+    buildApi();
+    ((AppCompatActivity) getActivity()).getSupportActionBar()
+        .setTitle(company + " " + getString(R.string.app_name));
   }
-  private static void build(){
+  private static void buildApi(){
     OkHttpClient.Builder builder = new OkHttpClient.Builder();
     builder.writeTimeout(60, TimeUnit.SECONDS).readTimeout(60, TimeUnit.SECONDS);
     builder.addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY));
@@ -383,7 +403,7 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
     request.reader = settings.reader;
     request.MyTaxNo = settings.myTaxNo;
     request.pdaGuid = mIDGenerator.genID() + "~" + getLanguage();
-    serviceApi
+    MyNetWork.getServiceApi()
         .spGetScanMasterMenu_MT(request)
         .subscribeOn(Schedulers.io())
         .subscribe(new Subscriber<SpResponse>() {
@@ -422,14 +442,12 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
   @Override public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     ButterKnife.bind(this, view);
-    setTextHint(mMode);
     mWebResponse.getSettings().setJavaScriptEnabled(false);
-    mTxtBarcode.requestFocus();
+   // mTxtBarcode.requestFocus();
     listenKeyCode();
     receiveZkcCode();
 
-    mSubscriptions.add(Observable.merge(RxTextView.editorActionEvents(mTxtBarcode),
-        RxTextView.editorActionEvents(mTxtBill))
+    mSubscriptions.add(RxTextView.editorActionEvents(mTxtBarcode)
         // .observeOn(AndroidSchedulers.mainThread())
         .subscribe(actionEvent -> {
           onEditAction(actionEvent.view(), actionEvent.actionId(), actionEvent.keyEvent());
@@ -472,12 +490,13 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
 
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
     super.onCreateOptionsMenu(menu, inflater);
-    inflater.inflate(R.menu.menu_scan_master_main, menu);
+    inflater.inflate(R.menu.menu_scan_master_main2, menu);
   }
 
   @Override public void onPrepareOptionsMenu(Menu menu) {
     super.onPrepareOptionsMenu(menu);
-    menu.removeGroup(GROUP_ID);
+    menu.findItem(R.id.action_reset).setChecked(isAutoReset);
+ /*   menu.removeGroup(GROUP_ID);
     menu.findItem(R.id.action_label).setVisible(false);
     int i = 0;
     if (menus.getValue() != null && menus.getValue().data != null) {
@@ -496,33 +515,29 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
             .setChecked(isChecked);
         ++i;
       }
-
     }
-    menu.setGroupCheckable(GROUP_ID, true, true);
+    menu.setGroupCheckable(GROUP_ID, true, true);*/
   }
 
-  private void setTextHint(String mode){
-/*    if(mode.equals(mode.toUpperCase())){
-      mTxtBill.setHint(R.string.billno_hint);
-      mTxtBarcode.setHint(R.string.barcode_hint);
-    }else{
-      mTxtBill.setHint(R.string.billno_hint2);
-      mTxtBarcode.setHint(R.string.barcode_hint2);
-    }*/
-  }
 
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     int id = item.getItemId();
+    if(id == R.id.action_reset){
+      isAutoReset = !isAutoReset;
+      getContext().getSharedPreferences(SP_SM, Context.MODE_PRIVATE).edit().putBoolean("isAutoReset",isAutoReset).apply();
+    }
     if (id == R.id.action_set_group) {
-      startActivityForResult(new Intent("android.intent.action.full.scanner"), REQUEST_GROUP);
+      startActivityForResult(new Intent("android.intent.action.full.scanner").setPackage(getActivity().getPackageName()), REQUEST_GROUP);
+    }
+    if(id == R.id.action_about){
+      startActivity(new Intent(getContext(), AboutActivity.class));
     }
     if (item.getGroupId() == GROUP_ID) {
       item.setChecked(true);
       int index = item.getItemId();
       if (menus.getValue() != null && menus.getValue().data != null) {
         mMode = menus.getValue().data[index].menu_Label_Eng;
-        setTextHint(mMode);
       }
     }
     if (getActivity() != null) {
@@ -547,7 +562,7 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
         } else if (mCurrEdit.getId() == R.id.txt_barcode) {
           queryBarCode();
         }
-        mTxtBarcode.requestFocus();
+     //   mTxtBarcode.requestFocus();
       }
     } catch (InvalidBarCodeException e) {
       Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
@@ -600,8 +615,6 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
         }
       }
     }
-
-
     mSubscriptions.add(apiOb
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
@@ -645,6 +658,7 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
     SpMaProcessRequest request = new SpMaProcessRequest();
     request.line = settings.line;
     request.reader = settings.reader;
+    request.mytaxno = settings.myTaxNo;
     request.process = process;
     request.lotno = lotno;
     request.lotq = Integer.parseInt(qty);
@@ -660,7 +674,7 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
       }
     }
 
-    mSubscriptions.add(MyNetWork.getServiceApi()
+    mSubscriptions.add(serviceApi
         .sp_MaProcessScan(request)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
@@ -678,29 +692,45 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
     MaterialDialog.Builder builder = new MaterialDialog.Builder(getActivity());
     MaterialDialog progressDialog = builder.progress(true, 0).build();
     progressDialog.show();
-    GroupRequest request = new GroupRequest();
-    request.macNo = getArguments().getString("macNo");
+    String macno =  android.provider.Settings.Secure.getString(getContext().getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
     MyNetWork.getServiceApi()
-        .getGroup(barCode, request)
+        .sp_join_group(macno,barCode)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Subscriber<GroupResponse>() {
+        .subscribe(new Subscriber<List<JoinGroupItem>>() {
           @Override public void onCompleted() {
             progressDialog.dismiss();
           }
 
           @Override public void onError(Throwable e) {
             progressDialog.dismiss();
-            Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+            if (e instanceof HttpException){
+              HttpException error = (HttpException) e;
+              String message = null;
+              try {
+                message = error.response().errorBody().string();
+                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+              } catch (IOException e1) {
+                e1.printStackTrace();
+              }
+
+            }
+
           }
 
-          @Override public void onNext(GroupResponse groupResponse) {
+          @Override public void onNext(List<JoinGroupItem> groupResponse) {
+            JoinGroupItem item = groupResponse.get(0);
             Toast.makeText(getActivity(), R.string.group_success, Toast.LENGTH_LONG).show();
-            settings.setMyTaxNo(groupResponse.result[0].myTaxNo);
-            settings.setLine(groupResponse.result[0].line);
+            settings.setMyTaxNo(item.getMyTaxNo());
+            settings.setLine(item.getLine());
+            getActivity().getSharedPreferences(SP_SM,Context.MODE_PRIVATE).edit()
+                .putString("mt_company",item.getMt_company())
+                .putString("mt_port", item.getMt_port())
+                .putString("mt_server", item.getMt_server())
+                .apply();
             settingChanged();
             ((AppCompatActivity) getActivity()).getSupportActionBar()
-                .setTitle(getString(R.string.app_name) + "(" + settings.myTaxNo + ")");
+                .setTitle(item.getMt_company()+ " " + getString(R.string.app_name));
             mMode = "In";
             getActivity().invalidateOptionsMenu();
           }
@@ -724,7 +754,7 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
     Timber.v(connectionStr);
     dbCommand.setConnectionString(connectionStr);
 
-    mBtnScan.setText("PDA#" + settings.getLine() + " / " + settings.getReader());
+    mBtnScan.setText("PDA#" + settings.getLine() + " / " + settings.myTaxNo);
   }
 
   private void dispatchTakePictureIntent() {
@@ -770,7 +800,7 @@ public class ScanMasterFragment2 extends Fragment implements MenuOpend {
 
   @Override public void menuOpened() {
     if(menus.getValue() == null || menus.getValue().data == null) {
-      loadMenu();
+    //  loadMenu();
     }
   }
 }

@@ -9,17 +9,17 @@
     >
 
 
-  <GridLayout
+  <android.support.v7.widget.GridLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_marginLeft="@dimen/activity_horizontal_margin"
       android:layout_marginRight="@dimen/activity_horizontal_margin"
-      android:columnCount="3"
-      android:orientation="horizontal"
+      app:columnCount="3"
+      app:orientation="horizontal"
       >
     <FrameLayout
         android:layout_width="0dp"
-        android:layout_columnWeight="1"
+        app:layout_columnWeight="1"
         android:layout_height="wrap_content"
         >
       <EditText
@@ -49,18 +49,18 @@
         android:id="@+id/btn_photo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        app:layout_gravity="center_vertical"
         android:src="@drawable/ic_camera_black_24dp"
         />
     <ImageButton
         android:id="@+id/btn_camera_scan_bill"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        app:layout_gravity="center_vertical"
         android:src="@drawable/ic_qrcode_scan_black_24dp"
         />
 
-    <GridLayout android:layout_columnSpan="3"
+    <GridLayout app:layout_columnSpan="3"
         android:layout_width="match_parent"
         android:columnCount="2">
       <EditText
@@ -69,7 +69,6 @@
           android:hint="2. 缸號"
           android:layout_columnWeight="1"
           android:lines="1"
-          android:inputType="number"
           android:imeOptions="actionNext"
           android:singleLine="true"
           android:textSize="24sp"
@@ -89,7 +88,7 @@
           />
     </GridLayout>
 
-    <FrameLayout android:layout_columnSpan="3"
+    <android.support.v7.widget.GridLayout app:layout_columnSpan="3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         >
@@ -105,26 +104,26 @@
           android:id="@+id/calc_clear_txt_memo"
           android:layout_width="20dp"
           android:layout_height="20dp"
-          android:layout_gravity="right|center_vertical"
+          app:layout_gravity="right|center_vertical"
           android:layout_marginRight="10dp"
           android:background="@drawable/ic_close_circle_grey600_18dp"
           android:visibility="gone"
           />
-    </FrameLayout>
+    </android.support.v7.widget.GridLayout>
 
 
     <FrameLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_columnSpan="2"
-        android:layout_columnWeight="1"
+        app:layout_columnSpan="2"
+        app:layout_columnWeight="1"
         >
       <EditText
           android:id="@+id/txt_barcode"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:digits="@string/digits"
-          android:hint="4. 進度"
+          android:hint="5. 進度"
           android:imeOptions="actionDone"
           android:maxLength="255"
           android:singleLine="true"
@@ -145,10 +144,10 @@
         android:id="@+id/btn_camera_scan_barcode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        app:layout_gravity="center_vertical"
         android:src="@drawable/ic_qrcode_scan_black_24dp"
         />
-  </GridLayout>
+  </android.support.v7.widget.GridLayout>
   <FrameLayout
       android:layout_width="match_parent"
       android:layout_height="0dp"
@@ -186,7 +185,7 @@
       android:layout_height="wrap_content"
       android:layout_gravity="center_vertical"
       android:drawableLeft="@drawable/ic_barcode_black_24dp"
-      android:text="@string/scan.btn"
+      android:text="威虹資訊版權所有"
       android:textStyle="bold"
       android:layout_marginLeft="@dimen/activity_horizontal_margin"
       android:layout_marginRight="@dimen/activity_horizontal_margin"

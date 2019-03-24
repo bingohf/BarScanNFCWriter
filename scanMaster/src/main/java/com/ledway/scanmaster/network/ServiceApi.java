@@ -1,10 +1,13 @@
 package com.ledway.scanmaster.network;
 
+import java.util.List;
 import okhttp3.ResponseBody;
 import retrofit2.http.Body;
+import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 import rx.Observable;
 
 /**
@@ -31,4 +34,7 @@ public interface ServiceApi {
 
   @POST("Sp/sp_MaProcessScan") Observable<SpResponse> sp_MaProcessScan(@Body
       SpMaProcessRequest request);
+
+  @GET("SpJson/sp_join_group") Observable<List<JoinGroupItem>> sp_join_group(
+      @Query("macno") String macno, @Query("series") String series);
 }

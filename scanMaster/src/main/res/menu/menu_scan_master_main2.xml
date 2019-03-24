@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+
+  <item
+      android:id="@+id/action_set_group"
+      android:icon="@drawable/ic_qrcode_scan_white_24dp"
+      android:orderInCategory="0"
+      android:title="@string/scan_group"
+      app:showAsAction="never"/>
+  <item android:id="@+id/action_reset"
+      android:title="自動重置"
+      app:showAsAction="never"
+      android:checkable="true"
+      />
+  <item
+      android:id="@+id/action_about"
+      android:orderInCategory="0"
+      android:title="關於"
+      app:showAsAction="never"/>
+</menu>
