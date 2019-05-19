@@ -90,4 +90,6 @@
   <string name="re_grant_message">The permissions are required.</string>
   <string name="app_setting">App Settings</string>
   <string name="hint_filter_product">Input text to filter show rooms</string>
+  <string name="success_add">Success to add</string>
+  <string name="wish_list">Wish List</string>
 </resources>

@@ -48,6 +48,7 @@ public class SampleProductListFragment extends Fragment {
   private static final int REQUEST_PICKER = 1;
   private static final int RESULT_CAMERA_QR_CODE = 2;
   private static final int REQUEST_PRODUCT = 3;
+  private static final int RESULT_CAMERA_QR_CODE2 = 4;
   @BindView(R.id.listview) RecyclerView mListView;
   @BindView(R.id.swiperefresh) SwipeRefreshLayout mSwipeRefresh;
   @BindView(R.id.statefulLayout) StatefulLayout mStatefulLayout;
@@ -78,6 +79,15 @@ public class SampleProductListFragment extends Fragment {
         if (resultCode == Activity.RESULT_OK) {
           String qrcode = data.getStringExtra("barcode");
           appendOrNewProduct(qrcode);
+        }
+        break;
+      }
+      case RESULT_CAMERA_QR_CODE2: {
+        if (resultCode == Activity.RESULT_OK) {
+          String qrcode = data.getStringExtra("barcode");
+          appendOrNewProduct(qrcode);
+          startActivityForResult(new Intent(getActivity(), FullScannerActivity.class),
+              RESULT_CAMERA_QR_CODE2);
         }
         break;
       }
@@ -126,6 +136,7 @@ public class SampleProductListFragment extends Fragment {
       mStatefulLayout.showContent();
       add((TodoProd) list.get(0));
       mSampleMaster.isDirty = true;
+      Toast.makeText(requireContext(), R.string.success_add, Toast.LENGTH_SHORT).show();
     }
   }
 
@@ -152,7 +163,7 @@ public class SampleProductListFragment extends Fragment {
       mSampleMaster.sampleProdLinks.remove(0);
     }
     Observable.defer(() -> Observable.from(new Select().from(TodoProd.class)
-        .where("prodNo in (" + TextUtils.join(",", placeholderArray) + ")",       paramArray)
+        .where("prodNo in (" + TextUtils.join(",", placeholderArray) + ")", (Object[]) paramArray)
         .orderBy("update_time desc")
         .execute())).map(o -> {
       TodoProd todoProd = (TodoProd) o;
@@ -288,6 +299,11 @@ public class SampleProductListFragment extends Fragment {
 
         startActivityForResult(new Intent(getActivity(), FullScannerActivity.class),
             RESULT_CAMERA_QR_CODE);
+        break;
+      }
+      case R.id.action_multi_scan:{
+        startActivityForResult(new Intent(getActivity(), FullScannerActivity.class),
+            RESULT_CAMERA_QR_CODE2);
         break;
       }
       default:

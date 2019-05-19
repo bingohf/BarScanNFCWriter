@@ -368,7 +368,7 @@ public class SampleMainFragment extends Fragment {
     String[] args = ids.toArray(new String[ids.size()]);
     return Observable.just(new Pair<>(where, args))
         .map((Func1<Pair<String, String[]>, List<TodoProd>>) stringPair -> new Select().from(
-            TodoProd.class).where(stringPair.first, stringPair.second).execute())
+            TodoProd.class).where(stringPair.first, (Object[]) stringPair.second).execute())
         .flatMap(Observable::from)
         .flatMap(todoProd -> todoProd.remoteSave2()
             .flatMap(spReturnRestSpResponse -> {

@@ -7,7 +7,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import com.ledway.btprinter.R;
 
 public class SampleFragmentPagerAdapter extends FragmentPagerAdapter {
-    int[] titles = new int[]{ R.string.customer, R.string.product};
+    int[] titles = new int[]{ R.string.customer, R.string.wish_list};
     private Fragment[] fragments = new Fragment[]{new SampleMainFragment(), new SampleProductListFragment()};
     private Context context;
 
