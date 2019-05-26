@@ -87,17 +87,17 @@
     android:layout_weight="1"
     android:layout_height="wrap_content"
     >
-      <EditText
-          android:id="@+id/txt_barcode"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:hint="@string/barcode.hint"
-          android:imeOptions="actionSearch"
-          android:maxLength="255"
-          android:singleLine="true"
-          android:textSize="24sp"
-          android:textStyle="bold"
-          android:digits="@string/digits"
+  <EditText
+      android:id="@+id/txt_barcode"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:digits="@string/digits"
+      android:hint="@string/barcode.hint"
+      android:imeOptions="actionSearch"
+      android:maxLength="255"
+      android:singleLine="true"
+      android:textSize="24sp"
+      android:textStyle="bold"
       />
   <Button
       android:id="@+id/calc_clear_txt_barcode"
@@ -108,6 +108,14 @@
       android:layout_gravity="right|center_vertical"
       android:background="@drawable/ic_close_circle_grey600_18dp" />
 </FrameLayout>
+
+      <ImageButton
+          android:id="@+id/btn_multi_scan"
+          android:src="@drawable/ic_action_qrcode_scan_black"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center_vertical"
+          />
       <ImageButton
           android:id="@+id/btn_camera_scan_barcode"
           android:src="@drawable/ic_qrcode_scan_black_24dp"

@@ -88,6 +88,7 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
   static final int REQUEST_TAKE_PHOTO = 3;
   private static final int REQUEST_GROUP = 1;
   private static final int REQUEST_BAR_CODE = 2;
+  private static final int REQUEST_BAR_CODE2 = 4;
   final int GROUP_ID = 1001;
   @Inject Settings settings;
   @Inject IDGenerator mIDGenerator;
@@ -106,10 +107,11 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
   private DBCommand dbCommand = new DBCommand();
   private BroadcastReceiver sysBroadcastReceiver;
   private boolean mContinueScan;
-  private EditText mCurrEdit;
+  private EditText mCurrEdit = mTxtBarcode;
   private BroadcastReceiver scanBroadcastReceiver;
   private String mMode = "Check";
   private int mModeIndex = 0;
+  private String mLastBarCode = "";
   private MutableLiveData<Resource<RemoteMenu[]>> menus = new MutableLiveData<>();
 
   public ScanMasterFragment() {
@@ -284,6 +286,13 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
     startActivityForResult(new Intent("android.intent.action.full.scanner"), REQUEST_BAR_CODE);
   }
 
+  @OnClick(R2.id.btn_multi_scan) void onBtnMultiScanClick(){
+    mCurrEdit = mTxtBarcode;
+    mCurrEdit.requestFocus();
+    mLastBarCode = "";
+    startActivityForResult(new Intent("android.intent.action.full.scanner"), REQUEST_BAR_CODE2);
+  }
+
   @OnClick(R2.id.btn_photo) void  onBtnPhotoClick(){
     dispatchTakePictureIntent();
   }
@@ -295,6 +304,17 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
         if (resultCode == Activity.RESULT_OK) {
           String barCode = data.getStringExtra("barcode");
           receiveCode(barCode);
+        }
+        break;
+      }
+      case REQUEST_BAR_CODE2: {
+        if (resultCode == Activity.RESULT_OK) {
+          String barCode = data.getStringExtra("barcode");
+          if(!barCode.equals(mLastBarCode)){
+            mLastBarCode = barCode;
+            receiveCode(barCode);
+            onBtnMultiScanClick();
+          }
         }
         break;
       }
