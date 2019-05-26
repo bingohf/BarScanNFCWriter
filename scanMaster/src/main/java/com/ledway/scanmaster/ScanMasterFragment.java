@@ -23,6 +23,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -46,14 +47,17 @@ import butterknife.OnFocusChange;
 import butterknife.OnTextChanged;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.jakewharton.rxbinding.widget.RxTextView;
+import com.ledway.rxbus.RxBus;
 import com.ledway.scanmaster.data.DBCommand;
 import com.ledway.scanmaster.data.Settings;
 import com.ledway.scanmaster.domain.InvalidBarCodeException;
+import com.ledway.scanmaster.event.ServerChangedEvent;
 import com.ledway.scanmaster.interfaces.IDGenerator;
 import com.ledway.scanmaster.interfaces.MenuOpend;
 import com.ledway.scanmaster.model.Resource;
 import com.ledway.scanmaster.network.GroupRequest;
 import com.ledway.scanmaster.network.GroupResponse;
+import com.ledway.scanmaster.network.JoinGroupItem;
 import com.ledway.scanmaster.network.MyNetWork;
 import com.ledway.scanmaster.network.RemoteMenu;
 import com.ledway.scanmaster.network.SpGetMenuRequest;
@@ -640,13 +644,12 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
     MaterialDialog.Builder builder = new MaterialDialog.Builder(getActivity());
     MaterialDialog progressDialog = builder.progress(true, 0).build();
     progressDialog.show();
-    GroupRequest request = new GroupRequest();
-    request.macNo = getArguments().getString("macNo");
+    String macNo = getArguments().getString("macNo");
     MyNetWork.getServiceApi()
-        .getGroup(barCode, request)
+        .sp_join_group(macNo,barCode)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Subscriber<GroupResponse>() {
+        .subscribe(new Subscriber<List<JoinGroupItem>>() {
           @Override public void onCompleted() {
             progressDialog.dismiss();
           }
@@ -656,13 +659,34 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
             Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
           }
 
-          @Override public void onNext(GroupResponse groupResponse) {
+          @Override public void onNext(List<JoinGroupItem> groupResponse) {
+            JoinGroupItem item = groupResponse.get(0);
             Toast.makeText(getActivity(), R.string.group_success, Toast.LENGTH_LONG).show();
-            settings.setMyTaxNo(groupResponse.result[0].myTaxNo);
-            settings.setLine(groupResponse.result[0].line);
+            settings.setMyTaxNo(item.getMyTaxNo());
+            settings.setLine(item.getLine());
             settingChanged();
-            ((AppCompatActivity) getActivity()).getSupportActionBar()
-                .setTitle(getString(R.string.app_name) + "(" + settings.myTaxNo + ")");
+            ServerChangedEvent serverChangedEvent = new ServerChangedEvent();
+            if(item.getSm_server() != null && item.getSm_port() != null && item .getSm_company() != null) {
+              serverChangedEvent.sm_company = item.getSm_company();
+              serverChangedEvent.sm_server = item.getSm_server();
+              serverChangedEvent.sm_port = item.getSm_port();
+            }
+
+
+
+            if(getActivity() != null){
+              requireActivity().getSharedPreferences("sm_server", Context.MODE_PRIVATE)
+                  .edit().putString("sm_server", item.getSm_server())
+                  .putString("sm_company", item .getSm_company())
+                  .putInt("sm_port", item.getSm_port()).commit();
+              String titleHTML = getString(R.string.app_name) + "(" + settings.myTaxNo + ")";
+              if (!serverChangedEvent.sm_company.equalsIgnoreCase("ledway")){
+                titleHTML = "<font color=\"yellow\">" + titleHTML + "</font>";
+              }
+              ((AppCompatActivity) getActivity()).getSupportActionBar()
+                  .setTitle(Html.fromHtml(titleHTML));
+              RxBus.getInstance().post(serverChangedEvent);
+            }
             mMode = "In";
             getActivity().invalidateOptionsMenu();
           }

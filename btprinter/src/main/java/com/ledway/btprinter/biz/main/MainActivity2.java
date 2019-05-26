@@ -20,6 +20,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -76,7 +77,13 @@ public class MainActivity2 extends AppCompatActivity {
 
     String myTaxNo = getSharedPreferences("setting", Context.MODE_PRIVATE).getString("MyTaxNo", "");
     if (!myTaxNo.isEmpty()) {
-      getSupportActionBar().setTitle(getString(R.string.app_name) + "(" + myTaxNo + ")");
+
+      String titleHTML = getString(R.string.app_name) + "(" + myTaxNo + ")";
+      if (!getSharedPreferences("sm_server", Context.MODE_PRIVATE)
+          .getString("sm_company","ledway").equalsIgnoreCase("ledway")){
+        titleHTML = "<font color=\"yellow\">" + titleHTML + "</font>";
+      }
+      getSupportActionBar().setTitle(Html.fromHtml( titleHTML));
     }
     Bundle bundle = new Bundle();
     bundle.putString("macNo", MApp.getApplication().getSystemInfo().getDeviceId());
