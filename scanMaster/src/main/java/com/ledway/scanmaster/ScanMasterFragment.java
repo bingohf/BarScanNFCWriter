@@ -671,6 +671,11 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
               serverChangedEvent.sm_server = item.getSm_server();
               serverChangedEvent.sm_port = item.getSm_port();
             }
+            if(item.getSe_server() != null && item.getSe_port() != null && item .getSe_company() != null) {
+              serverChangedEvent.se_company = item.getSe_company();
+              serverChangedEvent.se_server = item.getSe_server();
+              serverChangedEvent.se_port = item.getSe_port();
+            }
 
 
 
@@ -679,9 +684,17 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
                   .edit().putString("sm_server", item.getSm_server())
                   .putString("sm_company", item .getSm_company())
                   .putInt("sm_port", item.getSm_port()).commit();
-              String titleHTML = getString(R.string.app_name) + "(" + settings.myTaxNo + ")";
+              requireActivity().getSharedPreferences("se_server", Context.MODE_PRIVATE)
+                  .edit().putString("se_server", item.getSe_server())
+                  .putString("se_company", item .getSe_company())
+                  .putInt("se_port", item.getSe_port()).commit();
+              String title = getString(R.string.app_name) + "(" + settings.myTaxNo + ")";
+              String titleHTML = title;
               if (!serverChangedEvent.sm_company.equalsIgnoreCase("ledway")){
-                titleHTML = "<font color=\"yellow\">" + titleHTML + "</font>";
+                titleHTML = "<font color=\"yellow\">" + title + "</font>";
+              }
+              if (!serverChangedEvent.se_company.equalsIgnoreCase("ledway")){
+                titleHTML = "<font color=\"blue\">" + title + "</font>";
               }
               ((AppCompatActivity) getActivity()).getSupportActionBar()
                   .setTitle(Html.fromHtml(titleHTML));

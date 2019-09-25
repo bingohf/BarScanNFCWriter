@@ -8,8 +8,8 @@ android {
         applicationId "com.ledway.barcodescannfcwriter"
         minSdkVersion 17
         targetSdkVersion 28
-        versionCode 30
-        versionName "3.0"
+        versionCode 31
+        versionName "3.1"
     }
     signingConfigs{
         relase_signing_config{

@@ -78,10 +78,15 @@ public class MainActivity2 extends AppCompatActivity {
     String myTaxNo = getSharedPreferences("setting", Context.MODE_PRIVATE).getString("MyTaxNo", "");
     if (!myTaxNo.isEmpty()) {
 
-      String titleHTML = getString(R.string.app_name) + "(" + myTaxNo + ")";
+      String title = getString(R.string.app_name) + "(" + myTaxNo + ")";
+      String titleHTML = title;
       if (!getSharedPreferences("sm_server", Context.MODE_PRIVATE)
           .getString("sm_company","ledway").equalsIgnoreCase("ledway")){
-        titleHTML = "<font color=\"yellow\">" + titleHTML + "</font>";
+        titleHTML = "<font color=\"yellow\">" + title + "</font>";
+      }
+      if (!getSharedPreferences("se_server", Context.MODE_PRIVATE)
+          .getString("se_company","ledway").equalsIgnoreCase("ledway")){
+        titleHTML = "<font color=\"blue\">" + title + "</font>";
       }
       getSupportActionBar().setTitle(Html.fromHtml( titleHTML));
     }
