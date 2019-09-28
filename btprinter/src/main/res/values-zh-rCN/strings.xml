@@ -1,0 +1,98 @@
+﻿<resources>
+    <string name="app_name">销售优势</string>
+
+    <string name="barcode">条码</string>
+    <string name="scan_barcode">6 扫条码</string>
+    <string name="cust_contact">联系人列表</string>
+    <string name="read_qr_code">3 扫条码</string>
+    <string name="take_photo_1">1 照片 +</string>
+    <string name="take_photo_2">2 照片 -</string>
+    <string name="action_save">保存</string>
+    <string name="action_print">打印</string>
+    <string name="action_add">新增</string>
+    <string name="action_preview">预览</string>
+    <string name="action_upload">上传</string>
+    <string name="action_bind_bt_printer">蓝牙</string>
+    <string name="prod">产品:</string>
+    <string name="qr_card">客户端:</string>
+    <string name="save_record">保存</string>
+    <string name="bind_bt_printer">打印机</string>
+    <string name="hint_enable_bluetooth">打开蓝牙</string>
+    <string name="card1">照片 +</string>
+    <string name="card2">照片 -</string>
+    <string name="pls_input_data">首先输入</string>
+    <string name="action_update_prod">展示厅</string>
+    <string name="update_prod">展示厅</string>
+    <string name="hint_prod_image">点击照片</string>
+    <string name="action_re_take_photo">拍照片</string>
+    <string name="action_re_uplaod">上传</string>
+    <string name="hint_product_spec">描述</string>
+    <string name ="agreement"> <b>该软件按“原样”提供，不提供任何形式的明示或暗示担保，包括但不限于对适销性，特定用途的适用性和非侵权性的保证。 无论是由于软件，使用或其他方式产生的，与之有关或与之有关的合同，侵权或其他形式的任何索赔，损害或其他责任，作者或版权所有者概不负责。
+  </b>\n\n
+   您可以将所有数据上传到LEDWAY云服务以启用示例共享。</string>
+    <string name="title_agreement">授权</string>
+    <string name="btn_agree">同意</string>
+    <string name="loading">加载…</string>
+    <string name="prod_exists">重复了</string>
+    <string name="title_my_business_card">我的二维码</string>
+    <string name="action_my_business_card">我的</string>
+    <string name="default_my_business_card">在此输入的内容将会被转成二维码
+  </string>
+    <string name="title_new_version">发现新版本</string>
+    <string name="btn_install">安装</string>
+
+    <string name="message_find_latest_version">发现新版本</string>
+    <string name="btn_cancel">取消</string>
+    <string name="btn_upgrade">下载</string>
+    <string name="today">今天</string>
+    <string name="titile_id">我的ID</string>
+    <string name="titile_share_app">应用程序</string>
+    <string name="share_to">4 扫描ID</string>
+    <string name="input_barcode">5 输入代码</string>
+    <string name="share_to_title">接收ID:</string>
+    <string name="data_from">发送者:</string>
+    <string name="my_sample">商机</string>
+    <string name="my_list">我的清单</string>
+    <string name="title_receive_sample">接收到的样品</string>
+    <string name="no_image">没有照片</string>
+    <string name="action_data_list">展示厅</string>
+    <string name="action_sample_track">跟踪</string>
+    <string name="product">展示厅</string>
+    <string name="business_hint">点击，拍名片</string>
+    <string name="hint_share_to">点击，扫对方二维码分享</string>
+    <string name="my">我的</string>
+    <string name="customer">客户</string>
+    <string name="formater_selected">选择了%1$d 产品</string>
+    <string name="formater_sample_title">%1$s</string>
+    <string name="share">分享</string>
+    <string name="my_qrcode">我的二维码</string>
+    <string name="input_product_number">输入产品编号</string>
+    <string name="input_hint_product_no">产品编号</string>
+    <string name="install_app_before_sharing">分享前先安装App</string>
+    <string name="sample_will_sent_to_this_phone">通过扫描二维码，样品会被发送到对方手机</string>
+    <string name="delete">删除</string>
+    <string name="help_share_to">扫描另一隻手机的"我的ID"，以便发送样品</string>
+    <string name="pa">PA云</string>
+    <string name="not_found_data">没有找到数据</string>
+
+    <string name="scan_master">二维扫描</string>
+    <string name="received">接收到的</string>
+    <string name="are_you_sure_to_exit">确定退出？</string>
+    <string name="hint_clear_business_card_hint_first">请清除名片的备注</string>
+    <string name="ocr_count_limit">OCR 被使用了 %1$d 次 (限制:%2$d) </string>
+    <string name="hint_clear_description">请先清除内容才能使用</string>
+    <string name="delete_all">删除手机产品资料</string>
+    <string name="download_from_group">下载集团产品</string>
+    <string name="show_room">展示厅</string>
+    <string name="exhibition">展览</string>
+    <string name="empty_sample_hint">请点击加号</string>
+    <string name="fail_grant">授权失败</string>
+    <string name="re_grant">重新授权</string>
+    <string name="re_grant_message">需要获取权限</string>
+    <string name="app_setting">应用设定</string>
+    <string name="hint_filter_product">输入过滤条件</string>
+    <string name="success_add">成功加入</string>
+    <string name="wish_list">愿望清单</string>
+
+
+</resources>

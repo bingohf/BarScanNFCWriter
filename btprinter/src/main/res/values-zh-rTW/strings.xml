@@ -1,0 +1,98 @@
+﻿<resources>
+  <string name="app_name">銷售優勢</string>
+
+  <string name="barcode">條碼</string>
+  <string name="scan_barcode">6 掃條碼</string>
+  <string name="cust_contact">聯系人列表</string>
+  <string name="read_qr_code">3 掃條碼</string>
+  <string name="take_photo_1">1 照片 +</string>
+  <string name="take_photo_2">2 照片 -</string>
+  <string name="action_save">保存</string>
+  <string name="action_print">打印</string>
+  <string name="action_add">新增</string>
+  <string name="action_preview">預覽</string>
+  <string name="action_upload">上傳</string>
+  <string name="action_bind_bt_printer">藍牙</string>
+  <string name="prod">產品:</string>
+  <string name="qr_card">客戶端:</string>
+  <string name="save_record">保存</string>
+  <string name="bind_bt_printer">打印機</string>
+  <string name="hint_enable_bluetooth">打開藍牙</string>
+  <string name="card1">照片 +</string>
+  <string name="card2">照片 -</string>
+  <string name="pls_input_data">首先輸入</string>
+  <string name="action_update_prod">展示廳</string>
+  <string name="update_prod">展示廳</string>
+  <string name="hint_prod_image">點擊照片</string>
+  <string name="action_re_take_photo">拍照片</string>
+  <string name="action_re_uplaod">上傳</string>
+  <string name="hint_product_spec">描述</string>
+  <string name ="agreement"> <b>該軟件按“原樣”提供，不提供任何形式的明示或暗示擔保，包括但不限於對適銷性，特定用途的適用性和非侵權性的保證。 無論是由於軟件，使用或其他方式產生的，與之有關或與之有關的合同，侵權或其他形式的任何索賠，損害或其他責任，作者或版權所有者概不負責。
+  </b>\n\n
+   您可以將所有數據上傳到LEDWAY雲服務以啟用示例共享。</string>
+  <string name="title_agreement">授權</string>
+  <string name="btn_agree">同意</string>
+  <string name="loading">加載…</string>
+  <string name="prod_exists">重復了</string>
+  <string name="title_my_business_card">我的二維碼</string>
+  <string name="action_my_business_card">我的</string>
+  <string name="default_my_business_card">在此輸入的內容將會被轉成二維碼
+  </string>
+  <string name="title_new_version">發現新版本</string>
+  <string name="btn_install">安裝</string>
+
+  <string name="message_find_latest_version">發現新版本</string>
+  <string name="btn_cancel">取消</string>
+  <string name="btn_upgrade">下載</string>
+  <string name="today">今天</string>
+  <string name="titile_id">我的ID</string>
+  <string name="titile_share_app">應用程序</string>
+  <string name="share_to">4 掃描ID</string>
+  <string name="input_barcode">5 輸入代碼</string>
+  <string name="share_to_title">接收ID:</string>
+  <string name="data_from">發送者:</string>
+  <string name="my_sample">商機</string>
+  <string name="my_list">我的清單</string>
+  <string name="title_receive_sample">接收到的樣品</string>
+  <string name="no_image">沒有照片</string>
+  <string name="action_data_list">展示廳</string>
+  <string name="action_sample_track">跟蹤</string>
+  <string name="product">展示廳</string>
+  <string name="business_hint">點擊，拍名片</string>
+  <string name="hint_share_to">點擊，掃對方二維碼分享</string>
+  <string name="my">我的</string>
+  <string name="customer">客戶</string>
+  <string name="formater_selected">選擇了%1$d 產品</string>
+  <string name="formater_sample_title">%1$s</string>
+  <string name="share">分享</string>
+  <string name="my_qrcode">我的二維碼</string>
+  <string name="input_product_number">輸入產品編號</string>
+  <string name="input_hint_product_no">產品編號</string>
+  <string name="install_app_before_sharing">分享前先安裝App</string>
+  <string name="sample_will_sent_to_this_phone">通過掃描二維碼，樣品會被發送到對方手機</string>
+  <string name="delete">刪除</string>
+  <string name="help_share_to">掃描另一隻手機的"我的ID"，以便發送樣品</string>
+  <string name="pa">PA雲</string>
+  <string name="not_found_data">沒有找到數據</string>
+
+  <string name="scan_master">二維掃描</string>
+  <string name="received">接收到的</string>
+  <string name="are_you_sure_to_exit">確定退出？</string>
+  <string name="hint_clear_business_card_hint_first">請清除名片的備註</string>
+  <string name="ocr_count_limit">OCR 被使用了 %1$d 次 (限制:%2$d) </string>
+  <string name="hint_clear_description">請先清除內容才能使用</string>
+  <string name="delete_all">刪除手機產品資料</string>
+  <string name="download_from_group">下載集團產品</string>
+  <string name="show_room">展示廳</string>
+  <string name="exhibition">展覽</string>
+  <string name="empty_sample_hint">請點擊加號</string>
+  <string name="fail_grant">授權失敗</string>
+  <string name="re_grant">重新授權</string>
+  <string name="re_grant_message">需要獲取權限</string>
+  <string name="app_setting">應用設定</string>
+  <string name="hint_filter_product">輸入過濾條件</string>
+  <string name="success_add">成功加入</string>
+  <string name="wish_list">願望清單</string>
+
+
+</resources>
