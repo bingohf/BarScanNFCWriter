@@ -20,6 +20,7 @@ import rx.functions.Action1;
  */
 public class MyProjectApi {
   private static MyProjectApi instance;
+  public static String SE_SERVER = "http://ledwayvip.cloudapp.net";
   private DBService dbService;
   private LedwayService ledwayService;
 
@@ -34,11 +35,11 @@ public class MyProjectApi {
   private void buildSeApi(){
     SharedPreferences sp =
         MApp.getInstance().getSharedPreferences("se_server", Context.MODE_PRIVATE);
-    String se_server  = sp.getString("se_server", "");
+    SE_SERVER  = sp.getString("se_server", "");
     int se_port = sp.getInt("se_port", -1);
     String se_company = sp.getString("se_company", "");
-    if(TextUtils.isEmpty(se_server) ){
-      se_server = "http://ledwayvip.cloudapp.net";
+    if(TextUtils.isEmpty(SE_SERVER) ){
+      SE_SERVER = "http://ledwayvip.cloudapp.net";
     }
     if(TextUtils.isEmpty(se_company) ){
       se_company = "ledway";
@@ -46,7 +47,7 @@ public class MyProjectApi {
     if(se_port < 0 ){
       se_port = 8080;
     }
-    String url = se_server + ":" + se_port +"/datasnap/rest/TLwDataModule/";
+    String url = SE_SERVER + ":" + se_port +"/datasnap/rest/TLwDataModule/";
 
 
     OkHttpClient.Builder builder = new OkHttpClient.Builder();

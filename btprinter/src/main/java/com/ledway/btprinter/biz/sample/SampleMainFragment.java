@@ -30,6 +30,7 @@ import butterknife.OnClick;
 import butterknife.OnTextChanged;
 import butterknife.Unbinder;
 import com.activeandroid.query.Select;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.ledway.btprinter.BuildConfig;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
@@ -245,6 +246,12 @@ public class SampleMainFragment extends Fragment {
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
+      case R.id.action_link:{
+        MaterialDialog dialog = new MaterialDialog.Builder(requireActivity()).customView(R.layout.dialog_link_qrcode, true)
+                .build();
+        
+        break;
+      }
       case R.id.action_upload: {
         if (mSampleMaster.isHasData()) {
           uploadAll();

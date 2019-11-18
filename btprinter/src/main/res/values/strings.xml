@@ -92,4 +92,6 @@
   <string name="hint_filter_product">Input text to filter show rooms</string>
   <string name="success_add">Success to add</string>
   <string name="wish_list">Wish List</string>
+    <string name="action_link">Link</string>
+    <string name="scan_qrcode">Please scan QRCODE below</string>
 </resources>
