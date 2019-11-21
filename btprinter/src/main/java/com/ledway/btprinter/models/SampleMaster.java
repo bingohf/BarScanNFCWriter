@@ -206,7 +206,7 @@ import rx.functions.Func1;
           int returnCode = spReturn.errCode;
           String returnMessage = spReturn.errData;
           if (returnCode == 1) {
-            qrcode =  MyProjectApi.SE_SERVER+ "/i/s.aspx?series=" + guid;
+            qrcode =  MyProjectApi.SE_SERVER+ "/i/c.aspx?series=" + guid;
             save();
             return Observable.just(returnMessage);
           } else {

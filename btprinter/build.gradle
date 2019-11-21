@@ -13,8 +13,8 @@ android {
     applicationId "com.ledway.sales_edge"
     minSdkVersion 17
     targetSdkVersion 28
-    versionCode 103
-    versionName "10.3"
+    versionCode 104
+    versionName "10.4"
     multiDexEnabled true
   }
   signingConfigs{
@@ -35,14 +35,12 @@ android {
       // Assigns this product flavor to the "version" flavor dimension.
       // This property is optional if you are using only one dimension.
       dimension "version"
-      shortName="sales_edge"
     }
     mt_tracking {
       dimension "version"
       applicationId "com.ledway.mt_tracking"
       versionCode 11
       versionName "1.1"
-      shortName="mt_tracking"
     }
   }
   buildTypes {
