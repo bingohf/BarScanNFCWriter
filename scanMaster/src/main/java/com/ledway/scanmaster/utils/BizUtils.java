@@ -51,7 +51,7 @@ public class BizUtils {
     return locale.getLanguage() + "_" + locale.getCountry();
   }
 
-  private Observable<Bitmap> getQrCode(final String qrCode, final int size) {
+  public static Observable<Bitmap> getQrCode(final String qrCode, final int size) {
     return Observable.create(new Observable.OnSubscribe<Bitmap>() {
       @Override public void call(Subscriber<? super Bitmap> subscriber) {
         QRCodeWriter writer = new QRCodeWriter();

@@ -37,8 +37,6 @@ import com.ledway.btprinter.R;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.models.SampleProdLink;
 import com.ledway.btprinter.models.TodoProd;
-import com.ledway.btprinter.network.model.RestSpResponse;
-import com.ledway.btprinter.network.model.SpReturn;
 import com.ledway.framework.FullScannerActivity;
 import com.ledway.scanmaster.model.OCRData;
 import com.ledway.scanmaster.model.Resource;
@@ -69,7 +67,6 @@ import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 import static android.app.Activity.RESULT_OK;
-import static com.activeandroid.Cache.getContext;
 
 /**
  * Created by togb on 2017/12/3.
@@ -131,7 +128,8 @@ public class SampleMainFragment extends Fragment {
             FileProvider.getUriForFile(getActivity(), BuildConfig.APPLICATION_ID + ".provider",
                 photoFile);
         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-        takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        takePictureIntent.addFlags(
+            Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         List<ResolveInfo> resolvedIntentActivities = getActivity().getPackageManager()
             .queryIntentActivities(takePictureIntent, PackageManager.MATCH_DEFAULT_ONLY);
         for (ResolveInfo resolvedIntentInfo : resolvedIntentActivities) {
@@ -141,7 +139,6 @@ public class SampleMainFragment extends Fragment {
               Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);*/
         }
         startActivityForResult(takePictureIntent, REQUEST_BUSINESS_CARD);
-
       }
     }
   }
@@ -244,12 +241,22 @@ public class SampleMainFragment extends Fragment {
     inflater.inflate(R.menu.sample_main_menu, menu);
   }
 
+  private void showQRCode(){
+    if(!TextUtils.isEmpty(mSampleMaster.qrcode)) {
+      MaterialDialog dialog =
+          new MaterialDialog.Builder(requireActivity()).customView(R.layout.dialog_link_qrcode,
+              true)
+              .build();
+      ImageView imageView = (ImageView) dialog.findViewById(R.id.image_view);
+      BizUtils.getQrCode(mSampleMaster.qrcode, 400).subscribe(imageView::setImageBitmap
+      );
+      dialog.show();
+    }
+  }
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
-      case R.id.action_link:{
-        MaterialDialog dialog = new MaterialDialog.Builder(requireActivity()).customView(R.layout.dialog_link_qrcode, true)
-                .build();
-        
+      case R.id.action_link: {
+        showQRCode();
         break;
       }
       case R.id.action_upload: {
@@ -291,10 +298,11 @@ public class SampleMainFragment extends Fragment {
           break;
         }
         case SUCCESS: {
-          if(resource.data instanceof String){
-            Toast.makeText(getContext(), (String)resource.data, Toast.LENGTH_LONG).show();
+          if (resource.data instanceof String) {
+            Toast.makeText(getContext(), (String) resource.data, Toast.LENGTH_LONG).show();
           }
           stopLoading();
+          showQRCode();
           break;
         }
         case ERROR: {
@@ -316,9 +324,10 @@ public class SampleMainFragment extends Fragment {
         }
         case SUCCESS: {
           mEdtSpec.setText(ocrData.data.text);
-          if(ocrData.data.limit - ocrData.data.count  <=100) {
+          if (ocrData.data.limit - ocrData.data.count <= 100) {
             Toast.makeText(getContext(),
-                getString(R.string.ocr_count_limit, ocrData.data.count, ocrData.data.limit), Toast.LENGTH_LONG).show();
+                getString(R.string.ocr_count_limit, ocrData.data.count, ocrData.data.limit),
+                Toast.LENGTH_LONG).show();
           }
           stopLoading();
           break;
@@ -357,6 +366,7 @@ public class SampleMainFragment extends Fragment {
 
           @Override public void onNext(String message) {
             uploading.postValue(Resource.success(message));
+
           }
         }));
   }
@@ -379,17 +389,17 @@ public class SampleMainFragment extends Fragment {
         .flatMap(Observable::from)
         .flatMap(todoProd -> todoProd.remoteSave2()
             .flatMap(spReturnRestSpResponse -> {
-          int returnCode = spReturnRestSpResponse.result.get(0).errCode;
-          String returnMessage = spReturnRestSpResponse.result.get(0).errData;
-          if (returnCode == 1) {
-            todoProd.uploaded_time = new Date();
-            todoProd.save();
-          } else {
-            return Observable.error(new Exception(returnMessage));
-          }
+              int returnCode = spReturnRestSpResponse.result.get(0).errCode;
+              String returnMessage = spReturnRestSpResponse.result.get(0).errData;
+              if (returnCode == 1) {
+                todoProd.uploaded_time = new Date();
+                todoProd.save();
+              } else {
+                return Observable.error(new Exception(returnMessage));
+              }
 
-          return Observable.just(spReturnRestSpResponse);
-        })        .onErrorResumeNext(throwable -> Observable.empty()))
+              return Observable.just(spReturnRestSpResponse);
+            }).onErrorResumeNext(throwable -> Observable.empty()))
         .subscribeOn(Schedulers.io())
         .ignoreElements().cast(String.class);
   }
@@ -444,7 +454,6 @@ public class SampleMainFragment extends Fragment {
               new File(mSampleMaster.image1)), "image/*");
       intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
       getContext().startActivity(intent);
-
     }
   }
 
@@ -481,7 +490,7 @@ public class SampleMainFragment extends Fragment {
       @Override public void onResponse(Call call, Response response) throws IOException {
         try {
           JSONObject jsonObject = new JSONObject(response.body().string());
-          if(jsonObject.getInt("returnCode") <0){
+          if (jsonObject.getInt("returnCode") < 0) {
             orc.postValue(Resource.error(jsonObject.getString("returnInfo"), null));
           }
           JSONObject json = new JSONObject(jsonObject.getString("data"));
@@ -493,7 +502,7 @@ public class SampleMainFragment extends Fragment {
           ocrData.limit = limit;
           ocrData.text = text;
           orc.postValue(Resource.success(ocrData));
-        } catch (JSONException| IOException e) {
+        } catch (JSONException | IOException e) {
           e.printStackTrace();
           orc.postValue(Resource.error(e.getMessage(), null));
         }
