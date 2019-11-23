@@ -130,7 +130,7 @@ import rx.functions.Func1;
 
     mac_address = MApp.getApplication().getSystemInfo().getDeviceId();
     update_date = new Date();
-    qrcode = "http://vip.ledway.com.tw/i/s.aspx?series=" + guid;
+    qrcode = "http://vip.ledway.com.tw/i/c.aspx?series=" + guid;
 
 
     int i = 0;
