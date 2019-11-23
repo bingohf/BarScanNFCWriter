@@ -261,6 +261,7 @@ public class SampleMainFragment extends Fragment {
       }
       case R.id.action_upload: {
         if (mSampleMaster.isHasData()) {
+          mSampleMaster.allSave();
           uploadAll();
         } else {
           Toast.makeText(getActivity(), R.string.pls_input_data, Toast.LENGTH_LONG).show();
