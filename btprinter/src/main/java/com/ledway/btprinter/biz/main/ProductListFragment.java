@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleRegistry;
 import android.arch.lifecycle.MutableLiveData;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -32,6 +34,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
+import com.activeandroid.Model;
 import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -50,6 +53,7 @@ import com.ledway.btprinter.network.model.RemoteGroupProduct;
 import com.ledway.btprinter.network.model.RestDataSetResponse;
 import com.ledway.framework.FullScannerActivity;
 import com.ledway.rxbus.RxBus;
+import com.ledway.scanmaster.event.ResignedEvent;
 import com.ledway.scanmaster.model.Resource;
 import com.ledway.scanmaster.utils.BizUtils;
 import com.ledway.scanmaster.utils.ContextUtils;
@@ -125,12 +129,30 @@ public class ProductListFragment extends Fragment {
         REQUEST_TODO_PRODUCT);
   }
 
+  protected void checkResignedStatus(){
+    if(getActivity() != null){
+      SharedPreferences sp = getActivity().getSharedPreferences("setting", Context.MODE_PRIVATE);
+      String myTaxNo =sp.getString("MyTaxNo", "");
+      String resignedKey = myTaxNo +"_resigned";
+      String  resigned = sp.getString(resignedKey, "");
+      String  resigned_product = sp.getString(resignedKey +"_product", "");
+      if(resigned.equals("Y") && resigned_product.isEmpty()){
+        List<Model> tmp =
+            new Delete().from(TodoProd.class).where("uploaded_time >= update_time ").execute();
+        sp.edit().putString(resignedKey +"_product","Y").commit();
+        loadData();
+        Toast.makeText(requireContext(),R.string.removed_group_product, Toast.LENGTH_LONG).show();
+      }
+    }
+
+  }
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     if (getArguments() != null) {
       inSelectMode = getArguments().getBoolean("select", false);
       mSelectedList = getArguments().getStringArrayList(DATA_PRODUCTS);
     }
+
     if (mSelectedList == null) {
       mSelectedList = new ArrayList<>();
     }
@@ -174,9 +196,19 @@ public class ProductListFragment extends Fragment {
     mSubscription.add(RxBus.getInstance()
         .toObservable(ProdSaveEvent.class)
         .subscribe(prodSaveEvent -> loadData()));
+
+    mSubscription.add(RxBus.getInstance()
+        .toObservable(ResignedEvent.class)
+        .subscribe(resignedEvent -> checkResignedStatus()));
+    checkResignedStatus();
     loadData();
     ((LifecycleRegistry) getLifecycle()).handleLifecycleEvent(Lifecycle.Event.ON_CREATE);
     initView();
+
+
+
+
+
   }
 
   @Nullable @Override
@@ -305,10 +337,14 @@ public class ProductListFragment extends Fragment {
   }
 
   private void loadData(String filter) {
-    Observable.defer(() -> Observable.from(new Select().from(TodoProd.class)
+
+
+
+    Observable.defer(() ->{
+      return Observable.from(new Select().from(TodoProd.class)
         .where("prodno like ? or spec_desc like ?", filter, filter)
         .orderBy("prodno ")
-        .execute())).map(o -> {
+        .execute());}).map(o -> {
       TodoProd todoProd = (TodoProd) o;
       return toViewData(todoProd);
     }).toList().subscribe(new Subscriber<List<SampleListAdapter2.ItemData>>() {

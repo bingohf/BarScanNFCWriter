@@ -1,7 +1,9 @@
 package com.ledway.btprinter.biz.main;
 
 import android.arch.lifecycle.MutableLiveData;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -22,6 +24,7 @@ import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import com.activeandroid.Model;
 import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 import com.google.gson.JsonSyntaxException;
@@ -30,6 +33,9 @@ import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.biz.sample.ReceivedSampleDetailActivity;
 import com.ledway.btprinter.models.ReceivedSample;
+import com.ledway.btprinter.models.TodoProd;
+import com.ledway.rxbus.RxBus;
+import com.ledway.scanmaster.event.ResignedEvent;
 import com.ledway.scanmaster.model.Resource;
 import com.ledway.btprinter.models.SampleMaster;
 import com.ledway.btprinter.network.MyProjectApi;
@@ -47,6 +53,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import org.w3c.dom.Text;
 import rx.Observable;
 import rx.Subscriber;
 import rx.schedulers.Schedulers;
@@ -63,7 +70,6 @@ public class ReceiveSampleListFragment extends Fragment {
   private SampleListAdapter2 mSampleListAdapter;
   private MutableLiveData<Resource<List<SampleListAdapter2.ItemData>>> dataResource =
       new MutableLiveData<>();
-
   @Override public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
@@ -71,6 +77,10 @@ public class ReceiveSampleListFragment extends Fragment {
     loadFromCache();
     mDisposables.add(mSampleListAdapter.getClickObservable().subscribe(
         guid -> startActivity(new Intent(getContext(), ReceivedSampleDetailActivity.class).putExtra("guid", (String)guid))));
+    checkResignedStatus();
+    mSubscriptions.add(RxBus.getInstance()
+        .toObservable(ResignedEvent.class)
+        .subscribe(resignedEvent -> checkResignedStatus()));
   }
 
   private void loadFromCache(){
@@ -102,6 +112,25 @@ public class ReceiveSampleListFragment extends Fragment {
         }
       }
     });
+
+  }
+
+  protected void checkResignedStatus(){
+    if(getActivity() != null){
+      SharedPreferences sp = getActivity().getSharedPreferences("setting", Context.MODE_PRIVATE);
+      String myTaxNo =sp.getString("MyTaxNo", "");
+      if(!TextUtils.isEmpty(myTaxNo)) {
+        String resignedKey = myTaxNo + "_resigned";
+        String resigned = sp.getString(resignedKey, "");
+        String resigned_received = sp.getString(resignedKey + "_received", "");
+        if (resigned.equals("Y") && resigned_received.isEmpty()) {
+          loadFromRemoteData();
+          sp.edit().putString(resignedKey + "_received", "Y").commit();
+          Toast.makeText(requireContext(), R.string.removed_group_received, Toast.LENGTH_LONG)
+              .show();
+        }
+      }
+    }
 
   }
 

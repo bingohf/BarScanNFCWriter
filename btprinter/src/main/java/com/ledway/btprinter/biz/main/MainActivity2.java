@@ -39,15 +39,20 @@ import com.ledway.btprinter.R;
 import com.ledway.btprinter.fragments.NewVersionDialogFragment;
 import com.ledway.btprinter.network.ApkVersionResponse;
 import com.ledway.btprinter.network.MyProjectApi;
+import com.ledway.rxbus.RxBus;
+import com.ledway.scanmaster.BaseActivity;
 import com.ledway.scanmaster.ScanMasterFragment;
 import com.ledway.scanmaster.ScanMasterViewModel;
+import com.ledway.scanmaster.event.ResignedEvent;
 import com.ledway.scanmaster.interfaces.MenuOpend;
+import com.ledway.scanmaster.network.MyNetWork;
 import com.ledway.scanmaster.nfc.GNfc;
 import com.ledway.scanmaster.nfc.GNfcLoader;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import javax.inject.Inject;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -56,20 +61,24 @@ import timber.log.Timber;
 
 import static com.ledway.btprinter.AppConstants.REQUEST_AGREEMENT;
 
-public class MainActivity2 extends AppCompatActivity {
+public class MainActivity2 extends BaseActivity {
   final int REQUEST_PERMISSIONS_SETTING = 10;
   final RxPermissions rxPermissions = new RxPermissions(this);
   @BindView(R.id.viewPager) ViewPager mViewPager;
+
   @BindView(R.id.bottomNavigation) BottomNavigationView mBottomNav;
+
   Fragment scanMasterFragment = new ScanMasterFragment();
   Fragment[] fragments = new Fragment[] {
       new CombinFramgment(), new ProductListFragment(), new MyAccountFragment(), scanMasterFragment,
       new WebViewFragment()
   };
   private CompositeSubscription mSubscriptions = new CompositeSubscription();
-  final String[] PERMISSIONS = new String[]{Manifest.permission.NFC, Manifest.permission.CAMERA,
+  final String[] PERMISSIONS = new String[] {
+      Manifest.permission.NFC, Manifest.permission.CAMERA,
       Manifest.permission.CALL_PHONE, Manifest.permission.WRITE_EXTERNAL_STORAGE,
-      Manifest.permission.ACCESS_WIFI_STATE};
+      Manifest.permission.ACCESS_WIFI_STATE
+  };
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -81,14 +90,14 @@ public class MainActivity2 extends AppCompatActivity {
       String title = getString(R.string.app_name) + "(" + myTaxNo + ")";
       String titleHTML = title;
       if (!getSharedPreferences("sm_server", Context.MODE_PRIVATE)
-          .getString("sm_company","ledway").equalsIgnoreCase("ledway")){
+          .getString("sm_company", "ledway").equalsIgnoreCase("ledway")) {
         titleHTML = "<font color=\"yellow\">" + title + "</font>";
       }
       if (!getSharedPreferences("se_server", Context.MODE_PRIVATE)
-          .getString("se_company","ledway").equalsIgnoreCase("ledway")){
+          .getString("se_company", "ledway").equalsIgnoreCase("ledway")) {
         titleHTML = "<font color=\"blue\">" + title + "</font>";
       }
-      getSupportActionBar().setTitle(Html.fromHtml( titleHTML));
+      getSupportActionBar().setTitle(Html.fromHtml(titleHTML));
     }
     Bundle bundle = new Bundle();
     bundle.putString("macNo", MApp.getApplication().getSystemInfo().getDeviceId());
@@ -103,6 +112,39 @@ public class MainActivity2 extends AppCompatActivity {
     checkVersion();
     requestPermission();
 
+    checkGroupStatus();
+  }
+
+  private void checkGroupStatus() {
+    SharedPreferences sp = getSharedPreferences("setting", Context.MODE_PRIVATE);
+    String myTaxNo = sp.getString("MyTaxNo", "");
+    String macno = MApp.getApplication().getSystemInfo().getDeviceId();
+    if (!TextUtils.isEmpty(myTaxNo)) {
+      String resignedKey = myTaxNo + "_resigned";
+      String resigned = sp.getString(resignedKey, "");
+      if (!resigned.equals("Y")) {
+        mSubscriptions.add(
+            MyNetWork.getServiceApi().sp_check_status(macno, myTaxNo)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(spCheckStatusResps -> {
+                  if (!spCheckStatusResps.isEmpty()) {
+                    String resignedStatus  = spCheckStatusResps.get(0).getResigned();
+                    if("Y".equals(resignedStatus)) {
+                      settings.setMyTaxNo(myTaxNo + "_resigned");
+                      sp.edit()
+                          .putString(resignedKey, resignedStatus)
+                          .commit();
+                      RxBus.getInstance().post(new ResignedEvent(myTaxNo));
+                    }
+                  }
+                }, error -> {
+                  Timber.e(error);
+                  Toast.makeText(MApp.getApplication(), error.getMessage(), Toast.LENGTH_LONG).show();
+                })
+        );
+      }
+    }
   }
 
   @Override protected void onDestroy() {
@@ -286,10 +328,10 @@ public class MainActivity2 extends AppCompatActivity {
         }
         break;
       }
-      case REQUEST_PERMISSIONS_SETTING:{
-        for(String permission : PERMISSIONS){
-          if(!rxPermissions.isGranted(permission)){
-            Toast.makeText(this, R.string.fail_grant,Toast.LENGTH_LONG).show();
+      case REQUEST_PERMISSIONS_SETTING: {
+        for (String permission : PERMISSIONS) {
+          if (!rxPermissions.isGranted(permission)) {
+            Toast.makeText(this, R.string.fail_grant, Toast.LENGTH_LONG).show();
             finish();
             break;
           }
@@ -324,10 +366,7 @@ public class MainActivity2 extends AppCompatActivity {
         .putString("Server", server)
         .putString("cloudDataListUrl", cloudDataListUrl)
         .apply();
-    if ((TextUtils.isEmpty(line) || TextUtils.isEmpty(reader) || TextUtils.isEmpty(server))) {
-      return false;
-    }
-    return true;
+    return (!TextUtils.isEmpty(line) && !TextUtils.isEmpty(reader) && !TextUtils.isEmpty(server));
   }
 
   @Override public void onBackPressed() {

@@ -37,4 +37,8 @@ public interface ServiceApi {
 
   @GET("SpJson/sp_join_group") Observable<List<JoinGroupItem>> sp_join_group(
       @Query("macno") String macno, @Query("series") String series);
+
+  @GET("SpJson/sp_check_status") Observable<List<SpCheckStatusResp>> sp_check_status(
+      @Query("macno") String macno, @Query("mytaxno") String mytaxno);
+
 }

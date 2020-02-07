@@ -657,6 +657,7 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
           @Override public void onError(Throwable e) {
             progressDialog.dismiss();
             Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+            Timber.e(e);
           }
 
           @Override public void onNext(List<JoinGroupItem> groupResponse) {
@@ -683,11 +684,11 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
               requireActivity().getSharedPreferences("sm_server", Context.MODE_PRIVATE)
                   .edit().putString("sm_server", item.getSm_server())
                   .putString("sm_company", item .getSm_company())
-                  .putInt("sm_port", item.getSm_port()).commit();
+                  .putInt("sm_port", item.getSm_port() != null ?item.getSm_port():-1).commit();
               requireActivity().getSharedPreferences("se_server", Context.MODE_PRIVATE)
                   .edit().putString("se_server", item.getSe_server())
                   .putString("se_company", item .getSe_company())
-                  .putInt("se_port", item.getSe_port()).commit();
+                  .putInt("se_port", item.getSe_port() != null ? item.getSe_port() : -1).commit();
               String title = getString(R.string.app_name) + "(" + settings.myTaxNo + ")";
               String titleHTML = title;
               if (!serverChangedEvent.sm_company.equalsIgnoreCase("ledway")){
