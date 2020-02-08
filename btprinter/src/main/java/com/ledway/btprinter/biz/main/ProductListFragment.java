@@ -133,7 +133,10 @@ public class ProductListFragment extends Fragment {
     if(getActivity() != null){
       SharedPreferences sp = getActivity().getSharedPreferences("setting", Context.MODE_PRIVATE);
       String myTaxNo =sp.getString("MyTaxNo", "");
-      String resignedKey = myTaxNo +"_resigned";
+      if (!myTaxNo.endsWith("_resigned")){
+        return;
+      }
+      String resignedKey = myTaxNo;
       String  resigned = sp.getString(resignedKey, "");
       String  resigned_product = sp.getString(resignedKey +"_product", "");
       if(resigned.equals("Y") && resigned_product.isEmpty()){
@@ -532,6 +535,7 @@ public class ProductListFragment extends Fragment {
         }
         case SUCCESS: {
           hideLoading();
+          loadData();
           break;
         }
       }
