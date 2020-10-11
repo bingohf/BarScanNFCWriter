@@ -132,17 +132,11 @@ public class ProductListFragment extends Fragment {
   protected void checkResignedStatus(){
     if(getActivity() != null){
       SharedPreferences sp = getActivity().getSharedPreferences("setting", Context.MODE_PRIVATE);
-      String myTaxNo =sp.getString("MyTaxNo", "");
-      if (!myTaxNo.endsWith("_resigned")){
-        return;
-      }
-      String resignedKey = myTaxNo;
-      String  resigned = sp.getString(resignedKey, "");
-      String  resigned_product = sp.getString(resignedKey +"_product", "");
-      if(resigned.equals("Y") && resigned_product.isEmpty()){
+      String  resigned_product = sp.getString("resigned_product", "");
+      if("Y".equals(resigned_product)){
         List<Model> tmp =
             new Delete().from(TodoProd.class).where("uploaded_time >= update_time ").execute();
-        sp.edit().putString(resignedKey +"_product","Y").commit();
+        sp.edit().putString("resigned_product","N").commit();
         loadData();
         Toast.makeText(requireContext(),R.string.removed_group_product, Toast.LENGTH_LONG).show();
       }

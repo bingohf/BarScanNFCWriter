@@ -118,18 +118,15 @@ public class ReceiveSampleListFragment extends Fragment {
   protected void checkResignedStatus(){
     if(getActivity() != null){
       SharedPreferences sp = getActivity().getSharedPreferences("setting", Context.MODE_PRIVATE);
-      String myTaxNo =sp.getString("MyTaxNo", "");
-      if(!TextUtils.isEmpty(myTaxNo)) {
-        String resignedKey = myTaxNo + "_resigned";
-        String resigned = sp.getString(resignedKey, "");
-        String resigned_received = sp.getString(resignedKey + "_received", "");
-        if (resigned.equals("Y") && resigned_received.isEmpty()) {
+        String resigned_received = sp.getString("resigned_received", "");
+        if (resigned_received != null
+       && resigned_received.equals("Y")) {
           loadFromRemoteData();
-          sp.edit().putString(resignedKey + "_received", "Y").commit();
+          sp.edit().putString("resigned_received", "").commit();
           Toast.makeText(requireContext(), R.string.removed_group_received, Toast.LENGTH_LONG)
               .show();
         }
-      }
+
     }
 
   }

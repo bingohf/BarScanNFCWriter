@@ -663,20 +663,21 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
           @Override public void onNext(List<JoinGroupItem> groupResponse) {
             JoinGroupItem item = groupResponse.get(0);
             Toast.makeText(getActivity(), R.string.group_success, Toast.LENGTH_LONG).show();
+           getActivity(). getSharedPreferences("setting", Context.MODE_PRIVATE).edit().putString("resigned","").commit();
             settings.setMyTaxNo(item.getMyTaxNo());
             settings.setLine(item.getLine());
             settingChanged();
             ServerChangedEvent serverChangedEvent = new ServerChangedEvent();
-            if(item.getSm_server() != null && item.getSm_port() != null && item .getSm_company() != null) {
-              serverChangedEvent.sm_company = item.getSm_company();
-              serverChangedEvent.sm_server = item.getSm_server();
-              serverChangedEvent.sm_port = item.getSm_port();
-            }
-            if(item.getSe_server() != null && item.getSe_port() != null && item .getSe_company() != null) {
-              serverChangedEvent.se_company = item.getSe_company();
-              serverChangedEvent.se_server = item.getSe_server();
-              serverChangedEvent.se_port = item.getSe_port();
-            }
+//            if(item.getSm_server() != null && item.getSm_port() != null && item .getSm_company() != null) {
+//              serverChangedEvent.sm_company = item.getSm_company();
+//              serverChangedEvent.sm_server = item.getSm_server();
+//              serverChangedEvent.sm_port = item.getSm_port();
+//            }
+//            if(item.getSe_server() != null && item.getSe_port() != null && item .getSe_company() != null) {
+//              serverChangedEvent.se_company = item.getSe_company();
+//              serverChangedEvent.se_server = item.getSe_server();
+//              serverChangedEvent.se_port = item.getSe_port();
+//            }
 
 
 
@@ -689,16 +690,8 @@ public class ScanMasterFragment extends Fragment implements MenuOpend {
                   .edit().putString("se_server", item.getSe_server())
                   .putString("se_company", item .getSe_company())
                   .putInt("se_port", item.getSe_port() != null ? item.getSe_port() : -1).commit();
-              String title = getString(R.string.app_name) + "(" + settings.myTaxNo + ")";
-              String titleHTML = title;
-              if (!serverChangedEvent.sm_company.equalsIgnoreCase("ledway")){
-                titleHTML = "<font color=\"yellow\">" + title + "</font>";
-              }
-              if (!serverChangedEvent.se_company.equalsIgnoreCase("ledway")){
-                titleHTML = "<font color=\"blue\">" + title + "</font>";
-              }
-              ((AppCompatActivity) getActivity()).getSupportActionBar()
-                  .setTitle(Html.fromHtml(titleHTML));
+
+
               RxBus.getInstance().post(serverChangedEvent);
             }
             mMode = "In";

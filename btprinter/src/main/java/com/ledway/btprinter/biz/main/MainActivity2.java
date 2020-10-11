@@ -44,6 +44,7 @@ import com.ledway.scanmaster.BaseActivity;
 import com.ledway.scanmaster.ScanMasterFragment;
 import com.ledway.scanmaster.ScanMasterViewModel;
 import com.ledway.scanmaster.event.ResignedEvent;
+import com.ledway.scanmaster.event.ServerChangedEvent;
 import com.ledway.scanmaster.interfaces.MenuOpend;
 import com.ledway.scanmaster.network.MyNetWork;
 import com.ledway.scanmaster.nfc.GNfc;
@@ -84,21 +85,13 @@ public class MainActivity2 extends BaseActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main2);
 
-    String myTaxNo = getSharedPreferences("setting", Context.MODE_PRIVATE).getString("MyTaxNo", "");
-    if (!myTaxNo.isEmpty()) {
 
-      String title = getString(R.string.app_name) + "(" + myTaxNo + ")";
-      String titleHTML = title;
-      if (!getSharedPreferences("sm_server", Context.MODE_PRIVATE)
-          .getString("sm_company", "ledway").equalsIgnoreCase("ledway")) {
-        titleHTML = "<font color=\"yellow\">" + title + "</font>";
-      }
-      if (!getSharedPreferences("se_server", Context.MODE_PRIVATE)
-          .getString("se_company", "ledway").equalsIgnoreCase("ledway")) {
-        titleHTML = "<font color=\"blue\">" + title + "</font>";
-      }
-      getSupportActionBar().setTitle(Html.fromHtml(titleHTML));
-    }
+    setCustomTile();
+
+    RxBus.getInstance().toObservable(ServerChangedEvent.class).subscribe(data ->{
+      setCustomTile();
+    });
+
     Bundle bundle = new Bundle();
     bundle.putString("macNo", MApp.getApplication().getSystemInfo().getDeviceId());
     scanMasterFragment.setArguments(bundle);
@@ -115,14 +108,34 @@ public class MainActivity2 extends BaseActivity {
     checkGroupStatus();
   }
 
+  private void setCustomTile(){
+    String myTaxNo = getSharedPreferences("setting", Context.MODE_PRIVATE).getString("MyTaxNo", "");
+    if (!myTaxNo.isEmpty()) {
+
+      String title = getString(R.string.app_name) + "(" + myTaxNo + ")";
+      String titleHTML = title;
+      if (!getSharedPreferences("sm_server", Context.MODE_PRIVATE)
+              .getString("sm_company", "ledway").equalsIgnoreCase("ledway")) {
+        titleHTML = "<font color=\"yellow\">" + title + "</font>";
+      }
+      if (!getSharedPreferences("se_server", Context.MODE_PRIVATE)
+              .getString("se_company", "ledway").equalsIgnoreCase("ledway")) {
+        titleHTML = "<font color=\"blue\">" + title + "</font>";
+      }
+      getSupportActionBar().setTitle(Html.fromHtml(titleHTML));
+    }else {
+      getSupportActionBar().setTitle(R.string.app_name);
+    }
+  }
+
+
   private void checkGroupStatus() {
     SharedPreferences sp = getSharedPreferences("setting", Context.MODE_PRIVATE);
     String myTaxNo = sp.getString("MyTaxNo", "");
     String macno = MApp.getApplication().getSystemInfo().getDeviceId();
     if (!TextUtils.isEmpty(myTaxNo)) {
-      String resignedKey = myTaxNo + "_resigned";
-      String resigned = sp.getString(resignedKey, "");
-      if (!resigned.equals("Y")) {
+      String resigned = sp.getString("resigned", "");
+      if (!"Y".equals(resigned)) {
         mSubscriptions.add(
             MyNetWork.getServiceApi().sp_check_status(macno, myTaxNo)
                 .subscribeOn(Schedulers.io())
@@ -131,11 +144,27 @@ public class MainActivity2 extends BaseActivity {
                   if (!spCheckStatusResps.isEmpty()) {
                     String resignedStatus  = spCheckStatusResps.get(0).getResigned();
                     if("Y".equals(resignedStatus)) {
-                      settings.setMyTaxNo(myTaxNo + "_resigned");
+                      settings.setMyTaxNo("");
+                      settings.setLine("");
+
+                      getSharedPreferences("sm_server", Context.MODE_PRIVATE)
+                              .edit().putString("sm_server", "")
+                              .putString("sm_company", "")
+                              .putInt("sm_port", -1).commit();
+                      getSharedPreferences("se_server", Context.MODE_PRIVATE)
+                              .edit().putString("se_server", "")
+                              .putString("se_company", "")
+                              .putInt("se_port", -1).commit();
+
+
+
                       sp.edit()
-                          .putString(resignedKey, resignedStatus)
+                          .putString("resigned", "Y").putString("resigned_product","Y")
+                              .putString("resigned_received","Y")
                           .commit();
-                      RxBus.getInstance().post(new ResignedEvent(myTaxNo));
+
+                      RxBus.getInstance().post(new ResignedEvent(""));
+                      RxBus.getInstance().post(new ServerChangedEvent());
                     }
                   }
                 }, error -> {
