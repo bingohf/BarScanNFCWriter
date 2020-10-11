@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/BarScanNFCWriter.iml" filepath="$PROJECT_DIR$/BarScanNFCWriter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/BarScanNFCWriter.iml" filepath="$PROJECT_DIR$/BarScanNFCWriter.iml" group="BarScanNFCWriter" />
       <module fileurl="file://$PROJECT_DIR$/app/BarScanNFCWriter-app.iml" filepath="$PROJECT_DIR$/app/BarScanNFCWriter-app.iml" />
       <module fileurl="file://$PROJECT_DIR$/btprinter/BarScanNFCWriter-btprinter.iml" filepath="$PROJECT_DIR$/btprinter/BarScanNFCWriter-btprinter.iml" />
       <module fileurl="file://$PROJECT_DIR$/framework/BarScanNFCWriter-framework.iml" filepath="$PROJECT_DIR$/framework/BarScanNFCWriter-framework.iml" />
@@ -11,14 +11,14 @@
       <module fileurl="file://$PROJECT_DIR$/scanMaster/BarScanNFCWriter-scanMaster.iml" filepath="$PROJECT_DIR$/scanMaster/BarScanNFCWriter-scanMaster.iml" />
       <module fileurl="file://$PROJECT_DIR$/zkc/BarScanNFCWriter-zkc.iml" filepath="$PROJECT_DIR$/zkc/BarScanNFCWriter-zkc.iml" />
       <module fileurl="file://$PROJECT_DIR$/android-BarScanNFCWriter.iml" filepath="$PROJECT_DIR$/android-BarScanNFCWriter.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/btprinter/btprinter.iml" filepath="$PROJECT_DIR$/btprinter/btprinter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="BarScanNFCWriter/app" />
+      <module fileurl="file://$PROJECT_DIR$/btprinter/btprinter.iml" filepath="$PROJECT_DIR$/btprinter/btprinter.iml" group="BarScanNFCWriter/btprinter" />
       <module fileurl="file://$PROJECT_DIR$/bundlechecking/bundlechecking.iml" filepath="$PROJECT_DIR$/bundlechecking/bundlechecking.iml" />
-      <module fileurl="file://$PROJECT_DIR$/framework/framework.iml" filepath="$PROJECT_DIR$/framework/framework.iml" />
-      <module fileurl="file://$PROJECT_DIR$/mylibrary/mylibrary.iml" filepath="$PROJECT_DIR$/mylibrary/mylibrary.iml" />
-      <module fileurl="file://$PROJECT_DIR$/rxbus/rxbus.iml" filepath="$PROJECT_DIR$/rxbus/rxbus.iml" />
-      <module fileurl="file://$PROJECT_DIR$/scanMaster/scanMaster.iml" filepath="$PROJECT_DIR$/scanMaster/scanMaster.iml" />
-      <module fileurl="file://$PROJECT_DIR$/zkc/zkc.iml" filepath="$PROJECT_DIR$/zkc/zkc.iml" />
+      <module fileurl="file://$PROJECT_DIR$/framework/framework.iml" filepath="$PROJECT_DIR$/framework/framework.iml" group="BarScanNFCWriter/framework" />
+      <module fileurl="file://$PROJECT_DIR$/mylibrary/mylibrary.iml" filepath="$PROJECT_DIR$/mylibrary/mylibrary.iml" group="BarScanNFCWriter/mylibrary" />
+      <module fileurl="file://$PROJECT_DIR$/rxbus/rxbus.iml" filepath="$PROJECT_DIR$/rxbus/rxbus.iml" group="BarScanNFCWriter/rxbus" />
+      <module fileurl="file://$PROJECT_DIR$/scanMaster/scanMaster.iml" filepath="$PROJECT_DIR$/scanMaster/scanMaster.iml" group="BarScanNFCWriter/scanMaster" />
+      <module fileurl="file://$PROJECT_DIR$/zkc/zkc.iml" filepath="$PROJECT_DIR$/zkc/zkc.iml" group="BarScanNFCWriter/zkc" />
     </modules>
   </component>
 </project>
