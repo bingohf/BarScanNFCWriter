@@ -5,7 +5,7 @@ import android.content.Context;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.multidex.MultiDex;
+import androidx.multidex.MultiDex;
 import android.view.Display;
 import com.activeandroid.ActiveAndroid;
 import com.crashlytics.android.Crashlytics;

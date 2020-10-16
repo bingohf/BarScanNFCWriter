@@ -1,12 +1,10 @@
 package com.ledway.btprinter.adapters;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 import com.ledway.btprinter.R;
@@ -14,7 +12,6 @@ import com.ledway.btprinter.models.SampleMaster;
 import java.util.ArrayList;
 import java.lang.Iterable;
 import java.util.Iterator;
-import org.w3c.dom.Text;
 
 /**
  * Created by togb on 2016/6/5.

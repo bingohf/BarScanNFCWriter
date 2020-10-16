@@ -25,7 +25,7 @@ public class LogDebugTree extends Timber.DebugTree {
 
   private void buildFile() {
     String time = simpleDateFormat.format(new Date());
-    String logFileName = Environment.getExternalStorageDirectory().getAbsolutePath() +"/ledwayLog/" + BuildConfig.APPLICATION_ID +"/"+ time +".txt";
+    String logFileName = Environment.getExternalStorageDirectory().getAbsolutePath() +"/ledwayLog/" + BuildConfig.LIBRARY_PACKAGE_NAME +"/"+ time +".txt";
     File logFile  = new File(logFileName);
     logFile.getParentFile().mkdirs();
     try {

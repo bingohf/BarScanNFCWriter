@@ -12,7 +12,7 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceGroup;
 import android.preference.TwoStatePreference;
-import android.support.v7.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.widget.EditText;
 import android.widget.Toast;
 import com.ledway.scanmaster.BuildConfig;

@@ -1,10 +1,10 @@
 package com.ledway.btprinter.biz.sample;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.design.widget.TabLayout;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.Nullable;
+import com.google.android.material.tabs.TabLayout;
+import androidx.viewpager.widget.ViewPager;
+import androidx.appcompat.app.AppCompatActivity;
 import android.text.TextUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -13,11 +13,9 @@ import com.activeandroid.query.Select;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.models.SampleMaster;
-import com.ledway.btprinter.models.SampleProdLink;
 import com.ledway.scanmaster.utils.JsonUtils;
-import java.util.Date;
+
 import java.util.List;
-import org.w3c.dom.Text;
 
 public class SampleActivity extends AppCompatActivity {
   @BindView(R.id.sliding_tabs) TabLayout mTabLayout;

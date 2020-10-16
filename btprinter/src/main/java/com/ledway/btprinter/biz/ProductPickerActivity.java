@@ -1,8 +1,8 @@
 package com.ledway.btprinter.biz;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import butterknife.ButterKnife;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.biz.main.ProductListFragment;

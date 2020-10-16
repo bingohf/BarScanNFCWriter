@@ -15,7 +15,7 @@ import android.nfc.tech.NfcA;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.serialport.api.SerialPort;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;

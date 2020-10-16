@@ -1,13 +1,10 @@
 package com.ledway.btprinter.biz.main;
 
-import android.content.Context;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
 import com.ledway.btprinter.MApp;
 import com.ledway.btprinter.R;
-import com.ledway.btprinter.biz.sample.SampleMainFragment;
-import com.ledway.btprinter.biz.sample.SampleProductListFragment;
 
 public class CombinFragmentPagerAdapter extends FragmentPagerAdapter {
     int[] titles = new int[]{ R.string.my_list, R.string.received};

@@ -1,6 +1,6 @@
 package com.ledway.btprinter.fragments;
 
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
 
 /**
  * Created by togb on 2016/8/28.

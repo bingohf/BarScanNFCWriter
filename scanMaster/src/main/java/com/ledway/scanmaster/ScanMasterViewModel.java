@@ -1,6 +1,6 @@
 package com.ledway.scanmaster;
 
-import android.arch.lifecycle.MutableLiveData;
+import androidx.lifecycle.MutableLiveData;
 
 /**
  * Created by togb on 2018/1/7.

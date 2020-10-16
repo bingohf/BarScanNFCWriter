@@ -1,6 +1,5 @@
 package com.ledway.btprinter.adapters;
 
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 import com.ledway.btprinter.MApp;

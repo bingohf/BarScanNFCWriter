@@ -9,7 +9,7 @@
     >
 
 
-  <android.support.v7.widget.GridLayout
+  <androidx.gridlayout.widget.GridLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_marginLeft="@dimen/activity_horizontal_margin"
@@ -88,7 +88,7 @@
           />
     </GridLayout>
 
-    <android.support.v7.widget.GridLayout app:layout_columnSpan="3"
+    <androidx.gridlayout.widget.GridLayout app:layout_columnSpan="3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         >
@@ -109,7 +109,7 @@
           android:background="@drawable/ic_close_circle_grey600_18dp"
           android:visibility="gone"
           />
-    </android.support.v7.widget.GridLayout>
+    </androidx.gridlayout.widget.GridLayout>
 
 
     <FrameLayout
@@ -147,7 +147,7 @@
         app:layout_gravity="center_vertical"
         android:src="@drawable/ic_qrcode_scan_black_24dp"
         />
-  </android.support.v7.widget.GridLayout>
+  </androidx.gridlayout.widget.GridLayout>
   <FrameLayout
       android:layout_width="match_parent"
       android:layout_height="0dp"

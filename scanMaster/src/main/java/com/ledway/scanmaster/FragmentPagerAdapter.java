@@ -1,9 +1,9 @@
 package com.ledway.scanmaster;
 
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
- class FragmentPagerAdapter extends android.support.v4.app.FragmentPagerAdapter {
+ class FragmentPagerAdapter extends androidx.fragment.app.FragmentPagerAdapter {
     int[] titles = new int[]{ R.string.in, R.string.out, R.string.check};
     private Fragment[] fragments = new Fragment[]{new Fragment(), new Fragment()};
 
