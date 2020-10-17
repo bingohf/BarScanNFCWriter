@@ -2,9 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:padding="16dp"
-    >
+    android:padding="16dp">
 
 <LinearLayout
     android:layout_width="match_parent"
@@ -44,20 +44,13 @@
       android:layout_height="0dp"
       android:layout_weight="1"
       >
-    <com.ledway.btprinter.views.MImageView
-        android:id="@+id/image"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        app:showDivider="middle"
+        app:dividerDrawable="@drawable/divider_flex"
         />
-
-    <TextView
-        android:id="@+id/txt_hint"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center_vertical|center_horizontal"
-        android:text="@string/hint_prod_image"
-        />
-
   </FrameLayout>
 
 </LinearLayout>

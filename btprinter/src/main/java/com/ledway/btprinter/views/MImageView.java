@@ -31,11 +31,13 @@ public class MImageView extends ImageView {
         if(TextUtils.isEmpty(imagePath)){
           return;
         }
-        Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_VIEW);
-        intent.setDataAndType(FileProvider.getUriForFile(getContext(),getContext().getPackageName()+".provider",new File(imagePath)), "image/*");
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        getContext().startActivity(intent);
+        if(new File(imagePath).exists()) {
+          Intent intent = new Intent();
+          intent.setAction(Intent.ACTION_VIEW);
+          intent.setDataAndType(FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".provider", new File(imagePath)), "image/*");
+          intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+          getContext().startActivity(intent);
+        }
       }
     });
   }

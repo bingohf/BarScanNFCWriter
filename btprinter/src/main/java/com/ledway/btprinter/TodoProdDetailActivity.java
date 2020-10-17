@@ -2,6 +2,9 @@ package com.ledway.btprinter;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.MutableLiveData;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -13,12 +16,16 @@ import android.provider.MediaStore;
 import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -29,6 +36,10 @@ import butterknife.OnClick;
 
 import com.activeandroid.query.Select;
 import com.example.android.common.logger.Log;
+import com.google.android.flexbox.FlexDirection;
+import com.google.android.flexbox.FlexboxItemDecoration;
+import com.google.android.flexbox.FlexboxLayoutManager;
+import com.google.android.flexbox.JustifyContent;
 import com.ledway.btprinter.event.ProdSaveEvent;
 import com.ledway.btprinter.models.TodoProd;
 import com.ledway.btprinter.network.model.RestSpResponse;
@@ -36,6 +47,7 @@ import com.ledway.btprinter.network.model.SpReturn;
 import com.ledway.btprinter.views.MImageView;
 import com.ledway.framework.FullScannerActivity;
 import com.ledway.rxbus.RxBus;
+import com.ledway.scanmaster.ApplicationContext;
 import com.ledway.scanmaster.model.OCRData;
 import com.ledway.scanmaster.model.Resource;
 import com.ledway.scanmaster.utils.BizUtils;
@@ -71,16 +83,16 @@ import timber.log.Timber;
 public class TodoProdDetailActivity extends AppCompatActivity {
   private static final int REQUEST_TAKE_IMAGE = 1;
   private static final int RESULT_CAMERA_QR_CODE = 2;
-  @BindView(R.id.image) MImageView mImageView;
-  @BindView(R.id.txt_hint) TextView mTxtHint;
+  private static final int REQUEST_TAKE_FOR =3000;
   @BindView(R.id.txt_spec) EditText mEdtSpec;
   @BindView(R.id.img_qrcode) ImageView mImgQrCode;
+  @BindView(R.id.list_view)  RecyclerView mListView;
   private TodoProd mTodoProd;
   private String mCurrentPhotoPath;
   private String mMyTaxNo;
   private MutableLiveData<Resource<OCRData>> orc = new MutableLiveData<>();
   private ProgressDialog mProgressDialog;
-
+  public static String[]  pictureTypes = new String[]{"Main" , "Left" ,"Flat", "Down", "Front", "Bent", "Right"};
   @Override public boolean onCreateOptionsMenu(Menu menu) {
     getMenuInflater().inflate(R.menu.todo_prod_menu, menu);
     return true;
@@ -94,7 +106,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
       case R.id.action_re_take_photo: {
-        startTakePhoto(1);
+        takePictureFor(0);
         break;
       }
       case R.id.action_re_upload: {
@@ -176,6 +188,23 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     }
   }
 
+  private String getImagePath(String pictureType, int type){
+    if ("Main".equals(pictureType)) {
+      return MApp.getApplication().getPicPath()
+              + "/"
+              + getProdNoFileName()
+              + "_type_"
+              + type
+              + ".jpeg";
+    }
+    return MApp.getApplication().getPicPath()
+            + "/"
+            + getProdNoFileName()
+            + "_" + pictureType + "_"
+            + type
+            + ".jpeg";
+  }
+
   private String getProdNoFileName() {
     return mTodoProd.prodNo.replaceAll("[\\*\\/\\\\\\?]", "_");
   }
@@ -185,28 +214,12 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     setContentView(R.layout.activity_todo_prod_detail);
     ButterKnife.bind(this);
 
+    bindListView();
+
     loadTodoProd();
     //mTodoProd.queryAllField();
     getSupportActionBar().setTitle(mTodoProd.prodNo);
     mEdtSpec.setText(mTodoProd.spec_desc);
-    if (TextUtils.isEmpty(mTodoProd.image1)) {
-      mTxtHint.setVisibility(View.VISIBLE);
-      mImageView.setVisibility(View.GONE);
-    } else {
-      mImageView.setVisibility(View.VISIBLE);
-      mTxtHint.setVisibility(View.GONE);
-
-      //Bitmap bitmap =  IOUtil.loadImage(mTodoProd.image1, 800,800);
-      if (new File(mTodoProd.image1).exists()) {
-        Picasso.with(this).load(new File(mTodoProd.image1)).into(mImageView);
-      }
-      mImageView.setImagePath(mTodoProd.image1);
-    }
-    mTxtHint.setOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View v) {
-        startTakePhoto(1);
-      }
-    });
     mEdtSpec.setOnFocusChangeListener(new View.OnFocusChangeListener() {
       @Override public void onFocusChange(View v, boolean hasFocus) {
         if (!hasFocus) {
@@ -260,6 +273,23 @@ public class TodoProdDetailActivity extends AppCompatActivity {
 
 /*    Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
     startActivityForResult(takePicture, REQUEST_TAKE_IMAGE);//zero can be replaced with any action code*/
+  }
+
+  private void bindListView() {
+    FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(this);
+
+    layoutManager.setFlexDirection(FlexDirection.ROW);
+    layoutManager.setJustifyContent(JustifyContent.CENTER);
+
+
+    FlexboxItemDecoration decor = new FlexboxItemDecoration(this);
+    decor.setDrawable(ContextCompat.getDrawable(this, R.drawable.divider_flex));
+    decor.setOrientation(FlexboxItemDecoration.BOTH);
+    mListView.addItemDecoration(decor);
+
+    mListView.setLayoutManager(layoutManager);
+    mListView.setAdapter(new MyAdapter());
+
   }
 
   @Override protected void onDestroy() {
@@ -320,6 +350,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
   }
 
   @Override protected void onActivityResult(final int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
     switch (requestCode) {
       case RESULT_CAMERA_QR_CODE: {
         if (resultCode == Activity.RESULT_OK) {
@@ -328,53 +359,51 @@ public class TodoProdDetailActivity extends AppCompatActivity {
         }
         break;
       }
-      case REQUEST_TAKE_IMAGE: {
-        if (RESULT_OK == resultCode) {
-          File f = new File(mCurrentPhotoPath);
-          if (f.exists()) {
-            if (f.length() < 1) {
-              f.delete();
-            }
-          }
-          if (f.exists()) {
-            mTodoProd.image1 = mCurrentPhotoPath;
-            IOUtil.cropImage(new File(mCurrentPhotoPath));
-            Picasso.with(this).invalidate(new File(mCurrentPhotoPath));
-            Bitmap bitmap = IOUtil.loadImage(mCurrentPhotoPath, 800, 800);
-            File file2 = new File(MApp.getApplication().getPicPath()
-                + "/"
-                + getProdNoFileName()
-                + "_type_"
-                + 2
-                + ".jpeg");
-            if (!file2.exists()) {
-              try {
-                file2.createNewFile();
-              } catch (IOException e) {
-                e.printStackTrace();
+      default:{
+        if (requestCode >= REQUEST_TAKE_FOR){
+          int typeIndex = requestCode - REQUEST_TAKE_FOR;
+          if (RESULT_OK == resultCode) {
+            File f = new File(mCurrentPhotoPath);
+            if (f.exists()) {
+              if (f.length() < 1) {
+                f.delete();
               }
             }
-            try {
-              OutputStream outputStream = new FileOutputStream(file2);
-              float rate = 110f / bitmap.getWidth();
-              Bitmap resized =
-                  Bitmap.createScaledBitmap(bitmap, 110, (int) (rate * bitmap.getHeight()), true);
-              resized.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-              mTodoProd.image2 = file2.getAbsolutePath();
-            } catch (FileNotFoundException e) {
-              e.printStackTrace();
+            if (f.exists()) {
+              if(typeIndex ==0) {
+                mTodoProd.image1 = mCurrentPhotoPath;
+              }
+              IOUtil.cropImage(new File(mCurrentPhotoPath));
+              Picasso.with(this).invalidate(new File(mCurrentPhotoPath));
+              Bitmap bitmap = IOUtil.loadImage(mCurrentPhotoPath, 800, 800);
+              File file2 = new File(getImagePath(pictureTypes[typeIndex], 2));
+              if (!file2.exists()) {
+                try {
+                  file2.createNewFile();
+                } catch (IOException e) {
+                  e.printStackTrace();
+                }
+              }
+              try {
+                OutputStream outputStream = new FileOutputStream(file2);
+                float rate = 110f / bitmap.getWidth();
+                Bitmap resized =
+                        Bitmap.createScaledBitmap(bitmap, 110, (int) (rate * bitmap.getHeight()), true);
+                resized.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+                if(typeIndex ==0) {
+                  mTodoProd.image2 = file2.getAbsolutePath();
+                }
+              } catch (FileNotFoundException e) {
+                e.printStackTrace();
+              }
+              mTodoProd.update_time = new Date();
+              mTodoProd.save();
+              mListView.getAdapter().notifyItemChanged(typeIndex);
             }
-            mImageView.setVisibility(View.VISIBLE);
-            mTxtHint.setVisibility(View.GONE);
-            Picasso.with(mImageView.getContext()).load(f).into(mImageView);
-            mImageView.setImagePath(f.getAbsolutePath());
-            mTodoProd.update_time = new Date();
-            mTodoProd.save();
-          }
-          //   upload();
+            //   upload();
 
+          }
         }
-        break;
       }
     }
   }
@@ -448,5 +477,109 @@ public class TodoProdDetailActivity extends AppCompatActivity {
         }
       }
     });
+  }
+
+  private void takePictureFor(int typeIndex){
+    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+    if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+      File photoFile = null;
+      try {
+        photoFile = new File(getImagePath(pictureTypes[typeIndex], 1));
+        mCurrentPhotoPath = photoFile.getAbsolutePath();
+        photoFile.createNewFile();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      if (photoFile != null) {
+        Uri photoURI = FileProvider.getUriForFile(getApplicationContext(),
+                BuildConfig.APPLICATION_ID + ".provider", photoFile);
+        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+        takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        List<ResolveInfo> resolvedIntentActivities =
+                getPackageManager().queryIntentActivities(takePictureIntent,
+                        PackageManager.MATCH_DEFAULT_ONLY);
+        for (ResolveInfo resolvedIntentInfo : resolvedIntentActivities) {
+          String packageName = resolvedIntentInfo.activityInfo.packageName;
+
+/*          grantUriPermission(packageName, photoURI,
+              Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);*/
+        }
+        startActivityForResult(takePictureIntent,REQUEST_TAKE_FOR + typeIndex);
+      }
+    }
+  }
+
+
+
+
+  private  class MyViewHolder extends RecyclerView.ViewHolder{
+    TextView txtLabel;
+    MImageView imageView;
+    int typeIndex;
+    public MyViewHolder(@NonNull View itemView) {
+      super(itemView);
+      txtLabel = itemView.findViewById(R.id.txt_label);
+      imageView = itemView.findViewById(R.id.image_view);
+      imageView.setOnClickListener(v -> {
+        File imageFile = new File(getImagePath(pictureTypes[typeIndex], 1));
+        if(imageFile.exists()){
+          Intent intent = new Intent();
+          intent.setAction(Intent.ACTION_VIEW);
+          intent.setDataAndType(FileProvider.getUriForFile(imageView.getContext(), imageView.getContext().getPackageName() + ".provider", imageFile), "image/*");
+          intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+          imageView.getContext().startActivity(intent);
+        }
+      });
+      itemView.findViewById(R.id.txt_change).setOnClickListener(v -> {
+        takePictureFor(typeIndex);
+      });
+    }
+  }
+
+  private class MyAdapter extends RecyclerView.Adapter<MyViewHolder>{
+
+
+    public MyAdapter(){
+    }
+
+
+    @NonNull
+    @Override
+    public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+      LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
+      View itemView = layoutInflater.inflate(R.layout.list_item_image_view, parent, false);
+      return new MyViewHolder(itemView);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+      String pictureType = pictureTypes[position];
+      holder.typeIndex = position;
+      ViewGroup.LayoutParams layoutParams = holder.itemView.getLayoutParams();
+      if (layoutParams instanceof FlexboxLayoutManager.LayoutParams){
+        FlexboxLayoutManager.LayoutParams flexboxLp = (FlexboxLayoutManager.LayoutParams) layoutParams;
+        if (pictureType.equals("Main")){
+          flexboxLp.setFlexBasisPercent(1f);
+        }else{
+          flexboxLp.setFlexBasisPercent(0.48f);
+        }
+      }
+      holder.txtLabel.setText(pictureType);
+      if (pictureType.equals("Main")){
+        Picasso.with(holder.imageView.getContext()).load(new File(mTodoProd.image1)).into(holder.imageView);
+        holder.imageView.setImagePath(mTodoProd.image1);
+      }else{
+        String path = getImagePath(pictureType, 1);
+        Picasso.with(holder.imageView.getContext()).load(new File(path)).into(holder.imageView);
+        holder.imageView.setImagePath(path);
+      }
+
+
+    }
+
+    @Override
+    public int getItemCount() {
+      return pictureTypes.length;
+    }
   }
 }
