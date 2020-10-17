@@ -123,10 +123,10 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     final ProgressDialog progressDialog =
         ProgressDialog.show(this, getString(R.string.upload), getString(R.string.wait_a_moment),
             true);
-    mTodoProd.remoteSave2()
+    mTodoProd.remoteSave3()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Subscriber<RestSpResponse<SpReturn>>() {
+        .subscribe(new Subscriber<String>() {
           @Override public void onCompleted() {
             progressDialog.dismiss();
           }
@@ -138,16 +138,10 @@ public class TodoProdDetailActivity extends AppCompatActivity {
             e.printStackTrace();
           }
 
-          @Override public void onNext(RestSpResponse<SpReturn> spReturnRestSpResponse) {
-            int returnCode = spReturnRestSpResponse.result.get(0).errCode;
-            String returnMessage = spReturnRestSpResponse.result.get(0).errData;
-            if (!TextUtils.isEmpty(returnMessage)) {
-              Toast.makeText(TodoProdDetailActivity.this, returnMessage, Toast.LENGTH_LONG).show();
-            }
-            if (returnCode == 1) {
-              mTodoProd.uploaded_time = new Date();
-              mTodoProd.save();
-            }
+          @Override public void onNext(String returnMessage) {
+            Toast.makeText(TodoProdDetailActivity.this, returnMessage, Toast.LENGTH_LONG).show();
+            mTodoProd.uploaded_time = new Date();
+            mTodoProd.save();
             invalidateOptionsMenu();
           }
         });
@@ -188,18 +182,18 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     }
   }
 
-  private String getImagePath(String pictureType, int type){
+  public static String getImagePath(String prodno ,String pictureType, int type){
     if ("Main".equals(pictureType)) {
       return MApp.getApplication().getPicPath()
               + "/"
-              + getProdNoFileName()
+              + prodno.replaceAll("[\\*\\/\\\\\\?]", "_")
               + "_type_"
               + type
               + ".jpeg";
     }
     return MApp.getApplication().getPicPath()
             + "/"
-            + getProdNoFileName()
+            + prodno.replaceAll("[\\*\\/\\\\\\?]", "_")
             + "_" + pictureType + "_"
             + type
             + ".jpeg";
@@ -364,6 +358,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
           int typeIndex = requestCode - REQUEST_TAKE_FOR;
           if (RESULT_OK == resultCode) {
             File f = new File(mCurrentPhotoPath);
+            TodoProd.setFileUpload(f, false);
             if (f.exists()) {
               if (f.length() < 1) {
                 f.delete();
@@ -376,7 +371,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
               IOUtil.cropImage(new File(mCurrentPhotoPath));
               Picasso.with(this).invalidate(new File(mCurrentPhotoPath));
               Bitmap bitmap = IOUtil.loadImage(mCurrentPhotoPath, 800, 800);
-              File file2 = new File(getImagePath(pictureTypes[typeIndex], 2));
+              File file2 = new File(getImagePath(mTodoProd.prodNo,pictureTypes[typeIndex], 2));
               if (!file2.exists()) {
                 try {
                   file2.createNewFile();
@@ -484,7 +479,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
     if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
       File photoFile = null;
       try {
-        photoFile = new File(getImagePath(pictureTypes[typeIndex], 1));
+        photoFile = new File(getImagePath(mTodoProd.prodNo,  pictureTypes[typeIndex], 1));
         mCurrentPhotoPath = photoFile.getAbsolutePath();
         photoFile.createNewFile();
       } catch (IOException e) {
@@ -521,7 +516,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
       txtLabel = itemView.findViewById(R.id.txt_label);
       imageView = itemView.findViewById(R.id.image_view);
       imageView.setOnClickListener(v -> {
-        File imageFile = new File(getImagePath(pictureTypes[typeIndex], 1));
+        File imageFile = new File(getImagePath(mTodoProd.prodNo,pictureTypes[typeIndex], 1));
         if(imageFile.exists()){
           Intent intent = new Intent();
           intent.setAction(Intent.ACTION_VIEW);
@@ -569,7 +564,7 @@ public class TodoProdDetailActivity extends AppCompatActivity {
         Picasso.with(holder.imageView.getContext()).load(new File(mTodoProd.image1)).into(holder.imageView);
         holder.imageView.setImagePath(mTodoProd.image1);
       }else{
-        String path = getImagePath(pictureType, 1);
+        String path = getImagePath(mTodoProd.prodNo,pictureType, 1);
         Picasso.with(holder.imageView.getContext()).load(new File(path)).into(holder.imageView);
         holder.imageView.setImagePath(path);
       }

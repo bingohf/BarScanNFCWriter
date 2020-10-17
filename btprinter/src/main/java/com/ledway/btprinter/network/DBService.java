@@ -5,6 +5,7 @@ import com.ledway.btprinter.network.model.ProductReturn;
 import com.ledway.btprinter.network.model.RestDataSetResponse;
 import com.ledway.btprinter.network.model.RestSpResponse;
 import com.ledway.btprinter.network.model.SpReturn;
+import com.ledway.btprinter.network.model.Sp_UpProductLineImage_Request;
 import com.ledway.btprinter.network.model.Sp_UpProduct_Request;
 import com.ledway.btprinter.network.model.Sp_UpSampleDetail_Request;
 import com.ledway.btprinter.network.model.Sp_UpSampleDetail_Return;
@@ -49,9 +50,12 @@ public interface DBService {
   @GET("sql/{sql}") Observable<ResponseBody> customQuery(@Path("sql") String sql);
 
 
-  @POST("Sp/sp_UpProductLine") Observable<RestSpResponse<SpReturn>> sp_UpProduct(@Body
+  @POST("Sp/sp_UpProductLineV2") Observable<RestSpResponse<SpReturn>> sp_UpProduct(@Body
       Sp_UpProduct_Request request);
 
+
+  @POST("Sp/sp_UpProductLineImage") Observable<RestSpResponse<SpReturn>> sp_UpProductLineImage(@Body
+                                                                                                       Sp_UpProductLineImage_Request request);
 
   @Multipart
   @POST

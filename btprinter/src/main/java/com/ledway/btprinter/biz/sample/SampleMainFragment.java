@@ -388,19 +388,7 @@ public class SampleMainFragment extends Fragment {
         .map((Func1<Pair<String, String[]>, List<TodoProd>>) stringPair -> new Select().from(
             TodoProd.class).where(stringPair.first, (Object[]) stringPair.second).execute())
         .flatMap(Observable::from)
-        .flatMap(todoProd -> todoProd.remoteSave2()
-            .flatMap(spReturnRestSpResponse -> {
-              int returnCode = spReturnRestSpResponse.result.get(0).errCode;
-              String returnMessage = spReturnRestSpResponse.result.get(0).errData;
-              if (returnCode == 1) {
-                todoProd.uploaded_time = new Date();
-                todoProd.save();
-              } else {
-                return Observable.error(new Exception(returnMessage));
-              }
-
-              return Observable.just(spReturnRestSpResponse);
-            }).onErrorResumeNext(throwable -> Observable.empty()))
+        .flatMap(TodoProd::remoteSave3)
         .subscribeOn(Schedulers.io())
         .ignoreElements().cast(String.class);
   }

@@ -5,17 +5,23 @@ import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
+import com.example.android.common.logger.Log;
 import com.ledway.btprinter.MApp;
+import com.ledway.btprinter.TodoProdDetailActivity;
 import com.ledway.btprinter.network.MyProjectApi;
 import com.ledway.btprinter.network.model.RestSpResponse;
 import com.ledway.btprinter.network.model.SpReturn;
+import com.ledway.btprinter.network.model.Sp_UpProductLineImage_Request;
 import com.ledway.btprinter.network.model.Sp_UpProduct_Request;
 import com.ledway.scanmaster.utils.IOUtil;
+
+import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import rx.Observable;
 import rx.Subscriber;
+import rx.functions.Func1;
 
 /**
  * Created by togb on 2016/7/3.
@@ -97,6 +103,109 @@ import rx.Subscriber;
         android.util.Base64.encodeToString(image2Buffer, android.util.Base64.DEFAULT);
     return MyProjectApi.getInstance().getDbService().sp_UpProduct(request);
   }
+
+
+  public Observable<String> remoteSave3() {
+    String mac_address = MApp.getApplication().getSystemInfo().getDeviceId();
+    byte[] image1Buffer = new byte[] {};
+    byte[] image2Buffer = new byte[] {};
+    if (!TextUtils.isEmpty(image1)) {
+      try {
+        image1Buffer = IOUtil.readFile(image1);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+    if (!TextUtils.isEmpty(image2)) {
+      try {
+        image2Buffer = IOUtil.readFile(image2);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+    Sp_UpProduct_Request request = new Sp_UpProduct_Request();
+    request.empno = mac_address;
+    request.prodno = prodNo;
+    request.specdesc = spec_desc;
+    request.graphic = android.util.Base64.encodeToString(image1Buffer, android.util.Base64.DEFAULT);
+    request.graphic2 =
+            android.util.Base64.encodeToString(image2Buffer, android.util.Base64.DEFAULT);
+    Observable<String> ob = MyProjectApi.getInstance().getDbService().sp_UpProduct(request).flatMap(response -> {
+      int returnCode = response.result.get(0).errCode;
+      String returnMessage = response.result.get(0).errData;
+      if (returnCode == 1) {
+        return Observable.just(returnMessage);
+      } else {
+        return Observable.error(new Throwable(returnMessage));
+      }
+    });
+    for(int i =1;i < TodoProdDetailActivity.pictureTypes.length; ++i){
+      ob = ob.concatWith(uploadImages(i));
+    }
+    return ob;
+  }
+
+  public static void setFileUpload(File file, boolean isUploaded){
+    File flagFile = new File(file.getAbsolutePath() +".uploaded");
+    if(!flagFile.exists() && isUploaded){
+      try {
+        flagFile.createNewFile();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    } else if (!isUploaded){
+      flagFile.delete();
+    }
+
+  }
+
+  private boolean isFileUpload(File file){
+    File flagFile = new File(file.getAbsolutePath() +".uploaded");
+    return flagFile.exists();
+  }
+
+  private Observable<String> uploadImages(int typeIndex){
+    return Observable.defer( ()->{
+      File imageFile = new File(TodoProdDetailActivity.getImagePath(prodNo, TodoProdDetailActivity.pictureTypes[typeIndex], 1));
+      if (isFileUpload(imageFile)) {
+        return Observable.empty();
+      }
+      if (imageFile.exists() && imageFile.length() >0){
+        byte[] image1Buffer = new byte[] {};
+        byte[] image2Buffer = new byte[] {};
+        try {
+          image1Buffer = IOUtil.readFile(imageFile);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+        try {
+          image2Buffer = IOUtil.readFile(TodoProdDetailActivity.getImagePath(prodNo, TodoProdDetailActivity.pictureTypes[typeIndex], 2));
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+        Sp_UpProductLineImage_Request request = new Sp_UpProductLineImage_Request();
+        request.prodno = prodNo;
+        request.empno = MApp.getApplication().getSystemInfo().getDeviceId();
+        request.type = TodoProdDetailActivity.pictureTypes[typeIndex];
+        request.graphic = android.util.Base64.encodeToString(image1Buffer, android.util.Base64.DEFAULT);
+        request.graphic2 =
+                android.util.Base64.encodeToString(image2Buffer, android.util.Base64.DEFAULT);
+
+        return MyProjectApi.getInstance().getDbService().sp_UpProductLineImage(request).flatMap( response -> {
+          int returnCode = response.result.get(0).errCode;
+          String returnMessage = response.result.get(0).errData;
+          if (returnCode == 1) {
+            setFileUpload(imageFile, true);
+            return Observable.just(returnMessage);
+          }else {
+            return Observable.error(new Throwable(returnMessage));
+          }
+        });
+      }
+      return Observable.empty();
+    });
+  }
+
 
   public void queryAllField() {
     if (getId() != null) {
