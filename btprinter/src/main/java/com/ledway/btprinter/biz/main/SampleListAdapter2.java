@@ -1,6 +1,9 @@
 package com.ledway.btprinter.biz.main;
 
 import android.content.Context;
+
+import androidx.annotation.IdRes;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
@@ -25,6 +28,11 @@ import java.util.Locale;
 
 public class SampleListAdapter2 extends RecyclerView.Adapter<SampleListAdapter2.SampleViewHolder>
     implements View.OnClickListener, View.OnLongClickListener {
+
+  public interface ViewClickCallback{
+    void onClick(View view, int index);
+  }
+
   private final LayoutInflater mLayoutInflater;
   private SimpleDateFormat mDateFormatter =
       new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault());
@@ -33,30 +41,62 @@ public class SampleListAdapter2 extends RecyclerView.Adapter<SampleListAdapter2.
   private PublishSubject<Object> mLongClickSubject = PublishSubject.create();
   private PublishSubject<Pair<Integer,Boolean>> mCheckSubject = PublishSubject.create();
   private boolean selectMode = false;
+  private final int mLayout_item;
 
-  public SampleListAdapter2(Context context) {
-    this(context, new ArrayList<>());
+  private ViewClickCallback mViewClickCallback = null;
+
+  private View.OnClickListener mViewItemClick = v ->{
+    if(mViewClickCallback != null){
+      mViewClickCallback.onClick(v, (Integer) v.getTag());
+    }
+  };
+
+  public SampleListAdapter2(Context context, int layout) {
+    this(context, new ArrayList<>(), layout);
   }
 
+
+  public SampleListAdapter2(Context context) {
+    this(context, new ArrayList<>(), R.layout.list_item_sample);
+  }
   public SampleListAdapter2(Context context, List<ItemData> data) {
+    this(context, data, R.layout.list_item_sample);
+  }
+
+  public void setViewClickCallback(ViewClickCallback callback){
+    mViewClickCallback = callback;
+  }
+
+
+  public SampleListAdapter2(Context context, List<ItemData> data, int layout) {
     mLayoutInflater = LayoutInflater.from(context);
     mData = data;
+    mLayout_item = layout;
   }
 
   @Override public SampleViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-    View view = mLayoutInflater.inflate(R.layout.list_item_sample, parent, false);
+    View view = mLayoutInflater.inflate(mLayout_item, parent, false);
     view.setOnClickListener(this);
     view.setOnLongClickListener(this);
     SampleViewHolder hold = new SampleViewHolder(view);
-    hold.checkBox.setOnCheckedChangeListener(
-        (compoundButton, b) -> {
-          if(hold.position >-1) {
-            mData.get(hold.position).isChecked = b;
-            mCheckSubject.onNext(new Pair<>(hold.position, b));
-          }
-
-
-        });
+    if (hold.checkBox != null) {
+      hold.checkBox.setOnCheckedChangeListener(
+              (compoundButton, b) -> {
+                if (hold.position > -1) {
+                  mData.get(hold.position).isChecked = b;
+                  mCheckSubject.onNext(new Pair<>(hold.position, b));
+                }
+              });
+    }
+    if(hold.txtMemo != null){
+      hold.txtMemo.setOnClickListener(mViewItemClick);
+    }
+    if(hold.btnAdd != null){
+      hold.btnAdd.setOnClickListener(mViewItemClick);
+    }
+    if(hold.btnSub != null){
+      hold.btnSub.setOnClickListener(mViewItemClick);
+    }
     return hold;
   }
 
@@ -70,17 +110,44 @@ public class SampleListAdapter2 extends RecyclerView.Adapter<SampleListAdapter2.
         Picasso.with(holder.itemView.getContext()).load(file).fit().into(holder.imgIcon);
       }
     }
-    holder.txtTitle.setText(safeText(dataItem.title));
-    holder.txtSubTitle.setVisibility(TextUtils.isEmpty(dataItem.subTitle) ? View.GONE:View.VISIBLE);
-    holder.txtSubTitle.setText(safeText(dataItem.subTitle));
-    holder.txtTimestamp.setText(formatDate(dataItem.timestamp));
-    holder.txtTimestamp.setVisibility(dataItem.timestamp== null ?View.GONE:View.VISIBLE);
-    holder.imgSynced.setVisibility(dataItem.redFlag ? View.VISIBLE : View.GONE);
-    holder.checkBox.setVisibility(selectMode ? View.VISIBLE : View.GONE);
-
+    if(holder.txtTitle != null) {
+      holder.txtTitle.setText(safeText(dataItem.title));
+    }
+    if(holder.txtSubTitle != null) {
+      holder.txtSubTitle.setVisibility(TextUtils.isEmpty(dataItem.subTitle) ? View.GONE : View.VISIBLE);
+      holder.txtSubTitle.setText(safeText(dataItem.subTitle));
+    }
+    if(holder.txtTimestamp!= null) {
+      holder.txtTimestamp.setText(formatDate(dataItem.timestamp));
+      holder.txtTimestamp.setVisibility(dataItem.timestamp == null ? View.GONE : View.VISIBLE);
+    }
+    if(holder.imgSynced != null) {
+      holder.imgSynced.setVisibility(dataItem.redFlag ? View.VISIBLE : View.GONE);
+    }
     holder.position = position;
     holder.itemView.setTag(position);
-    holder.checkBox.setChecked(dataItem.isChecked);
+    if(holder.txtMemo != null) {
+      holder.txtMemo.setTag(position);
+      if(TextUtils.isEmpty(dataItem.memo)){
+        holder.txtMemo.setText("Click to set memo");
+      }else {
+        holder.txtMemo.setText(dataItem.memo);
+      }
+
+    }
+    if(holder.txtCount != null){
+      holder.txtCount.setText(String.valueOf(dataItem.count));
+    }
+    if(holder.btnAdd != null){
+      holder.btnAdd.setTag(position);
+    }
+    if(holder.btnSub != null){
+      holder.btnSub.setTag(position);
+    }
+    if(holder.checkBox != null) {
+      holder.checkBox.setVisibility(selectMode ? View.VISIBLE : View.GONE);
+      holder.checkBox.setChecked(dataItem.isChecked);
+    }
   }
 
   private String formatDate(Date date) {
@@ -149,12 +216,17 @@ public class SampleListAdapter2 extends RecyclerView.Adapter<SampleListAdapter2.
   }
 
   public static class SampleViewHolder extends RecyclerView.ViewHolder {
-    @BindView(R.id.icon) ImageView imgIcon;
-    @BindView(R.id.txt_title) TextView txtTitle;
-    @BindView(R.id.txt_sub_title) TextView txtSubTitle;
-    @BindView(R.id.txt_timestamp) TextView txtTimestamp;
-    @BindView(R.id.img_synced) View imgSynced;
-    @BindView(R.id.checkbox) CheckBox checkBox;
+    @BindView(R.id.icon) @Nullable
+    ImageView imgIcon;
+    @Nullable @BindView(R.id.txt_title) TextView txtTitle;
+    @Nullable @BindView(R.id.txt_sub_title) TextView txtSubTitle;
+    @Nullable @BindView(R.id.txt_timestamp) TextView txtTimestamp;
+    @Nullable @BindView(R.id.img_synced) View imgSynced;
+    @Nullable  @BindView(R.id.checkbox) CheckBox checkBox;
+    @Nullable  @BindView(R.id.txt_memo) TextView txtMemo;
+    @Nullable  @BindView(R.id.btn_add) View btnAdd;
+    @Nullable  @BindView(R.id.btn_sub) View btnSub;
+    @Nullable  @BindView(R.id.txt_count) TextView txtCount;
     public int position = -1;
     public SampleViewHolder(View itemView) {
       super(itemView);
@@ -169,6 +241,8 @@ public class SampleListAdapter2 extends RecyclerView.Adapter<SampleListAdapter2.
     public String subTitle;
     public boolean redFlag;
     public boolean isChecked;
+    public String memo;
+    public int count = 1;
     public T hold;
   }
 }

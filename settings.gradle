@@ -4,3 +4,4 @@ include ':zkc',":rxbus",':mylibrary',":framework",":scanMaster",':btprinter',':a
    // ":rxbus",
    // ":scanMaster",
    // ":btprinter"
+include ':activeandroid'

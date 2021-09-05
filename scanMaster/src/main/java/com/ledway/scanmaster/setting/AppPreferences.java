@@ -2,6 +2,7 @@ package com.ledway.scanmaster.setting;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.DialogPreference;
@@ -88,7 +89,14 @@ public class AppPreferences extends PreferenceActivity
       AppPreferences.this.startActivity(intent);
       return true;
     });
-    findPreference("version").setSummary(BuildConfig.VERSION_NAME);
+
+    try {
+      String versionName = getApplication().getPackageManager().getPackageInfo(getPackageName(),0).versionName;
+      findPreference("version").setSummary(versionName);
+    } catch (PackageManager.NameNotFoundException e) {
+      e.printStackTrace();
+    }
+
   }
 
   private void setPreference(Preference preference, PreferenceInterface preferenceInterface) {

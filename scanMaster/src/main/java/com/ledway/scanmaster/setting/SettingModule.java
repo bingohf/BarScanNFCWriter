@@ -9,10 +9,10 @@ import dagger.Provides;
 /**
  * Created by togb on 2017/3/5.
  */
-@ActivityScope
+
 @Module
 public class SettingModule {
-
+  @ActivityScope
   @Provides PasswordVerify providePasswordVerfiy(){
     return new LedwayPaswordVerify();
   }

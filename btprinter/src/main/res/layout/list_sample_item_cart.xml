@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:orientation="horizontal"
+    android:padding="8dp">
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      >
+
+    <ImageView
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:id="@+id/icon"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="3dp"
+        android:src="@drawable/ic_grid_on_black_24dp" />
+    <ImageView
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:id="@+id/img_synced"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="55dp"
+        android:src="@drawable/circle"
+        />
+
+
+    <LinearLayout
+        app:layout_constraintTop_toBottomOf="@id/icon"
+        app:layout_constraintStart_toStartOf="@id/icon"
+        app:layout_constraintEnd_toEndOf="@id/icon"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+      <Button
+          android:text="+"
+          android:minWidth="0dp"
+          android:minHeight="0dp"
+          android:id="@+id/btn_add"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"/>
+      <TextView
+          android:text="1"
+          android:id="@+id/txt_count"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"/>
+      <Button
+          android:text="-"
+          android:minWidth="0dp"
+          android:minHeight="0dp"
+          android:id="@+id/btn_sub"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"/>
+    </LinearLayout>
+  </androidx.constraintlayout.widget.ConstraintLayout>
+  <View
+      android:layout_width="6dp"
+      android:layout_height="1dp"
+      />
+  <RelativeLayout
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center_vertical"
+      android:layout_weight="1"
+      android:orientation="vertical"
+      >
+
+    <TextView
+        android:id="@+id/txt_memo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawableEnd="@drawable/ic_menu_edit_18"
+        android:text="Set Memo"
+        android:textColor="@color/material_on_primary_emphasis_medium" />
+
+
+    <TextView
+
+        android:layout_below="@id/txt_memo"
+        android:id="@+id/txt_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:text="Title"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+    <TextView
+        android:id="@+id/txt_sub_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/txt_title"
+        android:text="subTitle"
+        />
+
+
+  </RelativeLayout>
+
+
+</LinearLayout>

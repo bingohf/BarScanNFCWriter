@@ -1,5 +1,6 @@
 package com.ledway.btprinter.models;
 
+import android.content.Context;
 import android.text.TextUtils;
 import android.util.Base64;
 import com.activeandroid.Model;
@@ -12,8 +13,8 @@ import com.ledway.btprinter.network.MyProjectApi;
 import com.ledway.btprinter.network.model.RestSpResponse;
 import com.ledway.btprinter.network.model.SpReturn;
 import com.ledway.btprinter.network.model.Sp_UpSampleDetail_Request;
-import com.ledway.btprinter.network.model.Sp_UpSampleDetail_Return;
-import com.ledway.btprinter.network.model.Sp_UpSample_v3_Request;
+import com.ledway.btprinter.network.model.Sp_UpSample_Request;
+import com.ledway.scanmaster.utils.ContextUtils;
 import com.ledway.scanmaster.utils.IOUtil;
 import com.ledway.scanmaster.utils.JsonUtils;
 import java.io.File;
@@ -24,7 +25,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import rx.Observable;
-import rx.functions.Action0;
 import rx.functions.Func1;
 
 /**
@@ -191,16 +191,18 @@ import rx.functions.Func1;
     } catch (IOException e) {
       e.printStackTrace();
     }
-    final Sp_UpSample_v3_Request request =new Sp_UpSample_v3_Request();
+    final Sp_UpSample_Request request =new Sp_UpSample_Request();
     request.series = guid;
     request.empno = mac_address;
     request.custMemo = desc;
     request.shareToDeviceId = shareToDeviceId;
     request.json = toJson();
+    request.show_name = ContextUtils.mContext.getSharedPreferences("user_info", Context.MODE_PRIVATE)
+            .getString("show_name","");
     request.custCardPic = Base64.encodeToString(imageBuffer, Base64.DEFAULT);
     Observable<String> obMaster = MyProjectApi.getInstance()
         .getDbService()
-        .sp_UpSample_v3(request)
+        .sp_UpSample(request)
         .flatMap((Func1<RestSpResponse<SpReturn>, Observable<String>>) spReturnRestSpResponse -> {
           SpReturn spReturn = spReturnRestSpResponse.result.get(0);
           int returnCode = spReturn.errCode;
@@ -224,7 +226,9 @@ import rx.functions.Func1;
               detailRequest.series = guid;
               detailRequest.prodno =sampleProdLink.prodNo;
               detailRequest.itemExt = String.valueOf(sampleProdLink.ext);
-              detailRequest.pcsnum=1 ;
+              detailRequest.pcsnum= sampleProdLink.count ;
+              detailRequest.memo = sampleProdLink.memo;
+              detailRequest.dataFrom = dataFrom;
                   return MyProjectApi.getInstance().getDbService().sp_UpSampleDetail(detailRequest)
                       .flatMap(
                            response -> {

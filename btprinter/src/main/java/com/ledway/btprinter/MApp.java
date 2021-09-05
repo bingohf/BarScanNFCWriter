@@ -8,13 +8,11 @@ import android.os.Environment;
 import androidx.multidex.MultiDex;
 import android.view.Display;
 import com.activeandroid.ActiveAndroid;
-import com.crashlytics.android.Crashlytics;
 import com.facebook.stetho.Stetho;
 import com.ledway.btprinter.models.SystemInfo;
 import com.ledway.scanmaster.utils.*;
 import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
-import io.fabric.sdk.android.Fabric;
 import java.io.File;
 import timber.log.Timber;
 
@@ -29,7 +27,7 @@ public class MApp extends com.ledway.scanmaster.MApp {
   @Override public void onCreate() {
     super.onCreate();
 
-    Fabric.with(this, new Crashlytics());
+   // Fabric.with(this, new Crashlytics());
     ContextUtils.init(this);
     ActiveAndroid.initialize(this);
     Stetho.initializeWithDefaults(this);

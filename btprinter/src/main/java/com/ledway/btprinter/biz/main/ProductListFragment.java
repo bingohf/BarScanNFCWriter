@@ -467,6 +467,9 @@ public class ProductListFragment extends Fragment {
                 dialog.setSelectedIndex(which);
                 // syncProduct(text.toString());
                 GroupNameInfo selected = listResource.data.get(which);
+                getActivity().getSharedPreferences("user_info", Context.MODE_PRIVATE).edit()
+                        .putString("show_name", selected.showname)
+                        .apply();
                 downloadGroup.postValue(Resource.loading(new PagingInfo<>(selected.ttl, 0, null)));
                 downloadGroupProduct(selected.showname, selected.ttl, 0, 1);
                 return false;

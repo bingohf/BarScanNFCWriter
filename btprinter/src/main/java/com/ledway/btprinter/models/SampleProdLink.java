@@ -27,6 +27,8 @@ public class SampleProdLink {
   public Date uploaded_time;
   public Date update_time;
   public Date update_date;
+  public int count = 1;
+  public String memo = "";
 
   public String toSpec(){
     if(TextUtils.isEmpty(spec_desc)){

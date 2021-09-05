@@ -9,16 +9,14 @@ import com.ledway.btprinter.network.model.Sp_UpProductLineImage_Request;
 import com.ledway.btprinter.network.model.Sp_UpProduct_Request;
 import com.ledway.btprinter.network.model.Sp_UpSampleDetail_Request;
 import com.ledway.btprinter.network.model.Sp_UpSampleDetail_Return;
-import com.ledway.btprinter.network.model.Sp_UpSample_v3_Request;
+import com.ledway.btprinter.network.model.Sp_UpSample_Request;
 import com.ledway.btprinter.network.model.TotalUserReturn;
 
 import okhttp3.MultipartBody;
-import okhttp3.Response;
 import okhttp3.ResponseBody;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
-import retrofit2.http.Headers;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
@@ -39,10 +37,10 @@ public interface DBService {
   @GET("dataset/product") Observable<RestDataSetResponse<ProductReturn>> getProduct(
       @Query("query") String query, @Query("orderBy") String orderBy);
 
-  @POST("Sp/sp_UpSample_v3Line") Observable<RestSpResponse<SpReturn>> sp_UpSample_v3(@Body
-      Sp_UpSample_v3_Request request);
+  @POST("Sp/sp_UpSample_v4Line") Observable<RestSpResponse<SpReturn>> sp_UpSample(@Body
+                                                                                          Sp_UpSample_Request request);
 
-  @POST("Sp/sp_UpSampleDetailLine") Observable<RestSpResponse<Sp_UpSampleDetail_Return>> sp_UpSampleDetail(@Body
+  @POST("Sp/sp_UpSampleDetailLineV5") Observable<RestSpResponse<Sp_UpSampleDetail_Return>> sp_UpSampleDetail(@Body
       Sp_UpSampleDetail_Request request);
 
   @GET("sql/{sql}") Observable<RestDataSetResponse<TotalUserReturn>> queryTotalUser(@Path("sql") String sql);

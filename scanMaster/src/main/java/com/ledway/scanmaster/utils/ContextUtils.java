@@ -11,7 +11,7 @@ import java.io.IOException;
  */
 
 public class ContextUtils {
- static Context mContext;
+ public static Context mContext;
   public static void init(Context context){
     mContext = context;
   }

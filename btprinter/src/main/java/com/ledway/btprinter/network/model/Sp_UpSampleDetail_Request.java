@@ -22,4 +22,6 @@ public class Sp_UpSampleDetail_Request extends BaseRequest{
   public String prodno;
   public String itemExt;
   public int pcsnum;
+  public String memo;
+  public String dataFrom;
 }

@@ -18,12 +18,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.activeandroid.Model;
 import com.activeandroid.query.Select;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.gturedi.views.StatefulLayout;
 import com.ledway.btprinter.R;
 import com.ledway.btprinter.TodoProdDetailActivity;
@@ -39,8 +41,11 @@ import com.ledway.framework.FullScannerActivity;
 import com.ledway.scanmaster.utils.JsonUtils;
 import io.reactivex.disposables.CompositeDisposable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import rx.Observable;
 import rx.Subscriber;
 
@@ -98,15 +103,15 @@ public class SampleProductListFragment extends Fragment {
           if (TextUtils.isEmpty(prodLink.prod_id)){
             prodLink.prod_id = prodLink.prodNo;
           }
-          int index = mSampleMaster.sampleProdLinks.size();
-          for (int i =0;i < mSampleMaster.sampleProdLinks.size(); ++i){
-            if(mSampleMaster.sampleProdLinks.get(i).prodNo.equals(prodLink.prodNo)){
-              index = i;
-              mSampleMaster.sampleProdLinks.remove(i);
-              break;
-            }
+
+          SampleProdLink item = mSampleMaster.sampleProdLinks.stream().filter(it -> it.prodNo.equals(prodLink.prodNo)).findFirst().orElse(null);
+          if(item == null){
+            item = prodLink;
+            mSampleMaster.sampleProdLinks.add(mSampleMaster.sampleProdLinks.size() ,prodLink);
           }
-          mSampleMaster.sampleProdLinks.add(index ,prodLink);
+          item.prod_id = prodLink.prod_id;
+          item.spec_desc = prodLink.spec_desc;
+          item.image1 = prodLink.image1;
           Observable.from(mSampleMaster.sampleProdLinks ).map(this::toViewItem).toList().subscribe(
               itemData -> dataResource.postValue(Resource.success(itemData)));
         }
@@ -149,7 +154,9 @@ public class SampleProductListFragment extends Fragment {
     prodLink.image1 = todoProd.image1;
     prodLink.ext = mSampleMaster.sampleProdLinks.size();
     prodLink.spec_desc = todoProd.spec_desc;
-    mSampleMaster.sampleProdLinks.add(prodLink);
+    if (!mSampleMaster.sampleProdLinks.stream().anyMatch(it -> it.prodNo.equals(todoProd.prodNo))) {
+      mSampleMaster.sampleProdLinks.add(prodLink);
+    }
   }
 
   private void receiveSelected(ArrayList<String> selected) {
@@ -159,17 +166,29 @@ public class SampleProductListFragment extends Fragment {
       placeholderArray[i] ='?';
       paramArray[i] = selected.get(i);
     }
-    while (mSampleMaster.sampleProdLinks.size()>0){
-      mSampleMaster.sampleProdLinks.remove(0);
-    }
     Observable.defer(() -> Observable.from(new Select().from(TodoProd.class)
         .where("prodNo in (" + TextUtils.join(",", placeholderArray) + ")", (Object[]) paramArray)
         .orderBy("update_time desc")
-        .execute())).map(o -> {
-      TodoProd todoProd = (TodoProd) o;
-      add(todoProd);
-      return toViewItem(todoProd);
-    }).toList().subscribe(new Subscriber<List<SampleListAdapter2.ItemData>>() {
+        .execute()))
+            .cast(TodoProd.class)
+            .map(todoProd ->{
+              SampleProdLink ret = mSampleMaster.sampleProdLinks.stream().filter(it -> it.prodNo.equals(todoProd.prodNo)).findAny().orElse(new SampleProdLink());
+              ret.prodNo = todoProd.prodNo;
+              ret.create_time = new Date();
+              ret.update_time = todoProd.update_time;
+              ret.uploaded_time = todoProd.uploaded_time;
+              ret.image1 = todoProd.image1;
+              ret.ext = mSampleMaster.sampleProdLinks.size();
+              ret.spec_desc = todoProd.spec_desc;
+              return ret;
+            })
+            .toList()
+            .doOnNext(it -> {
+              mSampleMaster.sampleProdLinks.clear();
+              mSampleMaster.sampleProdLinks.addAll(it);
+            })
+            .map(it -> it.stream().map(this::toViewItem).collect(Collectors.toList()))
+            .subscribe(new Subscriber<List<SampleListAdapter2.ItemData>>() {
       @Override public void onCompleted() {
 
       }
@@ -185,7 +204,10 @@ public class SampleProductListFragment extends Fragment {
   }
 
   private SampleListAdapter2.ItemData toViewItem(TodoProd todoProd){
-    SampleListAdapter2.ItemData itemData = new SampleListAdapter2.ItemData();
+    SampleListAdapter2.ItemData itemData = viewData.stream().filter(it -> it.title.equals(todoProd.prodNo)).findAny().orElse(null);
+    if(itemData == null) {
+       itemData = new SampleListAdapter2.ItemData();
+    }
    // itemData.timestamp = todoProd.create_time;
     itemData.subTitle = todoProd.spec_desc;
     itemData.title = todoProd.prodNo;
@@ -203,6 +225,8 @@ public class SampleProductListFragment extends Fragment {
     itemData.title = prodLink.prodNo;
     itemData.hold = JsonUtils.Companion.toJson(prodLink);
     itemData.iconPath = prodLink.image1;
+    itemData.count = prodLink.count;
+    itemData.memo = prodLink.memo;
     itemData.redFlag = prodLink.uploaded_time == null
         || prodLink.update_time.getTime() > prodLink.uploaded_time.getTime();
     return itemData;
@@ -213,7 +237,43 @@ public class SampleProductListFragment extends Fragment {
         getActivity() != null ? ((SampleActivity) getActivity()).mSampleMaster
             : null;
     super.onCreate(savedInstanceState);
-    mSampleListAdapter = new SampleListAdapter2(getContext());
+    mSampleListAdapter = new SampleListAdapter2(getContext(), R.layout.list_sample_item_cart);
+
+
+    mSampleListAdapter.setViewClickCallback((view, index) ->{
+      if(view.getId() == R.id.btn_add){
+        int count = mSampleMaster.sampleProdLinks.get(index).count;
+        ++count;
+        if(count >99){
+          return;
+        }
+        mSampleMaster.sampleProdLinks.get(index).count = count;
+        TextView textView =((ViewGroup)view.getParent()).findViewById(R.id.txt_count);
+        textView.setText(String.valueOf(count));
+        viewData.get(index).count = count;
+      }else if(view.getId() == R.id.btn_sub){
+        int count = mSampleMaster.sampleProdLinks.get(index).count;
+        --count;
+        if(count ==0 ){
+          return;
+        }
+        mSampleMaster.sampleProdLinks.get(index).count = count;
+        TextView textView =((ViewGroup)view.getParent()).findViewById(R.id.txt_count);
+        textView.setText(String.valueOf(count));
+        viewData.get(index).count = count;
+      }else if (view.getId() == R.id.txt_memo){
+        new MaterialDialog.Builder(getActivity())
+                .title("Input memo")
+                .input("Memo", mSampleMaster.sampleProdLinks.get(index).memo, false, (v, text) ->{
+                  mSampleMaster.sampleProdLinks.get(index).memo = text.toString();
+                  TextView textView = (TextView) view;
+                  textView.setText(text);
+                  viewData.get(index).memo = text.toString();
+                }).positiveText("OK")
+                .negativeText("Cancel")
+                .show();
+      }
+    });
 
     Observable.from(mSampleMaster.sampleProdLinks ).map(this::toViewItem).toList().subscribe(
         itemData -> dataResource.postValue(Resource.success(itemData)));
